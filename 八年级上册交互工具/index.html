@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信息科技·八年级上册 交互工具总目录</title>
+<style>
+  :root{
+    --u1:#16a34a; --u1-soft:#dcfce7; --u1-deep:#14532d;
+    --u2:#0ea5e9; --u2-soft:#e0f2fe; --u2-deep:#0c4a6e;
+    --ink:#1e293b; --muted:#64748b; --bg:#f1f5f9; --card:#ffffff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.6; min-height:100vh;
+  }
+  header{
+    background:linear-gradient(135deg,#0f766e 0%,#0e7490 45%,#1d4ed8 100%);
+    color:#fff; padding:48px 24px 56px; text-align:center; position:relative; overflow:hidden;
+  }
+  header::before,header::after{
+    content:""; position:absolute; border-radius:50%; opacity:.15; background:#fff;
+  }
+  header::before{width:340px;height:340px;top:-160px;left:-100px;}
+  header::after{width:260px;height:260px;bottom:-140px;right:-60px;}
+  header .kicker{font-size:14px; letter-spacing:.35em; opacity:.85;}
+  header h1{font-size:clamp(24px,4vw,38px); margin:10px 0 8px; font-weight:800;}
+  header p.sub{max-width:720px;margin:0 auto;opacity:.92;font-size:15px;}
+  .badges{margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  .badge{background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.35);
+    padding:4px 14px; border-radius:999px; font-size:13px;}
+  main{max-width:1100px; margin:-28px auto 40px; padding:0 20px; position:relative;}
+  .unit{background:var(--card); border-radius:18px; box-shadow:0 8px 30px rgba(15,23,42,.08);
+    margin-bottom:32px; overflow:hidden;}
+  .unit-head{display:flex; align-items:center; gap:14px; padding:22px 26px; }
+  .unit1 .unit-head{background:var(--u1-soft);} .unit2 .unit-head{background:var(--u2-soft);}
+  .unit-no{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:22px;font-weight:800;flex-shrink:0;}
+  .unit1 .unit-no{background:var(--u1);} .unit2 .unit-no{background:var(--u2);}
+  .unit-head h2{font-size:20px;}
+  .unit1 .unit-head h2{color:var(--u1-deep);} .unit2 .unit-head h2{color:var(--u2-deep);}
+  .unit-head .proj{font-size:13px;color:var(--muted);margin-top:2px;}
+  .lessons{display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; padding:20px 24px 26px;}
+  .lesson{border:1px solid #e2e8f0; border-radius:14px; padding:16px 18px; background:#fff;
+    display:flex; flex-direction:column; gap:8px; transition:transform .15s ease, box-shadow .15s ease;}
+  .lesson:hover{transform:translateY(-3px); box-shadow:0 10px 24px rgba(15,23,42,.12);}
+  .lesson .no{font-size:12px; font-weight:700; letter-spacing:.08em;}
+  .unit1 .lesson .no{color:var(--u1);} .unit2 .lesson .no{color:var(--u2);}
+  .lesson h3{font-size:17px;}
+  .lesson h3 a{color:var(--ink); text-decoration:none;}
+  .lesson h3 a:hover{text-decoration:underline;}
+  .lesson .desc{font-size:13px; color:var(--muted); flex:1;}
+  .lesson .links{display:flex; gap:8px; flex-wrap:wrap; margin-top:4px;}
+  .btn{display:inline-block; font-size:13px; padding:6px 14px; border-radius:8px;
+    text-decoration:none; font-weight:600; border:1.5px solid transparent;}
+  .unit1 .btn-main{background:var(--u1); color:#fff;} .unit2 .btn-main{background:var(--u2); color:#fff;}
+  .btn-main:hover{filter:brightness(1.08);}
+  .py{font-size:12px; color:var(--muted); background:#f8fafc; border:1px dashed #cbd5e1;
+    border-radius:8px; padding:6px 10px; font-family:ui-monospace,Consolas,monospace;}
+  .note{background:var(--card); border-radius:18px; box-shadow:0 8px 30px rgba(15,23,42,.08);
+    padding:24px 28px; font-size:14px;}
+  .note h2{font-size:17px; margin-bottom:10px;}
+  .note ul{margin-left:20px; display:grid; gap:6px;}
+  .note li{color:#334155;}
+  footer{text-align:center; color:var(--muted); font-size:13px; padding:18px 16px 30px;}
+  @media (max-width:640px){ .lessons{padding:16px;} }
+</style>
+</head>
+<body>
+<header>
+  <div class="kicker">清华大学出版社 · 信息科技</div>
+  <h1>八年级上册 交互实验工具总目录</h1>
+  <p class="sub">把“感知—传输—处理—控制”和“采集—整理—分析—呈现”变成可操作、可观察、可验证的互动实验。全部页面单文件、离线运行，学习数据只保存在本机浏览器。</p>
+  <div class="badges">
+    <span class="badge">10 个课时交互网页</span>
+    <span class="badge">10 个 Tkinter 配套 Python 工具</span>
+    <span class="badge">完全离线 · 虚拟设备 · 安全边界</span>
+  </div>
+</header>
+<main>
+  <section class="unit unit1">
+    <div class="unit-head">
+      <div class="unit-no">1</div>
+      <div>
+        <h2>第1单元 · 物联网入门</h2>
+        <div class="proj">贯通项目：智能农植园物联网系统（感知 → 传输 → 处理 → 控制）</div>
+      </div>
+    </div>
+    <div class="lessons">
+      <div class="lesson">
+        <span class="no">第1节</span>
+        <h3><a href="单元1_第1节_从互联网到物联网.html">从互联网到物联网</a></h3>
+        <p class="desc">共享单车全流程数据流动画、物联网发展时间轴排序、四层结构拼装、桥梁监测情境设计器。</p>
+        <div class="links"><a class="btn btn-main" href="单元1_第1节_从互联网到物联网.html">打开网页工具</a></div>
+        <div class="py">Python：python工具/单元1_第1节_物联网原理实验室/</div>
+      </div>
+      <div class="lesson">
+        <span class="no">第2节</span>
+        <h3><a href="单元1_第2节_物联网的终端设备.html">物联网的终端设备</a></h3>
+        <p class="desc">开发板虚拟拆解、三种开源硬件选型、积木与 MicroPython 点亮虚拟 OLED、I/O 引脚配置诊断。</p>
+        <div class="links"><a class="btn btn-main" href="单元1_第2节_物联网的终端设备.html">打开网页工具</a></div>
+        <div class="py">Python：python工具/单元1_第2节_虚拟智能终端与GPIO实验器/</div>
+      </div>
+      <div class="lesson">
+        <span class="no">第3节</span>
+        <h3><a href="单元1_第3节_物联网的感知.html">物联网的感知</a></h3>
+        <p class="desc">传感器结构动画、开关量/模拟量/数字量信号实验台、感知技术配对、二维码识别流程、农植园感知方案。</p>
+        <div class="links"><a class="btn btn-main" href="单元1_第3节_物联网的感知.html">打开网页工具</a></div>
+        <div class="py">Python：python工具/单元1_第3节_传感器数据采集实验室/</div>
+      </div>
+      <div class="lesson">
+        <span class="no">第4节</span>
+        <h3><a href="单元1_第4节_物联网的通信.html">物联网的通信</a></h3>
+        <p class="desc">通信方式场景选择、数据包传输与丢包重传动画、MQTT 发布—订阅舞台、Topic 主题树与通配符实验。</p>
+        <div class="links"><a class="btn btn-main" href="单元1_第4节_物联网的通信.html">打开网页工具</a></div>
+        <div class="py">Python：python工具/单元1_第4节_本地发布订阅通信模拟器/</div>
+      </div>
+      <div class="lesson">
+        <span class="no">第5节</span>
+        <h3><a href="单元1_第5节_物联网的控制.html">物联网的控制</a></h3>
+        <p class="desc">OLED 与点阵绘制、RGB 混色挑战、蜂鸣器音调节拍、舵机/继电器/风扇控制、阈值自动控制规则实验室。</p>
+        <div class="links"><a class="btn btn-main" href="单元1_第5节_物联网的控制.html">打开网页工具</a></div>
+        <div class="py">Python：python工具/单元1_第5节_虚拟执行器控制台/</div>
+      </div>
+      <div class="lesson">
+        <span class="no">第6节 · 样板课</span>
+        <h3><a href="单元1_第6节_物联网系统的搭建.html">物联网系统的搭建</a></h3>
+        <p class="desc">七步项目工作台：搭建流程排序、农植园设备选择、Topic 设计、发布订阅模拟、自动控制、故障排查、项目成果导出。</p>
+        <div class="links"><a class="btn btn-main" href="单元1_第6节_物联网系统的搭建.html">打开网页工具</a></div>
+        <div class="py">Python：python工具/单元1_第6节_本地智能农植园实验平台/</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="unit unit2">
+    <div class="unit-head">
+      <div class="unit-no">2</div>
+      <div>
+        <h2>第2单元 · 初识数据科学（数据与数据探究）</h2>
+        <div class="proj">贯通项目：在线数字气象站数据探究（采集 → 整理 → 分析 → 可视化）</div>
+      </div>
+    </div>
+    <div class="lessons">
+      <div class="lesson">
+        <span class="no">第1节</span>
+        <h3><a href="单元2_第1节_从数据到大数据.html">从数据到大数据</a></h3>
+        <p class="desc">数据—信息—知识金字塔、数据类型分拣站、科学史数据故事时间轴、大数据 4V 模拟、路网大数据规划。</p>
+        <div class="links"><a class="btn btn-main" href="单元2_第1节_从数据到大数据.html">打开网页工具</a></div>
+        <div class="py">Python：python工具/单元2_第1节_数据与大数据实验室/</div>
+      </div>
+      <div class="lesson">
+        <span class="no">第2节</span>
+        <h3><a href="单元2_第2节_数据的采集和整理.html">数据的采集和整理</a></h3>
+        <p class="desc">采集方式选择、模拟网页数据提取、脏数据清洗工作台（缺失/重复/异常/格式）、排序筛选汇总、数据字典。</p>
+        <div class="links"><a class="btn btn-main" href="单元2_第2节_数据的采集和整理.html">打开网页工具</a></div>
+        <div class="py">Python：python工具/单元2_第2节_数据采集与清洗助手/</div>
+      </div>
+      <div class="lesson">
+        <span class="no">第3节</span>
+        <h3><a href="单元2_第3节_数据的统计分析.html">数据的统计分析</a></h3>
+        <p class="desc">分析方法选择、k-means 聚类动画、平均值与极端值实验、二氧化碳趋势拟合预测、气象数据分析任务。</p>
+        <div class="links"><a class="btn btn-main" href="单元2_第3节_数据的统计分析.html">打开网页工具</a></div>
+        <div class="py">Python：python工具/单元2_第3节_统计分析工作台/</div>
+      </div>
+      <div class="lesson">
+        <span class="no">第4节</span>
+        <h3><a href="单元2_第4节_数据可视化.html">数据可视化</a></h3>
+        <p class="desc">图表选择训练、交互图表设计器（柱/折/饼/散点）、错误图表诊所、词云工坊、代码联动、气象仪表盘拼装。</p>
+        <div class="links"><a class="btn btn-main" href="单元2_第4节_数据可视化.html">打开网页工具</a></div>
+        <div class="py">Python：python工具/单元2_第4节_数据可视化设计器/</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="note">
+    <h2>使用说明</h2>
+    <ul>
+      <li>网页工具：直接双击对应 .html 文件即可在浏览器中离线使用，无需联网、无需安装。</li>
+      <li>Python 工具：进入 python工具 下对应课时文件夹，运行 <b>python 工具名.py</b>（需要 Python 3，自带 Tkinter 即可；个别工具的 matplotlib / pandas 为可选增强，未安装会自动降级）。每个文件夹内附“使用说明.txt”和示例数据。</li>
+      <li>安全边界：全部使用虚拟传感器、虚拟执行器与虚构的设备 ID / Topic；不扫描真实网络、不控制真实设备；本地服务只绑定 127.0.0.1。</li>
+      <li>学习数据只保存在本机浏览器（localStorage）中，每个页面底部都提供“清除本机学习数据”按钮，成果可导出为 .txt / .json 留存。</li>
+      <li>建议教学顺序：第1单元按节推进并贯通“智能农植园”项目；第2单元围绕“在线数字气象站”完成采集、整理、分析与可视化，最后汇总项目报告。</li>
+    </ul>
+  </section>
+</main>
+<footer>信息科技 · 八年级上册 · 交互实验工具 | 单文件离线运行 · 仅供教学使用</footer>
+</body>
+</html>
