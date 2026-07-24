@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第1单元 第5节 物联网的控制 · 交互实验室</title>
+<style>
+:root{
+  --rose:#f43f5e; --rose-dark:#be123c; --rose-light:#fb7185; --coral:#fb923c;
+  --bg:#1b1024; --panel:#2a1b33; --panel2:#35223f; --line:#4c3358;
+  --ink:#f5e9ef; --muted:#c3a8b8; --ok:#34d399; --warn:#fbbf24; --err:#fb7185;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:
+    radial-gradient(1100px 500px at 15% -5%, rgba(244,63,94,.22), transparent 60%),
+    radial-gradient(900px 500px at 95% 0%, rgba(251,146,60,.14), transparent 55%),
+    var(--bg);
+  color:var(--ink); min-height:100vh; padding-bottom:60px;
+}
+code,.mono{font-family:ui-monospace,Consolas,"Courier New",monospace}
+header.top{
+  padding:26px 4vw 12px; display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; justify-content:space-between;
+}
+.brand h1{font-size:1.55rem; letter-spacing:.5px}
+.brand h1 .dot{color:var(--rose)}
+.brand .unit{color:var(--muted); font-size:.9rem; margin-top:4px}
+.goals{background:linear-gradient(135deg,rgba(244,63,94,.16),rgba(251,146,60,.10)); border:1px solid var(--line); border-radius:14px; padding:10px 16px; max-width:560px}
+.goals b{color:var(--rose-light)}
+.goals li{margin-left:1.2em; font-size:.86rem; color:var(--muted); line-height:1.7}
+nav.deck{
+  position:sticky; top:0; z-index:50; display:flex; flex-wrap:wrap; gap:8px;
+  padding:10px 4vw; background:rgba(27,16,36,.92); backdrop-filter:blur(6px); border-bottom:1px solid var(--line);
+}
+nav.deck a{
+  color:var(--muted); text-decoration:none; font-size:.83rem; padding:6px 12px; border-radius:999px; border:1px solid var(--line);
+  transition:.2s;
+}
+nav.deck a:hover{color:#fff; border-color:var(--rose); background:rgba(244,63,94,.18)}
+.grid{
+  display:grid; gap:18px; padding:18px 4vw;
+  grid-template-columns:repeat(12,1fr);
+}
+.card{
+  background:linear-gradient(180deg,var(--panel),var(--panel2));
+  border:1px solid var(--line); border-radius:18px; padding:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+  grid-column:span 6; display:flex; flex-direction:column; gap:12px;
+}
+.card.w4{grid-column:span 4}
+.card.w8{grid-column:span 8}
+.card.w12{grid-column:span 12}
+@media(max-width:1100px){.card,.card.w4,.card.w8{grid-column:span 12}}
+.card h2{font-size:1.05rem; display:flex; align-items:center; gap:8px}
+.card h2 .chip{
+  font-size:.68rem; background:var(--rose); color:#fff; padding:2px 9px; border-radius:999px; font-weight:600;
+}
+.task{
+  background:rgba(244,63,94,.10); border-left:3px solid var(--rose); padding:8px 12px; border-radius:0 10px 10px 0;
+  color:var(--muted); font-size:.84rem; line-height:1.7;
+}
+.note{color:var(--muted); font-size:.82rem; line-height:1.7}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+button{
+  font-family:inherit; font-size:.85rem; cursor:pointer; border:none; border-radius:10px; padding:8px 14px;
+  background:var(--rose); color:#fff; transition:.15s; font-weight:600;
+}
+button:hover{filter:brightness(1.12)}
+button.ghost{background:transparent; border:1px solid var(--line); color:var(--muted)}
+button.ghost:hover{border-color:var(--rose); color:#fff}
+button.small{padding:5px 10px; font-size:.78rem}
+button:disabled{opacity:.4; cursor:not-allowed}
+input[type=range]{accent-color:var(--rose); flex:1; min-width:100px}
+input[type=text],input[type=number],select{
+  font-family:inherit; background:#1f1229; border:1px solid var(--line); color:var(--ink);
+  border-radius:8px; padding:7px 10px; font-size:.85rem;
+}
+select{cursor:pointer}
+.badge{display:inline-block; padding:2px 10px; border-radius:999px; font-size:.75rem; font-weight:600}
+.badge.ok{background:rgba(52,211,153,.16); color:var(--ok); border:1px solid rgba(52,211,153,.4)}
+.badge.err{background:rgba(251,113,133,.14); color:var(--err); border:1px solid rgba(251,113,133,.4)}
+.badge.info{background:rgba(244,63,94,.16); color:var(--rose-light); border:1px solid rgba(244,63,94,.4)}
+.badge.warn{background:rgba(251,191,36,.14); color:var(--warn); border:1px solid rgba(251,191,36,.4)}
+.feedback{border-radius:10px; padding:9px 12px; font-size:.84rem; line-height:1.7; display:none}
+.feedback.show{display:block}
+.feedback.good{background:rgba(52,211,153,.12); border:1px solid rgba(52,211,153,.35); color:#a7f3d0}
+.feedback.bad{background:rgba(251,113,133,.10); border:1px solid rgba(251,113,133,.35); color:#fecdd3}
+.feedback.hint{background:rgba(251,191,36,.10); border:1px solid rgba(251,191,36,.35); color:#fde68a}
+.matrix{display:grid; grid-template-columns:repeat(8,30px); gap:4px; width:max-content}
+.matrix .px{width:30px; height:30px; border-radius:6px; background:#170d20; border:1px solid #3d2848; cursor:pointer; transition:.1s}
+.matrix .px.on{background:var(--rose); box-shadow:0 0 10px var(--rose), 0 0 22px rgba(244,63,94,.6); border-color:var(--rose-light)}
+canvas.oled{background:#05070d; border-radius:10px; border:2px solid #3d2848; image-rendering:pixelated; width:100%; max-width:384px}
+.swatch{
+  width:150px; height:150px; border-radius:20px; border:2px solid var(--line); margin:auto;
+  transition:.2s;
+}
+.slider-line{display:grid; grid-template-columns:60px 1fr 62px; gap:10px; align-items:center; font-size:.85rem}
+.slider-line .val{text-align:right; font-weight:700}
+.beats{display:grid; grid-template-columns:repeat(8,1fr); gap:6px}
+.beats .b{
+  height:44px; border-radius:8px; background:#1f1229; border:1px solid var(--line); cursor:pointer; transition:.1s;
+  display:flex; align-items:center; justify-content:center; color:#5d4468; font-size:.75rem;
+}
+.beats .b.on{background:var(--coral); color:#3d1c05; font-weight:700; box-shadow:0 0 12px rgba(251,146,60,.6)}
+.beats .b.play{outline:3px solid #fff}
+.devbox{background:#1f1229; border:1px solid var(--line); border-radius:14px; padding:12px; flex:1; min-width:190px}
+.devbox h3{font-size:.88rem; margin-bottom:8px; color:var(--rose-light)}
+.miniquiz{margin-top:8px; font-size:.8rem; color:var(--muted)}
+.miniquiz button{margin:3px 4px 0 0}
+.log{
+  background:#140b1c; border:1px solid var(--line); border-radius:10px; padding:10px; height:150px; overflow:auto;
+  font-size:.76rem; line-height:1.7;
+}
+.log .t{color:#7dd3fc}
+.log .r{color:var(--rose-light)}
+table.rules{width:100%; border-collapse:collapse; font-size:.8rem}
+table.rules th,table.rules td{border-bottom:1px solid var(--line); padding:6px 6px; text-align:left}
+table.rules th{color:var(--muted); font-weight:600}
+.actor{
+  display:flex; flex-direction:column; align-items:center; gap:6px; background:#1f1229; border:1px solid var(--line);
+  border-radius:12px; padding:10px; width:110px;
+}
+.actor .st{font-size:.72rem}
+.qcard{background:#1f1229; border:1px solid var(--line); border-radius:12px; padding:14px}
+.qcard .opts{display:flex; flex-direction:column; gap:8px; margin:10px 0}
+.qcard .opts button{text-align:left; background:#2a1b33; border:1px solid var(--line); color:var(--ink); font-weight:400}
+.qcard .opts button:hover{border-color:var(--rose)}
+.qcard .opts button.sel-ok{background:rgba(52,211,153,.18); border-color:var(--ok)}
+.qcard .opts button.sel-bad{background:rgba(251,113,133,.16); border-color:var(--err)}
+.progress{height:10px; background:#1f1229; border-radius:999px; overflow:hidden; border:1px solid var(--line)}
+.progress i{display:block; height:100%; background:linear-gradient(90deg,var(--rose),var(--coral)); width:0; transition:.4s}
+textarea.report{
+  width:100%; height:260px; background:#140b1c; color:#e7d6e0; border:1px solid var(--line); border-radius:10px;
+  padding:12px; font-family:ui-monospace,Consolas,monospace; font-size:.76rem; line-height:1.6; resize:vertical;
+}
+.switch{position:relative; width:52px; height:28px; background:#3d2848; border-radius:999px; cursor:pointer; transition:.2s; border:1px solid var(--line)}
+.switch::after{content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#c3a8b8; transition:.2s}
+.switch.on{background:var(--rose)}
+.switch.on::after{left:27px; background:#fff}
+.kv{font-size:.78rem; color:var(--muted)}
+.kv b{color:var(--ink)}
+footer{padding:24px 4vw; color:#7a5d6f; font-size:.75rem; text-align:center}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <h1>物联网的控制 <span class="dot">·</span> 执行器控制台</h1>
+    <div class="unit">清华大学出版社《信息科技》八年级上册 · 第1单元 物联网入门 · 第5节（教材 P49—62）</div>
+  </div>
+  <div class="goals">
+    <b>学习目标</b>
+    <ol>
+      <li>认识显示、声音、电动三大类输出模块（执行器）及其典型设备。</li>
+      <li>理解用高低电平、PWM 等信号控制执行器的方法。</li>
+      <li>能为智能农植园设计"传感器条件 → 执行器动作"的自动控制规则。</li>
+    </ol>
+  </div>
+</header>
+
+<nav class="deck">
+  <a href="#m1">① 显示设备</a>
+  <a href="#m2">② RGB 混色</a>
+  <a href="#m3">③ 蜂鸣器</a>
+  <a href="#m4">④ 运动控制</a>
+  <a href="#m5">⑤ 规则实验室</a>
+  <a href="#m6">⑥ 闯关练习</a>
+  <a href="#m7">⑦ 成果导出</a>
+</nav>
+
+<main class="grid">
+
+<!-- ============ 模块1 显示设备 ============ -->
+<section class="card w8" id="m1">
+  <h2><span class="chip">模块 1</span> 显示设备实验：OLED 屏 + 8×8 LED 点阵</h2>
+  <div class="task">任务：① 在 OLED 输入框里输入一句话，观察像素屏实时显示；② 在 LED 点阵上点亮格子，画出一个箭头或心形图案（也可用预设按钮），画好的图案会计入本页成果报告。</div>
+  <div class="row" style="align-items:flex-start">
+    <div class="devbox" style="flex:1.3">
+      <h3>虚拟 OLED 显示屏（128×32 像素）</h3>
+      <canvas id="oledCv" class="oled" width="384" height="96"></canvas>
+      <div class="row" style="margin-top:8px">
+        <input type="text" id="oledIn" maxlength="16" value="智能农植园" style="flex:1" placeholder="输入要显示的文字（16字以内）">
+        <button class="small" id="oledShow">显示</button>
+      </div>
+      <p class="note" style="margin-top:6px">教材中掌控板的屏幕就是 OLED，用 <code>oled.DispChar()</code> 可把文字显示出来。</p>
+    </div>
+    <div class="devbox">
+      <h3>8×8 LED 点阵（点击格子绘制）</h3>
+      <div class="matrix" id="matrix"></div>
+      <div class="row" style="margin-top:8px">
+        <button class="small ghost" data-preset="arrow">预设：箭头</button>
+        <button class="small ghost" data-preset="heart">预设：心形</button>
+        <button class="small ghost" id="mxClear">清空</button>
+      </div>
+      <div class="kv" style="margin-top:6px">已点亮：<b id="mxCount">0</b> / 64 个 LED</div>
+    </div>
+  </div>
+  <div id="m1fb" class="feedback"></div>
+  <p class="note">💡 结论：OLED、数码管、LED 点阵都属于<b style="color:var(--rose-light)">显示类执行器</b>——它们把智能终端输出的数字信号变成人能直接看懂的文字、数字和图案。</p>
+</section>
+
+<!-- ============ 模块2 RGB混色 ============ -->
+<section class="card w4" id="m2">
+  <h2><span class="chip">模块 2</span> RGB 全彩 LED 混色实验</h2>
+  <div class="task">任务：拖动 R、G、B 三个滑块（0~255）混合颜色，再点击"接受挑战"，把 LED 调成指定颜色。</div>
+  <div class="swatch" id="swatch"></div>
+  <div style="text-align:center" class="kv">当前颜色：<b class="mono" id="rgbHex">#FF0000</b> · <span class="mono" id="rgbTuple">rgb(255,0,0)</span></div>
+  <div class="slider-line"><span style="color:#fb7185">红 R</span><input type="range" id="sR" min="0" max="255" value="255"><span class="val mono" id="vR">255</span></div>
+  <div class="slider-line"><span style="color:#4ade80">绿 G</span><input type="range" id="sG" min="0" max="255" value="0"><span class="val mono" id="vG">0</span></div>
+  <div class="slider-line"><span style="color:#60a5fa">蓝 B</span><input type="range" id="sB" min="0" max="255" value="0"><span class="val mono" id="vB">0</span></div>
+  <div class="row">
+    <button id="rgbChallenge">🎯 接受挑战</button>
+    <button class="ghost" id="rgbCheck" disabled>提交我调的颜色</button>
+  </div>
+  <div id="rgbTask" class="note"></div>
+  <div id="rgbFb" class="feedback"></div>
+  <p class="note">全彩 LED 灯珠里有红、绿、蓝三颗小灯，教材代码 <code>rgb[0]=(255,0,0)</code> 就是给三种颜色各设一个 0~255 的亮度值。</p>
+</section>
+
+<!-- ============ 模块3 蜂鸣器 ============ -->
+<section class="card" id="m3">
+  <h2><span class="chip">模块 3</span> 会唱歌的蜂鸣器：音调与节奏</h2>
+  <div class="task">任务：① 拖动频率滑块并按"发声"，感受频率和音调的关系；② 点亮节拍格子，编一段 8 拍的节奏并播放。（本实验用浏览器本地合成声音，无需联网）</div>
+  <div class="row">
+    <span class="kv">静音开关</span><div class="switch" id="muteSw" title="静音开关"></div>
+    <span class="badge info" id="muteState">声音已开启</span>
+  </div>
+  <div class="slider-line"><span>频率</span><input type="range" id="freq" min="200" max="2000" value="440" step="10"><span class="val mono"><span id="freqV">440</span>Hz</span></div>
+  <div class="row">
+    <button id="beep">🔔 发声 0.5 秒</button>
+    <span class="note" id="pitchDesc">中等音调</span>
+  </div>
+  <div class="row" id="scaleRow">
+    <button class="small ghost" data-note="262">do</button>
+    <button class="small ghost" data-note="294">re</button>
+    <button class="small ghost" data-note="330">mi</button>
+    <button class="small ghost" data-note="349">fa</button>
+    <button class="small ghost" data-note="392">sol</button>
+    <button class="small ghost" data-note="440">la</button>
+    <button class="small ghost" data-note="494">si</button>
+    <button class="small ghost" data-note="523">do²</button>
+  </div>
+  <h3 style="font-size:.86rem; color:var(--rose-light)">简易节拍编辑器（点亮的格子按节奏发声）</h3>
+  <div class="beats" id="beats"></div>
+  <div class="row">
+    <button class="small" id="beatPlay">▶ 播放节奏</button>
+    <button class="small ghost" id="beatClear">清空节拍</button>
+    <span class="note" id="beatMsg"></span>
+  </div>
+  <div id="m3fb" class="feedback"></div>
+  <p class="note">💡 结论：蜂鸣器属于<b style="color:var(--rose-light)">声音类执行器</b>。给它的引脚输出<b>不同频率</b>的电信号，就发出不同音调：频率越高，音调越高。教材中 <code>music.play("C4:4")</code> 播放的就是特定频率的音符。</p>
+</section>
+
+<!-- ============ 模块4 运动控制 ============ -->
+<section class="card w12" id="m4">
+  <h2><span class="chip">模块 4</span> 运动控制实验：舵机 · 继电器 · 直流电动机</h2>
+  <div class="task">任务：分别操控三种电动执行模块，观察它们的动作方式，并完成每台设备下方的"它属于哪类执行器"判断小题（开关型 / 电机型）。</div>
+  <div class="row" style="align-items:stretch">
+
+    <div class="devbox">
+      <h3>舵机（SG90）— 精确控制角度</h3>
+      <svg viewBox="0 0 200 130" width="100%" style="max-width:240px">
+        <g stroke="#6d5375" stroke-width="1" font-size="7" fill="#a98db8">
+          <path d="M 20 110 A 80 80 0 0 1 180 110" fill="none"/>
+          <text x="10" y="116">0°</text><text x="92" y="24">90°</text><text x="172" y="116">180°</text>
+          <line x1="100" y1="110" x2="100" y2="30" stroke-dasharray="2 3"/>
+        </g>
+        <rect x="80" y="98" width="40" height="26" rx="4" fill="#3d2848" stroke="#f43f5e"/>
+        <g id="servoArm" transform="rotate(0 100 110)">
+          <line x1="100" y1="110" x2="24" y2="110" stroke="#f43f5e" stroke-width="6" stroke-linecap="round"/>
+          <circle cx="24" cy="110" r="5" fill="#fb7185"/>
+        </g>
+        <circle cx="100" cy="110" r="7" fill="#fb7185"/>
+      </svg>
+      <div class="slider-line"><span>角度</span><input type="range" id="servoS" min="0" max="180" value="0"><span class="val mono"><span id="servoV">0</span>°</span></div>
+      <p class="note">教材代码：<code>s1.write_angle(90)</code> 让舵机转到 90°。</p>
+      <div class="miniquiz" id="mq-servo">舵机属于哪类执行器？
+        <br><button class="small ghost" data-a="0">开关型</button><button class="small ghost" data-a="1">电机型</button>
+        <div class="feedback" style="margin-top:6px"></div>
+      </div>
+    </div>
+
+    <div class="devbox">
+      <h3>继电器 — 小电流控制大电流</h3>
+      <svg viewBox="0 0 220 130" width="100%" style="max-width:250px">
+        <rect x="10" y="40" width="80" height="60" rx="6" fill="#3d2848" stroke="#f43f5e"/>
+        <text x="50" y="72" text-anchor="middle" font-size="10" fill="#e7d6e0">继电器</text>
+        <text x="50" y="86" text-anchor="middle" font-size="8" fill="#a98db8" id="relayLv">引脚：低电平 0</text>
+        <line x1="90" y1="55" x2="120" y2="55" stroke="#c3a8b8" stroke-width="3"/>
+        <g id="relayArm" transform="rotate(-24 120 55)">
+          <line x1="120" y1="55" x2="152" y2="55" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+        </g>
+        <circle cx="120" cy="55" r="3.5" fill="#fbbf24"/>
+        <circle cx="152" cy="55" r="3.5" fill="#fbbf24"/>
+        <line x1="152" y1="55" x2="180" y2="55" stroke="#c3a8b8" stroke-width="3"/>
+        <g id="lampG">
+          <circle cx="192" cy="55" r="12" fill="#2a1b33" stroke="#c3a8b8" id="lamp"/>
+          <text x="192" y="95" text-anchor="middle" font-size="9" fill="#a98db8" id="lampTxt">台灯：灭</text>
+        </g>
+      </svg>
+      <div class="row">
+        <span class="kv">输出电平</span>
+        <button class="small" id="relayHigh">高电平 1（吸合）</button>
+        <button class="small ghost" id="relayLow">低电平 0（断开）</button>
+      </div>
+      <p class="note">教材代码：<code>relay.write_digital(1)</code> 输出高电平，触点"嗒"地吸合。</p>
+      <div class="miniquiz" id="mq-relay">继电器属于哪类执行器？
+        <br><button class="small ghost" data-a="1">开关型</button><button class="small ghost" data-a="0">电机型</button>
+        <div class="feedback" style="margin-top:6px"></div>
+      </div>
+    </div>
+
+    <div class="devbox">
+      <h3>直流电动机（130）— 带风扇旋转</h3>
+      <svg viewBox="0 0 160 130" width="100%" style="max-width:200px">
+        <circle cx="80" cy="60" r="46" fill="#1f1229" stroke="#4c3358"/>
+        <g id="fanBlades" transform="rotate(0 80 60)">
+          <path d="M80 60 C 60 24 96 18 84 52 Z" fill="#fb7185"/>
+          <path d="M80 60 C 116 46 110 82 84 66 Z" fill="#fb7185" transform="rotate(120 80 60)"/>
+          <path d="M80 60 C 116 46 110 82 84 66 Z" fill="#fb7185" transform="rotate(240 80 60)"/>
+        </g>
+        <circle cx="80" cy="60" r="8" fill="#f43f5e"/>
+        <text x="80" y="122" text-anchor="middle" font-size="9" fill="#a98db8" id="fanTxt">PWM 值 0（停转）</text>
+      </svg>
+      <div class="slider-line"><span>转速</span><input type="range" id="fanS" min="0" max="255" value="0"><span class="val mono" id="fanV">0</span></div>
+      <p class="note">教材代码：<code>pwm0.write_analog(255)</code> 用 PWM 模拟输出控制转速。</p>
+      <div class="miniquiz" id="mq-motor">直流电动机属于哪类执行器？
+        <br><button class="small ghost" data-a="0">开关型</button><button class="small ghost" data-a="1">电机型</button>
+        <div class="feedback" style="margin-top:6px"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 模块5 规则实验室 ============ -->
+<section class="card w12" id="m5">
+  <h2><span class="chip">模块 5</span> 核心模拟：阈值自动控制规则实验室</h2>
+  <div class="task">任务：① 先在"手动模式"下点击执行器体验开关；② 添加控制规则（如：当 温度 &gt; 30℃ 时 开启 风扇），切换到"自动模式"，再拖动左侧传感器滑块，观察执行器自动响应并查看日志；③ 点击"载入诊断案例"，找出写反的规则。</div>
+  <div class="row" style="align-items:flex-start">
+    <div class="devbox" style="flex:1">
+      <h3>虚拟传感器（模拟农植园环境）</h3>
+      <div class="slider-line"><span>温度</span><input type="range" id="senT" min="0" max="50" value="25"><span class="val mono"><span id="senTv">25</span>℃</span></div>
+      <div class="slider-line"><span>土壤湿度</span><input type="range" id="senH" min="0" max="100" value="60"><span class="val mono"><span id="senHv">60</span>%</span></div>
+      <div class="slider-line"><span>光照</span><input type="range" id="senL" min="0" max="1000" value="500"><span class="val mono"><span id="senLv">500</span>lx</span></div>
+      <div class="row" style="margin-top:10px">
+        <span class="kv">模式</span>
+        <button class="small" id="modeBtn">当前：手动模式（点击切换）</button>
+        <span class="badge warn" id="modeBadge">手动</span>
+      </div>
+    </div>
+    <div class="devbox" style="flex:1.1">
+      <h3>执行器面板（手动模式下可点击）</h3>
+      <div class="row">
+        <div class="actor" data-act="fan"><svg viewBox="0 0 40 40" width="42"><g class="spin" id="aFan"><path d="M20 20 C12 6 28 4 22 17 Z" fill="#fb7185"/><path d="M20 20 C12 6 28 4 22 17 Z" fill="#fb7185" transform="rotate(120 20 20)"/><path d="M20 20 C12 6 28 4 22 17 Z" fill="#fb7185" transform="rotate(240 20 20)"/></g><circle cx="20" cy="20" r="4" fill="#f43f5e"/></svg><span>风扇</span><span class="st badge err" id="stFan">关闭</span></div>
+        <div class="actor" data-act="pump"><svg viewBox="0 0 40 40" width="42"><rect x="10" y="14" width="20" height="16" rx="3" fill="#3d2848" stroke="#60a5fa"/><path id="aDrop" d="M20 4 C 16 10 16 12 20 12 C 24 12 24 10 20 4" fill="#60a5fa" opacity="0"/></svg><span>水泵</span><span class="st badge err" id="stPump">关闭</span></div>
+        <div class="actor" data-act="light"><svg viewBox="0 0 40 40" width="42"><circle cx="20" cy="17" r="9" id="aBulb" fill="#3d2848" stroke="#fbbf24"/><rect x="16" y="26" width="8" height="7" rx="2" fill="#4c3358"/></svg><span>补光灯</span><span class="st badge err" id="stLight">关闭</span></div>
+        <div class="actor" data-act="buzz"><svg viewBox="0 0 40 40" width="42"><circle cx="20" cy="20" r="10" fill="#3d2848" stroke="#fb923c"/><circle cx="20" cy="20" r="3" fill="#fb923c" id="aBuzz"/></svg><span>蜂鸣器</span><span class="st badge err" id="stBuzz">关闭</span></div>
+      </div>
+      <p class="note" style="margin-top:8px">自动模式下执行器由规则控制，手动点击无效。</p>
+    </div>
+  </div>
+  <div class="devbox">
+    <h3>控制规则编辑器</h3>
+    <div class="row">
+      <span class="kv">当</span>
+      <select id="rSen"><option value="T">温度(℃)</option><option value="H">土壤湿度(%)</option><option value="L">光照(lx)</option></select>
+      <select id="rOp"><option>&gt;</option><option>&lt;</option><option>&ge;</option><option>&le;</option></select>
+      <input type="number" id="rTh" value="30" style="width:80px">
+      <span class="kv">时</span>
+      <select id="rDo"><option value="on">开启</option><option value="off">关闭</option></select>
+      <select id="rAct"><option value="fan">风扇</option><option value="pump">水泵</option><option value="light">补光灯</option><option value="buzz">蜂鸣器</option></select>
+      <button class="small" id="rAdd">＋ 添加规则</button>
+      <button class="small ghost" id="rDiag">🔍 载入诊断案例</button>
+    </div>
+    <table class="rules" id="ruleTable">
+      <thead><tr><th>#</th><th>条件</th><th>动作</th><th>启用</th><th>删除</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div id="diagBox" style="display:none; margin-top:10px" class="qcard">
+      <b>🩺 诊断练习：</b>已载入一条"有问题"的规则。现在切到自动模式，把温度滑到 35℃ 试试——风扇竟然<b>不转</b>；把温度滑到 20℃，风扇反而<b>转了</b>！问题出在哪？
+      <div class="opts">
+        <button data-k="a">阈值 30 设得太低了</button>
+        <button data-k="b">比较符写反了：高温需要散热，应该是 温度 &gt; 30 才开风扇</button>
+        <button data-k="c">应该把执行器换成水泵</button>
+      </div>
+      <div class="feedback" id="diagFb"></div>
+    </div>
+  </div>
+  <div class="devbox">
+    <h3>运行日志（自动记录触发原因与时间）</h3>
+    <div class="log" id="ruleLog"><div class="note">暂无记录。切换到自动模式并拖动传感器滑块试试。</div></div>
+    <div class="row" style="margin-top:8px"><button class="small ghost" id="logClear">清空日志</button></div>
+  </div>
+</section>
+
+<!-- ============ 模块6 练习 ============ -->
+<section class="card w8" id="m6">
+  <h2><span class="chip">模块 6</span> 即时反馈闯关练习（8 题）</h2>
+  <div class="task">任务：逐题作答。答错可先看"提示 1"，还不会再看"提示 2"，然后重试。全部答对拿满 8 分！</div>
+  <div class="row"><span class="kv">进度</span><div class="progress" style="flex:1"><i id="quizProg"></i></div><span class="badge info" id="quizScore">得分 0 / 8</span></div>
+  <div class="qcard" id="quizBox"></div>
+  <div class="row">
+    <button class="ghost small" id="quizPrev">← 上一题</button>
+    <button class="ghost small" id="quizNext">下一题 →</button>
+    <button class="small" id="quizReset">重新开始</button>
+  </div>
+</section>
+
+<!-- ============ 模块7 成果 ============ -->
+<section class="card w4" id="m7">
+  <h2><span class="chip">模块 7</span> 我的控制方案 · 成果导出</h2>
+  <div class="task">任务：点击"生成报告"，自动汇总你在本页的点阵作品、RGB 挑战、控制规则、日志与练习成绩，然后下载留存。</div>
+  <div class="row">
+    <button id="genReport">📋 生成报告</button>
+    <button class="ghost" id="dlTxt">下载 .txt</button>
+    <button class="ghost" id="dlJson">下载 .json</button>
+  </div>
+  <textarea class="report" id="reportArea" placeholder="点击「生成报告」后，这里会出现你的学习成果小结……" readonly></textarea>
+  <div class="row">
+    <button class="ghost small" id="clearData">🗑 清除本机学习数据</button>
+    <span class="note" id="saveState"></span>
+  </div>
+</section>
+
+</main>
+
+<footer>本页为单文件离线交互学习工具 · 所有设备均为虚拟模拟，不连接真实硬件 · 学习数据仅保存在本机浏览器 localStorage</footer>
+
+<script>
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var LS = "u1l5_";
+
+/* ---------- 状态与持久化 ---------- */
+var state = {
+  matrix: new Array(64).fill(0),
+  oledText: "智能农植园",
+  rgbChallenges: [],          // {target, mine, ok, time}
+  rules: [],                  // {sen,op,th,act,do,en}
+  logs: [],                   // {t, msg}
+  quiz: { answers:{}, score:0 },
+  miniquiz: {},               // key->true
+  beat: new Array(8).fill(0),
+  events: []                  // 学习足迹
+};
+function save(){
+  try{ localStorage.setItem(LS+"state", JSON.stringify(state)); $("saveState").textContent = "已自动保存到本机"; }catch(e){}
+}
+function load(){
+  try{
+    var raw = localStorage.getItem(LS+"state");
+    if(raw){ var s = JSON.parse(raw); for(var k in state){ if(s[k]!==undefined) state[k]=s[k]; } }
+  }catch(e){}
+}
+load();
+function track(ev){ state.events.push({t:now(), ev:ev}); if(state.events.length>200) state.events.shift(); save(); }
+function now(){
+  var d = new Date();
+  function p(n){ return (n<10?"0":"")+n; }
+  return p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds());
+}
+function fb(el, cls, html){ el.className = "feedback show "+cls; el.innerHTML = html; }
+
+/* ================= 模块1：OLED + 点阵 ================= */
+var oled = $("oledCv"), octx = oled.getContext("2d");
+var tiny = document.createElement("canvas"); tiny.width=128; tiny.height=32;
+var tctx = tiny.getContext("2d");
+function drawOled(text){
+  tctx.fillStyle="#05070d"; tctx.fillRect(0,0,128,32);
+  tctx.fillStyle="#7ee0ff"; tctx.font="12px sans-serif"; tctx.textBaseline="middle";
+  tctx.fillText(text, 3, 16);
+  octx.imageSmoothingEnabled=false;
+  octx.clearRect(0,0,384,96);
+  octx.drawImage(tiny,0,0,384,96);
+  // 像素网格感
+  octx.strokeStyle="rgba(0,0,0,.35)";
+  for(var x=0;x<384;x+=3){ octx.beginPath(); octx.moveTo(x,0); octx.lineTo(x,96); octx.stroke(); }
+  for(var y=0;y<96;y+=3){ octx.beginPath(); octx.moveTo(0,y); octx.lineTo(384,y); octx.stroke(); }
+}
+$("oledShow").addEventListener("click", function(){
+  var t = $("oledIn").value.trim() || " ";
+  state.oledText = t; drawOled(t);
+  fb($("m1fb"),"good","✔ OLED 已显示「"+t+"」。显示类执行器把数字信号变成了人能看懂的信息。");
+  track("OLED显示："+t); save();
+});
+$("oledIn").addEventListener("input", function(){ drawOled(this.value || " "); });
+
+var mx = $("matrix");
+var PRESETS = {
+  arrow: [0,0,0,1,1,0,0,0, 0,0,1,1,1,1,0,0, 0,1,0,1,1,0,1,0, 1,0,0,1,1,0,0,1, 0,0,0,1,1,0,0,0, 0,0,0,1,1,0,0,0, 0,0,0,1,1,0,0,0, 0,0,0,1,1,0,0,0],
+  heart: [0,1,1,0,0,1,1,0, 1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1, 0,1,1,1,1,1,1,0, 0,0,1,1,1,1,0,0, 0,0,0,1,1,0,0,0, 0,0,0,0,0,0,0,0]
+};
+(function buildMatrix(){
+  for(var i=0;i<64;i++){
+    var d = document.createElement("div");
+    d.className="px"; d.dataset.i=i;
+    d.addEventListener("click", function(){
+      var i2=+this.dataset.i; state.matrix[i2]=state.matrix[i2]?0:1;
+      this.classList.toggle("on", !!state.matrix[i2]);
+      updMx();
+    });
+    mx.appendChild(d);
+  }
+})();
+function renderMx(){
+  var ps = mx.children;
+  for(var i=0;i<64;i++) ps[i].classList.toggle("on", !!state.matrix[i]);
+  updMx(false);
+}
+function updMx(saveIt){
+  var n = state.matrix.reduce(function(a,b){return a+b;},0);
+  $("mxCount").textContent = n;
+  if(saveIt!==false){
+    if(n>=8) fb($("m1fb"),"good","✔ 点阵作品已保存（点亮 "+n+" 个 LED），会进入你的成果报告。LED 点阵能显示汉字、图形、动画。");
+    track("点阵绘制，共点亮"+n+"个"); save();
+  }
+}
+Array.prototype.forEach.call(document.querySelectorAll("[data-preset]"), function(b){
+  b.addEventListener("click", function(){
+    state.matrix = PRESETS[this.dataset.preset].slice();
+    renderMx(); updMx();
+  });
+});
+$("mxClear").addEventListener("click", function(){
+  state.matrix = new Array(64).fill(0); renderMx(); save();
+  fb($("m1fb"),"hint","点阵已清空，试着自己画一个图案吧。");
+});
+
+/* ================= 模块2：RGB 混色 ================= */
+var rgbTargets = [
+  {name:"橙色", r:255,g:165,b:0},
+  {name:"紫色", r:128,g:0,b:128},
+  {name:"青色", r:0,g:255,b:255},
+  {name:"暖白色", r:255,g:230,b:180}
+];
+var curTarget = null;
+function rgbVals(){ return [ +$("sR").value, +$("sG").value, +$("sB").value ]; }
+function hex2(n){ var s=n.toString(16).toUpperCase(); return s.length<2?"0"+s:s; }
+function updRGB(){
+  var v = rgbVals();
+  $("vR").textContent=v[0]; $("vG").textContent=v[1]; $("vB").textContent=v[2];
+  var c = "rgb("+v[0]+","+v[1]+","+v[2]+")";
+  var sw = $("swatch");
+  sw.style.background = c;
+  sw.style.boxShadow = "0 0 30px "+c+", 0 0 70px rgba("+v[0]+","+v[1]+","+v[2]+",.45)";
+  $("rgbHex").textContent = "#"+hex2(v[0])+hex2(v[1])+hex2(v[2]);
+  $("rgbTuple").textContent = "rgb("+v.join(",")+")";
+}
+["sR","sG","sB"].forEach(function(id){ $(id).addEventListener("input", updRGB); });
+$("rgbChallenge").addEventListener("click", function(){
+  curTarget = rgbTargets[Math.floor(Math.random()*rgbTargets.length)];
+  $("rgbTask").innerHTML = "🎯 挑战：把 LED 调成 <b style='color:var(--rose-light)'>"+curTarget.name+"</b>（参考小色块 <span style='display:inline-block;width:16px;height:16px;border-radius:4px;vertical-align:middle;background:rgb("+curTarget.r+","+curTarget.g+","+curTarget.b+")'></span>），每个通道误差 ±40 以内算成功。";
+  $("rgbCheck").disabled = false;
+  $("rgbFb").className="feedback";
+});
+$("rgbCheck").addEventListener("click", function(){
+  if(!curTarget) return;
+  var v = rgbVals();
+  var dr=v[0]-curTarget.r, dg=v[1]-curTarget.g, db=v[2]-curTarget.b;
+  var ok = Math.abs(dr)<=40 && Math.abs(dg)<=40 && Math.abs(db)<=40;
+  var rec = {target:curTarget.name, mine:"rgb("+v.join(",")+")", ok:ok, time:now()};
+  state.rgbChallenges.push(rec); save();
+  if(ok){
+    fb($("rgbFb"),"good","🎉 成功调出「"+curTarget.name+"」！你的值 rgb("+v.join(",")+")，目标 rgb("+curTarget.r+","+curTarget.g+","+curTarget.b+")。RGB 三色按不同比例混合就能得到各种颜色。");
+    track("RGB挑战成功："+curTarget.name);
+  }else{
+    var tips=[];
+    if(dr>40) tips.push("红多了（减小 R）"); else if(dr<-40) tips.push("红少了（增大 R）");
+    if(dg>40) tips.push("绿多了（减小 G）"); else if(dg<-40) tips.push("绿少了（增大 G）");
+    if(db>40) tips.push("蓝多了（减小 B）"); else if(db<-40) tips.push("蓝少了（增大 B）");
+    fb($("rgbFb"),"bad","还差一点：" + tips.join("；") + "。调整后再点「提交我调的颜色」重试。");
+    track("RGB挑战未过："+curTarget.name);
+  }
+});
+
+/* ================= 模块3：蜂鸣器 ================= */
+var AC = null, muted = false;
+function audio(){ if(!AC){ try{ AC = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ AC=null; } } return AC; }
+function tone(f, dur){
+  if(muted) return;
+  var ac = audio(); if(!ac) return;
+  if(ac.state==="suspended") ac.resume();
+  var o = ac.createOscillator(), g = ac.createGain();
+  o.type="square"; o.frequency.value=f;
+  g.gain.setValueAtTime(0.0001, ac.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.15, ac.currentTime+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, ac.currentTime+dur);
+  o.connect(g); g.connect(ac.destination);
+  o.start(); o.stop(ac.currentTime+dur+0.05);
+}
+$("muteSw").addEventListener("click", function(){
+  muted = !muted;
+  this.classList.toggle("on", muted);
+  $("muteState").textContent = muted ? "已静音（只看视觉提示）" : "声音已开启";
+  $("muteState").className = "badge " + (muted?"warn":"info");
+});
+$("freq").addEventListener("input", function(){
+  var f=+this.value; $("freqV").textContent=f;
+  $("pitchDesc").textContent = f<400 ? "低沉的音调" : (f<900 ? "中等音调" : (f<1500 ? "较高的音调" : "尖锐的高音"));
+});
+$("beep").addEventListener("click", function(){
+  var f=+$("freq").value; tone(f, 0.5);
+  fb($("m3fb"),"good","🔔 蜂鸣器以 "+f+"Hz 发声。"+ (f>=900?"频率高，音调高。":"频率低，音调低。") + (muted?"（当前静音，只做视觉提示）":""));
+  track("蜂鸣器发声 "+f+"Hz");
+});
+Array.prototype.forEach.call($("scaleRow").querySelectorAll("[data-note]"), function(b){
+  b.addEventListener("click", function(){
+    var f=+this.dataset.note; tone(f,0.35);
+    $("freq").value=f; $("freqV").textContent=f;
+    fb($("m3fb"),"good","♪ "+this.textContent+" = "+f+"Hz。音阶从 do 到 do² 频率逐渐升高，所以音调也逐渐升高。");
+  });
+});
+var beatsEl = $("beats"), beatTimer=null, beatPos=0;
+(function buildBeats(){
+  for(var i=0;i<8;i++){
+    var d=document.createElement("div");
+    d.className="b"; d.textContent=i+1; d.dataset.i=i;
+    d.addEventListener("click", function(){
+      var i2=+this.dataset.i; state.beat[i2]=state.beat[i2]?0:1;
+      this.classList.toggle("on", !!state.beat[i2]); save();
+    });
+    beatsEl.appendChild(d);
+  }
+})();
+function renderBeat(){
+  for(var i=0;i<8;i++) beatsEl.children[i].classList.toggle("on", !!state.beat[i]);
+}
+$("beatPlay").addEventListener("click", function(){
+  var self=this;
+  if(beatTimer){ clearInterval(beatTimer); beatTimer=null; beatPos=0;
+    Array.prototype.forEach.call(beatsEl.children,function(c){c.classList.remove("play");});
+    self.textContent="▶ 播放节奏"; return; }
+  if(state.beat.indexOf(1)<0){ $("beatMsg").textContent="先点亮几个格子再播放哦。"; return; }
+  $("beatMsg").textContent=""; self.textContent="⏹ 停止";
+  beatPos=0;
+  beatTimer=setInterval(function(){
+    Array.prototype.forEach.call(beatsEl.children,function(c){c.classList.remove("play");});
+    beatsEl.children[beatPos].classList.add("play");
+    if(state.beat[beatPos]) tone(+$("freq").value, 0.18);
+    beatPos=(beatPos+1)%8;
+  }, 250);
+  track("播放节拍");
+});
+$("beatClear").addEventListener("click", function(){
+  state.beat=new Array(8).fill(0); renderBeat(); save();
+});
+
+/* ================= 模块4：运动控制 ================= */
+$("servoS").addEventListener("input", function(){
+  var a=+this.value; $("servoV").textContent=a;
+  $("servoArm").setAttribute("transform","rotate("+a+" 100 110)");
+});
+var relayOn=false;
+function setRelay(on){
+  relayOn=on;
+  $("relayArm").setAttribute("transform", on ? "rotate(0 120 55)" : "rotate(-24 120 55)");
+  $("relayLv").textContent = "引脚："+(on?"高电平 1":"低电平 0");
+  $("lamp").setAttribute("fill", on ? "#fbbf24" : "#2a1b33");
+  $("lamp").style.filter = on ? "drop-shadow(0 0 8px #fbbf24)" : "none";
+  $("lampTxt").textContent = "台灯："+(on?"亮":"灭");
+  track("继电器"+(on?"吸合":"断开"));
+}
+$("relayHigh").addEventListener("click", function(){ setRelay(true); });
+$("relayLow").addEventListener("click", function(){ setRelay(false); });
+
+var fanAngle=0, fanSpeed=0;
+var actorState={fan:false,pump:false,light:false,buzz:false};
+var autoMode=false, aFanAngle=0;
+$("fanS").addEventListener("input", function(){
+  fanSpeed=+this.value; $("fanV").textContent=fanSpeed;
+  $("fanTxt").textContent = fanSpeed===0 ? "PWM 值 0（停转）" : "PWM 值 "+fanSpeed+"（"+(fanSpeed<100?"慢速":fanSpeed<200?"中速":"高速")+"旋转）";
+});
+(function fanLoop(){
+  fanAngle=(fanAngle+fanSpeed/12)%360;
+  $("fanBlades").setAttribute("transform","rotate("+fanAngle+" 80 60)");
+  var on = actorState.fan;
+  aFanAngle=(aFanAngle+(on?14:0))%360;
+  $("aFan").setAttribute("transform","rotate("+aFanAngle+" 20 20)");
+  requestAnimationFrame(fanLoop);
+})();
+
+/* 小题：执行器分类 */
+var MQ_EXPLAIN = {
+  "mq-servo":"舵机内部是小电动机+齿轮，能把电信号变成轴的角度旋转，属于电机型执行器。",
+  "mq-relay":"继电器只有吸合/断开两种状态，用小电流控制大电流电路的通断，属于开关型执行器。",
+  "mq-motor":"直流电动机通电后连续旋转（PWM 控转速），属于电机型执行器。"
+};
+Array.prototype.forEach.call(document.querySelectorAll(".miniquiz"), function(box){
+  var fbEl = box.querySelector(".feedback");
+  Array.prototype.forEach.call(box.querySelectorAll("button"), function(b){
+    b.addEventListener("click", function(){
+      var right = this.dataset.a==="1";
+      if(right){
+        fb(fbEl,"good","✔ 正确！"+MQ_EXPLAIN[box.id]);
+        state.miniquiz[box.id]=true; save();
+      }else{
+        fb(fbEl,"bad","✘ 再想想。提示：开关型只有开/关两种状态（继电器、电磁阀、电磁锁）；电机型能产生旋转或角度运动（直流电动机、舵机、步进电动机）。");
+      }
+    });
+  });
+});
+
+/* ================= 模块5：规则实验室 ================= */
+var SEN_NAME={T:"温度",H:"土壤湿度",L:"光照"}, SEN_UNIT={T:"℃",H:"%",L:"lx"};
+var ACT_NAME={fan:"风扇",pump:"水泵",light:"补光灯",buzz:"蜂鸣器"};
+function senVals(){ return {T:+$("senT").value, H:+$("senH").value, L:+$("senL").value}; }
+["senT","senH","senL"].forEach(function(id){
+  $(id).addEventListener("input", function(){
+    $(id+"v").textContent=this.value;
+    if(autoMode) applyRules("拖动"+SEN_NAME[id==="senT"?"T":id==="senH"?"H":"L"]+"滑块");
+  });
+});
+function setActor(act,on,reason){
+  if(actorState[act]===on) return;
+  actorState[act]=on;
+  var stEl = $("st"+({fan:"Fan",pump:"Pump",light:"Light",buzz:"Buzz"})[act]);
+  stEl.textContent = on?"开启":"关闭";
+  stEl.className = "st badge "+(on?"ok":"err");
+  if(act==="pump") $("aDrop").setAttribute("opacity", on?"1":"0");
+  if(act==="light"){ $("aBulb").setAttribute("fill", on?"#fbbf24":"#3d2848"); $("aBulb").style.filter = on?"drop-shadow(0 0 6px #fbbf24)":"none"; }
+  if(act==="buzz"){ $("aBuzz").setAttribute("r", on?"7":"3"); if(on) tone(1200,0.25); }
+  if(reason) addLog(ACT_NAME[act]+(on?" 开启":" 关闭")+" —— "+reason);
+}
+Array.prototype.forEach.call(document.querySelectorAll(".actor"), function(a){
+  a.addEventListener("click", function(){
+    if(autoMode){ addLog("手动点击"+ACT_NAME[this.dataset.act]+"无效：当前为自动模式，执行器由规则控制"); return; }
+    var act=this.dataset.act;
+    setActor(act, !actorState[act], "手动模式下点击");
+  });
+});
+$("modeBtn").addEventListener("click", function(){
+  autoMode=!autoMode;
+  this.textContent = "当前："+(autoMode?"自动":"手动")+"模式（点击切换）";
+  $("modeBadge").textContent = autoMode?"自动":"手动";
+  $("modeBadge").className = "badge "+(autoMode?"ok":"warn");
+  addLog("已切换到"+(autoMode?"自动":"手动")+"模式");
+  if(autoMode) applyRules("切换到自动模式");
+  track("模式切换："+(autoMode?"自动":"手动"));
+});
+function addLog(msg){
+  state.logs.push({t:now(), msg:msg});
+  if(state.logs.length>120) state.logs.shift();
+  renderLog(); save();
+}
+function renderLog(){
+  var el=$("ruleLog");
+  if(!state.logs.length){ el.innerHTML='<div class="note">暂无记录。切换到自动模式并拖动传感器滑块试试。</div>'; return; }
+  el.innerHTML = state.logs.slice(-60).map(function(l){
+    return '<div><span class="t">['+l.t+']</span> <span class="r">'+l.msg+"</span></div>";
+  }).join("");
+  el.scrollTop = el.scrollHeight;
+}
+function cmp(v,op,th){
+  if(op===">") return v>th;
+  if(op==="<") return v<th;
+  if(op==="≥") return v>=th;
+  return v<=th;
+}
+function applyRules(cause){
+  var v=senVals();
+  state.rules.forEach(function(r,i){
+    if(!r.en) return;
+    var hit = cmp(v[r.sen], r.op, r.th);
+    var want = (r.do==="on") ? hit : (hit?false:actorState[r.act]);
+    if(r.do==="on"){
+      if(hit && !actorState[r.act]) setActor(r.act,true,"规则"+(i+1)+"触发："+SEN_NAME[r.sen]+"="+v[r.sen]+SEN_UNIT[r.sen]+" "+r.op+" "+r.th+"（"+cause+"）");
+      if(!hit && actorState[r.act]) setActor(r.act,false,"规则"+(i+1)+"条件不再满足："+SEN_NAME[r.sen]+"="+v[r.sen]+SEN_UNIT[r.sen]);
+    }else{
+      if(hit && actorState[r.act]) setActor(r.act,false,"规则"+(i+1)+"触发关闭："+SEN_NAME[r.sen]+"="+v[r.sen]+SEN_UNIT[r.sen]+" "+r.op+" "+r.th+"（"+cause+"）");
+    }
+    void want;
+  });
+}
+function renderRules(){
+  var tb=$("ruleTable").querySelector("tbody");
+  tb.innerHTML="";
+  state.rules.forEach(function(r,i){
+    var tr=document.createElement("tr");
+    tr.innerHTML = "<td>"+(i+1)+"</td><td>当 "+SEN_NAME[r.sen]+" "+r.op+" "+r.th+SEN_UNIT[r.sen]+"</td><td>"+(r.do==="on"?"开启":"关闭")+" "+ACT_NAME[r.act]+"</td>"+
+      '<td><button class="small '+(r.en?"":"ghost")+'" data-en="'+i+'">'+(r.en?"已启用":"已停用")+"</button></td>"+
+      '<td><button class="small ghost" data-del="'+i+'">✕</button></td>';
+    tb.appendChild(tr);
+  });
+  Array.prototype.forEach.call(tb.querySelectorAll("[data-en]"), function(b){
+    b.addEventListener("click", function(){ var i=+this.dataset.en; state.rules[i].en=!state.rules[i].en; renderRules(); save(); if(autoMode) applyRules("规则启停变化"); });
+  });
+  Array.prototype.forEach.call(tb.querySelectorAll("[data-del]"), function(b){
+    b.addEventListener("click", function(){ var i=+this.dataset.del; state.rules.splice(i,1); renderRules(); save(); });
+  });
+}
+$("rAdd").addEventListener("click", function(){
+  var op=$("rOp").selectedIndex; var ops=[">","<","≥","≤"];
+  state.rules.push({sen:$("rSen").value, op:ops[op], th:+$("rTh").value, act:$("rAct").value, do:$("rDo").value, en:true});
+  renderRules(); save();
+  addLog("添加规则：当 "+SEN_NAME[$("rSen").value]+" "+ops[op]+" "+$("rTh").value+" 时 "+($("rDo").value==="on"?"开启":"关闭")+" "+ACT_NAME[$("rAct").value]);
+  if(autoMode) applyRules("新规则生效");
+  track("添加控制规则");
+});
+$("rDiag").addEventListener("click", function(){
+  state.rules.push({sen:"T", op:"<", th:30, act:"fan", do:"on", en:true});
+  renderRules(); save();
+  $("diagBox").style.display="block";
+  addLog("已载入诊断案例规则：当 温度 < 30℃ 时 开启 风扇（请观察它对不对）");
+  if(autoMode) applyRules("诊断规则载入");
+});
+(function(){
+  var box=$("diagBox");
+  Array.prototype.forEach.call(box.querySelectorAll(".opts button"), function(b){
+    b.addEventListener("click", function(){
+      if(this.dataset.k==="b"){
+        this.classList.add("sel-ok");
+        fb($("diagFb"),"good","✔ 正确！风扇的作用是降温，应该在温度<b>偏高</b>时开启，所以条件应写成 温度 &gt; 30。比较符写反，系统就会「低温吹风、高温不吹」，完全相反。把规则删掉，重新添加一条正确的吧！");
+        track("诊断练习通过"); state.miniquiz["diag"]=true; save();
+      }else{
+        this.classList.add("sel-bad");
+        fb($("diagFb"),"bad","✘ 不对。提示：观察实验现象——20℃（凉快）风扇转、35℃（很热）风扇停。想一想：写这条规则的目的是什么？条件的「方向」对吗？");
+      }
+    });
+  });
+})();
+
+/* ================= 模块6：闯关练习 ================= */
+var QUIZ = [
+  {q:"OLED 显示屏、数码管、LED 点阵，它们属于哪一类执行器？", opts:["显示类","声音类","运动类（电动执行）"], a:0,
+   ex:"它们都把信号变成看得见的文字、数字或图案，属于显示类输出模块。",
+   h1:"想一想：这些设备的输出是给眼睛看的、耳朵听的，还是让东西动起来的？", h2:"教材把输出模块分为显示模块、声音模块、电动执行模块三类，屏幕类都属于第一类。"},
+  {q:"蜂鸣器发出「更高的音调」，需要给它输入什么样的电信号？", opts:["更高频率的信号","更高电压的信号","持续时间更长的信号"], a:0,
+   ex:"蜂鸣器的音调由输入信号的频率决定：频率越高，音调越高。",
+   h1:"回忆模块3的实验：拖动哪个滑块改变了音调？", h2:"200Hz 听起来低沉，2000Hz 听起来尖锐——变化的量是「频率」。"},
+  {q:"要精确地把农植园的天窗打开到 45° 角，最合适的执行器是？", opts:["舵机","继电器","蜂鸣器"], a:0,
+   ex:"舵机能精确控制并保持输出轴的角度（0~180°），适合开窗角度控制；继电器只有开/关两种状态。",
+   h1:"哪个设备能「转到指定角度并停住」？", h2:"教材代码 s1.write_angle(45) 控制的就是这种设备。"},
+  {q:"继电器的作用是？", opts:["用小电流电路的通断控制高电压大电流电路","把电能变成旋转运动","显示文字信息"], a:0,
+   ex:"继电器让智能终端的小电流信号安全地控制台灯、水泵等大电流设备，属于开关型执行器。",
+   h1:"回忆模块4：继电器吸合后，接通的是什么？", h2:"教材原句：继电器「通过控制小电流电路的通断，实现对高电压大电流电路的控制」。"},
+  {q:"执行代码 relay.write_digital(1) 后，继电器会怎样？", opts:["触点吸合，被控电路接通","触点断开，被控电路断电","继电器开始连续旋转"], a:0,
+   ex:"write_digital(1) 输出高电平，继电器线圈通电、触点吸合；write_digital(0) 输出低电平则断开。这就是开关量（数字量）控制。",
+   h1:"1 代表高电平还是低电平？", h2:"模块4里点「高电平 1」按钮时，台灯亮了——说明触点吸合、电路接通。"},
+  {q:"控制直流电动机（风扇）的转速，用的是哪种输出方式？", opts:["PWM 模拟输出（write_analog）","高低电平数字输出（0 或 1）","I2C 显示输出"], a:0,
+   ex:"转速需要连续变化的量，用 PWM（脉宽调制）模拟输出 0~255 的值来调节，教材代码是 pwm0.write_analog(255)。",
+   h1:"转速是「只有开/关」还是「可以连续变化」？", h2:"能连续取 0~255 的输出叫模拟输出（PWM），只有 0/1 的叫数字输出。"},
+  {q:"自动控制规则「当 温度 > 30℃ 时 开启 风扇」。现在温度是 28℃，风扇应处于什么状态？", opts:["关闭","开启","一半转速"], a:0,
+   ex:"28 不大于 30，条件不成立，所以风扇保持关闭。自动控制就是让机器代替人做这种「条件判断」。",
+   h1:"把数代进去：28 > 30 成立吗？", h2:"条件不成立时，规则不会触发「开启」动作。"},
+  {q:"全彩 LED 设置为 rgb = (255, 0, 255)，它大约会发出什么颜色的光？", opts:["紫（品红）色","黄色","青色"], a:0,
+   ex:"红 255 + 蓝 255、绿 0，红光和蓝光混合出紫（品红）色。红+绿=黄，绿+蓝=青。",
+   h1:"哪两种颜色是满值？它们混合是什么色？", h2:"在模块2里把 R、B 拉满、G 归零，看看色块是什么颜色。"}
+];
+var quizIdx=0;
+function renderQuiz(){
+  var q=QUIZ[quizIdx], st=state.quiz.answers[quizIdx]||{tries:0,done:false};
+  var html = "<div><b>第 "+(quizIdx+1)+" 题 / 共 "+QUIZ.length+" 题</b>　"+ (st.done?'<span class="badge ok">已答对</span>':'') +"</div><p style='margin:8px 0'>"+q.q+"</p><div class='opts'>";
+  q.opts.forEach(function(o,i){ html+='<button data-i="'+i+'">'+String.fromCharCode(65+i)+". "+o+"</button>"; });
+  html+="</div><div class='row'><button class='small ghost' id='qh1'>提示 1</button><button class='small ghost' id='qh2'>提示 2</button></div><div class='feedback' id='qfb'></div>";
+  $("quizBox").innerHTML=html;
+  Array.prototype.forEach.call($("quizBox").querySelectorAll(".opts button"), function(b){
+    b.addEventListener("click", function(){
+      var i=+this.dataset.i, st2=state.quiz.answers[quizIdx]||{tries:0,done:false};
+      if(st2.done){ fb($("qfb"),"good","这题你已经答对啦。"+q.ex); return; }
+      st2.tries++;
+      if(i===q.a){
+        st2.done=true; this.classList.add("sel-ok");
+        fb($("qfb"),"good","✔ 回答正确！"+q.ex);
+      }else{
+        this.classList.add("sel-bad");
+        fb($("qfb"),"bad","✘ 不对哦（第 "+st2.tries+" 次尝试）。"+(st2.tries===1?"可以点「提示 1」。":"点「提示 2」看更直接的提示，然后再试一次。"));
+      }
+      state.quiz.answers[quizIdx]=st2; updScore(); save();
+    });
+  });
+  $("qh1").addEventListener("click", function(){ fb($("qfb"),"hint","💡 提示 1："+q.h1); });
+  $("qh2").addEventListener("click", function(){ fb($("qfb"),"hint","💡 提示 2："+q.h2); });
+}
+function updScore(){
+  var s=0; for(var k in state.quiz.answers){ if(state.quiz.answers[k].done) s++; }
+  state.quiz.score=s;
+  $("quizScore").textContent="得分 "+s+" / "+QUIZ.length;
+  $("quizProg").style.width=(s/QUIZ.length*100)+"%";
+}
+$("quizPrev").addEventListener("click", function(){ quizIdx=(quizIdx+QUIZ.length-1)%QUIZ.length; renderQuiz(); });
+$("quizNext").addEventListener("click", function(){ quizIdx=(quizIdx+1)%QUIZ.length; renderQuiz(); });
+$("quizReset").addEventListener("click", function(){ state.quiz={answers:{},score:0}; quizIdx=0; renderQuiz(); updScore(); save(); });
+
+/* ================= 模块7：成果导出 ================= */
+function matrixArt(){
+  var out=[];
+  for(var r=0;r<8;r++){
+    var line="";
+    for(var c=0;c<8;c++) line += state.matrix[r*8+c] ? "■" : "·";
+    out.push(line);
+  }
+  return out.join("\n");
+}
+function buildReport(){
+  var lines=[];
+  lines.push("======================================");
+  lines.push(" 我的控制方案报告");
+  lines.push(" 第1单元 第5节《物联网的控制》");
+  lines.push(" 生成时间："+new Date().toLocaleString());
+  lines.push("======================================");
+  lines.push("");
+  lines.push("【一】OLED 显示内容：「"+state.oledText+"」");
+  lines.push("");
+  lines.push("【二】我的 8×8 LED 点阵作品（■=亮 ·=灭）：");
+  lines.push(matrixArt());
+  lines.push("");
+  lines.push("【三】RGB 混色挑战记录（共 "+state.rgbChallenges.length+" 次）：");
+  if(state.rgbChallenges.length===0) lines.push("  （尚未挑战）");
+  state.rgbChallenges.slice(-8).forEach(function(c){
+    lines.push("  ["+c.time+"] 目标："+c.target+"　我的值："+c.mine+"　"+(c.ok?"✔成功":"✘未达标"));
+  });
+  lines.push("");
+  lines.push("【四】我设计的自动控制规则（"+state.rules.length+" 条）：");
+  if(state.rules.length===0) lines.push("  （尚未添加规则）");
+  state.rules.forEach(function(r,i){
+    lines.push("  规则"+(i+1)+"：当 "+SEN_NAME[r.sen]+" "+r.op+" "+r.th+SEN_UNIT[r.sen]+" 时 "+(r.do==="on"?"开启":"关闭")+" "+ACT_NAME[r.act]+(r.en?"":"（已停用）"));
+  });
+  lines.push("");
+  lines.push("【五】运行日志摘要（最近 10 条）：");
+  if(state.logs.length===0) lines.push("  （暂无日志）");
+  state.logs.slice(-10).forEach(function(l){ lines.push("  ["+l.t+"] "+l.msg); });
+  lines.push("");
+  var mqDone=Object.keys(state.miniquiz).length;
+  lines.push("【六】练习成绩：闯关练习 "+state.quiz.score+" / "+QUIZ.length+" 分；执行器分类与诊断小题完成 "+mqDone+" / 4 个。");
+  lines.push("");
+  lines.push("【七】知识小结：");
+  lines.push("  输出模块（执行器）分三类——显示类（OLED/数码管/点阵）、声音类（蜂鸣器/喇叭）、");
+  lines.push("  电动执行类（开关型：继电器/电磁阀；电机型：直流电动机/舵机/步进电动机）。");
+  lines.push("  控制方式：数字输出（高/低电平）、PWM 模拟输出（0~255）、角度控制（0~180°）。");
+  return lines.join("\n");
+}
+$("genReport").addEventListener("click", function(){
+  $("reportArea").value = buildReport();
+  track("生成报告");
+});
+function download(name, text, mime){
+  var blob=new Blob([text],{type:mime});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },300);
+}
+$("dlTxt").addEventListener("click", function(){
+  if(!$("reportArea").value) $("reportArea").value = buildReport();
+  download("第5节_我的控制方案.txt", $("reportArea").value, "text/plain;charset=utf-8");
+});
+$("dlJson").addEventListener("click", function(){
+  var data={
+    lesson:"第1单元 第5节 物联网的控制", time:new Date().toLocaleString(),
+    oled:state.oledText, matrix:state.matrix, matrixArt:matrixArt(),
+    rgbChallenges:state.rgbChallenges, rules:state.rules,
+    logs:state.logs.slice(-30), quizScore:state.quiz.score, quizTotal:QUIZ.length,
+    miniquizDone:Object.keys(state.miniquiz)
+  };
+  download("第5节_我的控制方案.json", JSON.stringify(data,null,2), "application/json;charset=utf-8");
+});
+$("clearData").addEventListener("click", function(){
+  if(!confirm("确定清除本机保存的第5节学习数据吗？此操作不可恢复。")) return;
+  localStorage.removeItem(LS+"state");
+  location.reload();
+});
+$("logClear").addEventListener("click", function(){ state.logs=[]; renderLog(); save(); });
+
+/* ---------- 初始渲染 ---------- */
+drawOled(state.oledText);
+$("oledIn").value=state.oledText;
+renderMx(); updRGB(); renderBeat(); renderRules(); renderLog(); renderQuiz(); updScore();
+})();
+</script>
+</body>
+</html>

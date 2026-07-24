@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第1单元 第6节 物联网系统的搭建 · 智能农植园项目工作台</title>
+<style>
+:root{
+  --green:#16a34a; --green-dark:#15803d; --green-deep:#14532d; --green-light:#4ade80;
+  --bg:#f0fdf4; --bg2:#dcfce7; --panel:#ffffff; --line:#bbe6c8;
+  --ink:#14361f; --muted:#4e7a5d; --ok:#16a34a; --warn:#d97706; --err:#dc2626; --blue:#2563eb;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:
+    radial-gradient(900px 380px at 90% -5%, rgba(74,222,128,.25), transparent 60%),
+    linear-gradient(180deg,var(--bg),var(--bg2) 400px, var(--bg));
+  color:var(--ink); min-height:100vh;
+}
+code,.mono{font-family:ui-monospace,Consolas,"Courier New",monospace}
+header.top{
+  padding:20px 3vw 14px; border-bottom:2px solid var(--line);
+  background:rgba(240,253,244,.9); 
+}
+header.top h1{font-size:1.5rem; color:var(--green-deep)}
+header.top h1 em{font-style:normal; color:var(--green)}
+.sub{color:var(--muted); font-size:.88rem; margin-top:4px}
+.goalbar{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px}
+.goalbar span{background:#fff; border:1px solid var(--line); border-radius:999px; padding:4px 14px; font-size:.8rem; color:var(--muted)}
+.goalbar span b{color:var(--green-dark)}
+.projbar{display:flex; align-items:center; gap:12px; margin-top:12px}
+.projbar .track{flex:1; height:14px; background:#fff; border:1px solid var(--line); border-radius:999px; overflow:hidden}
+.projbar .track i{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--green-light),var(--green)); transition:.5s}
+.projbar b{font-size:.9rem; color:var(--green-dark); min-width:130px}
+.layout{display:grid; grid-template-columns:250px 1fr; gap:0; align-items:start}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.steps{position:static !important; display:flex; overflow-x:auto}}
+.steps{
+  position:sticky; top:0; padding:16px 10px; display:flex; flex-direction:column; gap:6px;
+  max-height:100vh; overflow-y:auto;
+}
+.step{
+  display:flex; gap:10px; align-items:center; padding:10px 12px; border-radius:12px; cursor:pointer;
+  border:1px solid transparent; color:var(--muted); font-size:.85rem; text-decoration:none; background:transparent;
+  min-width:190px;
+}
+.step:hover{background:#fff; border-color:var(--line)}
+.step .n{
+  width:26px; height:26px; border-radius:50%; background:#fff; border:2px solid var(--line);
+  display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; color:var(--muted); flex:none;
+}
+.step.done{color:var(--green-dark); font-weight:600}
+.step.done .n{background:var(--green); border-color:var(--green); color:#fff}
+.step.done .n::before{content:"✓"}
+.step.done .n span{display:none}
+.work{padding:16px 3vw 60px 8px; display:flex; flex-direction:column; gap:20px; min-width:0}
+section.mod{
+  background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:20px;
+  box-shadow:0 6px 20px rgba(20,83,45,.08);
+}
+section.mod h2{font-size:1.1rem; color:var(--green-deep); display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+h2 .chip{font-size:.7rem; background:var(--green); color:#fff; padding:3px 10px; border-radius:999px}
+h2 .stbadge{font-size:.72rem; padding:3px 10px; border-radius:999px; background:#fef3c7; color:var(--warn)}
+h2 .stbadge.ok{background:#dcfce7; color:var(--green-dark)}
+.task{
+  background:#f0fdf4; border-left:4px solid var(--green); padding:10px 14px; border-radius:0 10px 10px 0;
+  color:var(--muted); font-size:.85rem; line-height:1.8; margin:12px 0;
+}
+.note{color:var(--muted); font-size:.82rem; line-height:1.8}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+button{
+  font-family:inherit; font-size:.85rem; cursor:pointer; border:none; border-radius:10px; padding:8px 16px;
+  background:var(--green); color:#fff; font-weight:600; transition:.15s;
+}
+button:hover{filter:brightness(1.1)}
+button.ghost{background:#fff; border:1.5px solid var(--line); color:var(--muted)}
+button.ghost:hover{border-color:var(--green); color:var(--green-dark)}
+button.small{padding:5px 11px; font-size:.78rem}
+button:disabled{opacity:.45; cursor:not-allowed}
+input[type=text],input[type=number],select,textarea{
+  font-family:inherit; background:#fff; border:1.5px solid var(--line); color:var(--ink);
+  border-radius:8px; padding:7px 10px; font-size:.85rem;
+}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(22,163,74,.3)}
+input[type=range]{accent-color:var(--green)}
+.feedback{border-radius:10px; padding:10px 13px; font-size:.84rem; line-height:1.8; display:none; margin-top:10px}
+.feedback.show{display:block}
+.feedback.good{background:#dcfce7; border:1px solid #86efac; color:#166534}
+.feedback.bad{background:#fee2e2; border:1px solid #fca5a5; color:#991b1b}
+.feedback.hint{background:#fef3c7; border:1px solid #fcd34d; color:#92400e}
+.badge{display:inline-block; padding:2px 10px; border-radius:999px; font-size:.74rem; font-weight:600}
+.badge.ok{background:#dcfce7; color:var(--green-dark)}
+.badge.err{background:#fee2e2; color:var(--err)}
+.badge.info{background:#dbeafe; color:var(--blue)}
+.badge.warn{background:#fef3c7; color:var(--warn)}
+/* 模块1 流程 */
+.flow{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0}
+.flow .fnode{
+  background:linear-gradient(180deg,#fff,#f0fdf4); border:1.5px solid var(--line); border-radius:12px;
+  padding:9px 12px; font-size:.8rem; cursor:pointer; transition:.15s; font-weight:600; color:var(--green-deep);
+}
+.flow .fnode:hover,.flow .fnode.sel{border-color:var(--green); box-shadow:0 3px 10px rgba(22,163,74,.2)}
+.flow .arr{color:var(--green); font-weight:700}
+.flowdesc{background:#f0fdf4; border:1px dashed var(--line); border-radius:10px; padding:10px 14px; font-size:.84rem; color:var(--muted); line-height:1.8; min-height:52px}
+.sortlist{display:flex; flex-direction:column; gap:8px; margin:10px 0}
+.sortlist .si{
+  background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:10px 14px; cursor:grab;
+  display:flex; align-items:center; gap:10px; font-size:.85rem; user-select:none;
+}
+.sortlist .si.dragging{opacity:.4}
+.sortlist .si .pos{width:24px; height:24px; border-radius:50%; background:#f0fdf4; border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; flex:none}
+.sortlist .si.right{border-color:#86efac; background:#f0fdf4}
+.sortlist .si.right .pos{background:var(--green); color:#fff; border-color:var(--green)}
+.sortlist .si.wrong{border-color:#fca5a5; background:#fef2f2}
+.sortlist .si.wrong .pos{background:#fee2e2; color:var(--err); border-color:#fca5a5}
+.sortlist .si .updn{margin-left:auto; display:flex; gap:4px}
+/* 模块2 设备 */
+.devgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin:12px 0}
+.devcard{
+  background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:12px; cursor:pointer; transition:.15s;
+  display:flex; flex-direction:column; gap:6px; align-items:center; text-align:center;
+}
+.devcard:hover{border-color:var(--green)}
+.devcard.sel{border-color:var(--green); background:#f0fdf4; box-shadow:0 3px 12px rgba(22,163,74,.18)}
+.devcard .ic{font-size:1.6rem}
+.devcard b{font-size:.82rem; color:var(--green-deep)}
+.devcard span{font-size:.7rem; color:var(--muted)}
+.devcard .tick{width:20px; height:20px; border-radius:50%; border:1.5px solid var(--line); font-size:.7rem; display:flex; align-items:center; justify-content:center; color:transparent}
+.devcard.sel .tick{background:var(--green); border-color:var(--green); color:#fff}
+.needs{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0}
+.needs .nd{padding:5px 12px; border-radius:999px; font-size:.78rem; background:#fee2e2; color:#991b1b; border:1px solid #fca5a5}
+.needs .nd.ok{background:#dcfce7; color:#166534; border-color:#86efac}
+.biglight{width:22px; height:22px; border-radius:50%; background:#d1d5db; display:inline-block; vertical-align:middle; transition:.3s}
+.biglight.on{background:var(--green); box-shadow:0 0 12px var(--green-light)}
+/* 模块3 topic */
+.topicbuild{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:10px 0}
+.topicout{background:#14532d; color:#bbf7d0; border-radius:10px; padding:10px 16px; font-size:.95rem; letter-spacing:.5px}
+table.pair{width:100%; border-collapse:collapse; font-size:.82rem; margin-top:8px}
+table.pair th,table.pair td{border:1px solid var(--line); padding:8px; text-align:center}
+table.pair th{background:#f0fdf4; color:var(--muted)}
+/* 模块4 舞台 */
+.stage{background:#fbfffc; border:1.5px solid var(--line); border-radius:14px; padding:8px; overflow-x:auto}
+.msglog{background:#14532d; color:#d7f7e2; border-radius:10px; padding:10px; height:190px; overflow:auto; font-size:.74rem; line-height:1.8; font-family:ui-monospace,Consolas,monospace}
+.msglog .hd{color:#86efac}
+/* 模块5 执行器 */
+.actrow{display:flex; flex-wrap:wrap; gap:12px; margin:10px 0}
+.actbox{background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:10px; width:150px; text-align:center}
+.actbox .st{font-size:.74rem}
+.rulecfg{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:10px; margin:10px 0}
+.rulecfg .rc{background:#f0fdf4; border:1px solid var(--line); border-radius:10px; padding:10px; font-size:.82rem; display:flex; flex-wrap:wrap; align-items:center; gap:6px}
+.rulecfg input[type=number]{width:70px}
+.slider-line{display:grid; grid-template-columns:88px 1fr 84px; gap:10px; align-items:center; font-size:.85rem; margin:6px 0}
+.slider-line .val{text-align:right; font-weight:700; font-size:.82rem}
+/* 模块6 排查 */
+.checkchain{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0}
+.checkchain .ck{
+  border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:8px 13px; font-size:.8rem; cursor:pointer;
+  color:var(--muted); font-weight:600;
+}
+.checkchain .ck.avail{border-color:var(--green); color:var(--green-dark)}
+.checkchain .ck.donec{background:#f0fdf4; border-color:#86efac; color:#166534}
+.checkchain .ck:disabled{cursor:not-allowed}
+.cluebox{background:#fffbeb; border:1px solid #fcd34d; border-radius:10px; padding:10px 14px; font-size:.83rem; color:#78350f; line-height:1.8; min-height:46px; margin-bottom:10px}
+.causeopts{display:flex; flex-direction:column; gap:8px}
+.causeopts button{text-align:left; background:#fff; border:1.5px solid var(--line); color:var(--ink); font-weight:400}
+.causeopts button:hover{border-color:var(--green)}
+.causeopts button.sel-ok{background:#dcfce7; border-color:var(--green)}
+.causeopts button.sel-bad{background:#fee2e2; border-color:#fca5a5}
+/* 模块7 */
+textarea.summary{width:100%; height:90px; resize:vertical}
+textarea.report{width:100%; height:280px; background:#14532d; color:#d7f7e2; border-radius:10px; padding:12px; font-family:ui-monospace,Consolas,monospace; font-size:.75rem; line-height:1.6; border:none; resize:vertical}
+.topo{background:#fbfffc; border:1.5px solid var(--line); border-radius:12px; overflow-x:auto}
+footer{padding:24px; text-align:center; color:var(--muted); font-size:.75rem}
+.filebtn{position:relative; overflow:hidden; display:inline-block}
+.filebtn input{position:absolute; inset:0; opacity:0; cursor:pointer}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <h1>🌱 物联网系统的搭建 <em>· 智能农植园项目工作台</em></h1>
+  <div class="sub">清华大学出版社《信息科技》八年级上册 · 第1单元 物联网入门 · 第6节（教材 P63—70）</div>
+  <div class="goalbar">
+    <span><b>目标1</b> 掌握物联网系统搭建的完整流程</span>
+    <span><b>目标2</b> 理解 MQTT 服务器、Topic 与发布—订阅机制</span>
+    <span><b>目标3</b> 搭建并调试一个智能农植园系统模型</span>
+  </div>
+  <div class="projbar">
+    <b id="projPct">项目完成度 0 / 7</b>
+    <div class="track"><i id="projBar"></i></div>
+  </div>
+</header>
+
+<div class="layout">
+  <!-- 左侧步骤条 -->
+  <nav class="steps" id="stepNav">
+    <a class="step" href="#s1" data-step="s1"><span class="n"><span>1</span></span>搭建流程</a>
+    <a class="step" href="#s2" data-step="s2"><span class="n"><span>2</span></span>设备选择</a>
+    <a class="step" href="#s3" data-step="s3"><span class="n"><span>3</span></span>Topic 设计</a>
+    <a class="step" href="#s4" data-step="s4"><span class="n"><span>4</span></span>通信模拟</a>
+    <a class="step" href="#s5" data-step="s5"><span class="n"><span>5</span></span>自动控制</a>
+    <a class="step" href="#s6" data-step="s6"><span class="n"><span>6</span></span>故障排查</a>
+    <a class="step" href="#s7" data-step="s7"><span class="n"><span>7</span></span>项目成果</a>
+  </nav>
+
+  <main class="work">
+
+  <!-- ============ 模块1 搭建流程 ============ -->
+  <section class="mod" id="s1">
+    <h2><span class="chip">步骤 1</span> 物联网系统搭建流程 <span class="stbadge" id="st1">未完成</span></h2>
+    <div class="task">任务：① 点击下方流程图中的每一步，了解它的作用；② 完成"流程排序还原"挑战——把打乱的步骤拖回正确顺序（也可用 ↑↓ 按钮），排序实时判定。全部正确即完成本步骤。</div>
+    <div class="flow" id="flowChart"></div>
+    <div class="flowdesc" id="flowDesc">👆 点击上面任意一步，查看它的作用说明。</div>
+    <h3 style="font-size:.9rem; color:var(--green-deep); margin-top:16px">🧩 挑战：打乱的流程，拖回正确顺序</h3>
+    <div class="row" style="margin-top:6px"><button class="small" id="shuffleBtn">🔀 打乱并开始挑战</button><span class="note">拖动条目或用右侧 ↑↓ 调整位置，每次调整立即判定。</span></div>
+    <div class="sortlist" id="sortList"></div>
+    <div class="feedback" id="sortFb"></div>
+  </section>
+
+  <!-- ============ 模块2 设备选择 ============ -->
+  <section class="mod" id="s2">
+    <h2><span class="chip">步骤 2</span> 智能农植园设备选择 <span class="stbadge" id="st2">未完成</span></h2>
+    <div class="task">任务：小清的农植园有四项需求：<b>环境监测、缺水浇灌、高温通风、异常报警</b>。请从下面 10 种设备中勾选出需要的设备加入清单。系统会智能点评：缺了什么、为什么不行。四个需求全部满足且系统能运行时，绿灯亮起 <span class="biglight" id="devLight"></span></div>
+    <div class="needs" id="needsBar"></div>
+    <div class="devgrid" id="devGrid"></div>
+    <div class="feedback" id="devFb"></div>
+  </section>
+
+  <!-- ============ 模块3 Topic设计 ============ -->
+  <section class="mod" id="s3">
+    <h2><span class="chip">步骤 3</span> Topic 设计与配对 <span class="stbadge" id="st3">未完成</span></h2>
+    <div class="task">任务：① 用三个输入框拼出规范的 Topic（如 <code>smartfarm/device01/temperature</code>），注意：全小写、不能有空格、用 / 分隔；② 完成"发布者—Topic—订阅者"配对任务，让消息找到正确的收件人。</div>
+    <h3 style="font-size:.9rem; color:var(--green-deep)">① Topic 生成器</h3>
+    <div class="topicbuild">
+      <input type="text" id="tp1" value="smartfarm" placeholder="项目名" style="width:130px">
+      <b>/</b>
+      <input type="text" id="tp2" value="device01" placeholder="设备名" style="width:130px">
+      <b>/</b>
+      <input type="text" id="tp3" value="temperature" placeholder="数据类型" style="width:130px">
+      <button class="small" id="tpMake">生成 Topic</button>
+    </div>
+    <div class="topicout mono" id="tpOut">smartfarm/device01/temperature</div>
+    <div class="feedback" id="tpFb"></div>
+    <div class="row" style="margin-top:8px">
+      <button class="small ghost" id="tpAdd">✚ 把这个 Topic 加入项目清单</button>
+      <span class="note" id="tpListNote">项目 Topic 清单：0 个</span>
+    </div>
+    <h3 style="font-size:.9rem; color:var(--green-deep); margin-top:18px">② 发布者 — Topic — 订阅者 配对</h3>
+    <table class="pair">
+      <thead><tr><th>发布者（谁发消息）</th><th>Topic（贴什么标签）</th><th>订阅者（谁收消息）</th><th>判定</th></tr></thead>
+      <tbody id="pairBody"></tbody>
+    </table>
+    <div class="row" style="margin-top:10px"><button class="small" id="pairCheck">提交配对</button><button class="small ghost" id="pairReset">重置</button></div>
+    <div class="feedback" id="pairFb"></div>
+  </section>
+
+  <!-- ============ 模块4 通信模拟 ============ -->
+  <section class="mod" id="s4">
+    <h2><span class="chip">步骤 4</span> 发布—订阅通信模拟 <span class="stbadge" id="st4">未完成</span></h2>
+    <div class="task">任务：观察一条消息的完整旅程：传感器产生数据 → 设备发布消息 → MQTT 服务器接收 → 按 Topic 转发 → 控制端（订阅者）收到 → 页面更新状态。先用"单步执行"逐步看清每一环，再"连续运行"。完整跑完一条消息即完成本步骤。</div>
+    <div class="stage">
+      <svg viewBox="0 0 860 260" width="100%" style="min-width:700px">
+        <defs>
+          <marker id="mk" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#86efac"/></marker>
+        </defs>
+        <g font-size="12" text-anchor="middle">
+          <line x1="118" y1="120" x2="188" y2="120" stroke="#86efac" stroke-width="2.5" marker-end="url(#mk)"/>
+          <line x1="318" y1="120" x2="388" y2="120" stroke="#86efac" stroke-width="2.5" marker-end="url(#mk)"/>
+          <line x1="528" y1="120" x2="598" y2="120" stroke="#86efac" stroke-width="2.5" marker-end="url(#mk)"/>
+          <line x1="728" y1="120" x2="788" y2="120" stroke="#86efac" stroke-width="2.5" marker-end="url(#mk)"/>
+          <!-- 传感器 -->
+          <g id="nSensor"><rect x="18" y="85" width="100" height="70" rx="12" fill="#fff" stroke="#16a34a" stroke-width="2"/>
+            <text x="68" y="110" fill="#14532d" font-weight="bold">传感器</text>
+            <text x="68" y="132" fill="#4e7a5d" id="senReading">待采集…</text></g>
+          <!-- 智能终端 -->
+          <g id="nTerm"><rect x="192" y="85" width="126" height="70" rx="12" fill="#fff" stroke="#16a34a" stroke-width="2"/>
+            <text x="255" y="110" fill="#14532d" font-weight="bold">智能终端·发布者</text>
+            <text x="255" y="132" fill="#4e7a5d" font-size="10" id="termTxt">等待数据</text></g>
+          <!-- 服务器 -->
+          <g id="nBroker"><rect x="392" y="70" width="136" height="100" rx="14" fill="#f0fdf4" stroke="#15803d" stroke-width="3"/>
+            <text x="460" y="100" fill="#14532d" font-weight="bold">MQTT 服务器</text>
+            <text x="460" y="122" fill="#4e7a5d" font-size="10">（如 SIoT，本地中转站）</text>
+            <text x="460" y="146" fill="#4e7a5d" font-size="10" id="brokerTxt">空闲</text></g>
+          <!-- 订阅者 -->
+          <g id="nSub"><rect x="602" y="85" width="126" height="70" rx="12" fill="#fff" stroke="#16a34a" stroke-width="2"/>
+            <text x="665" y="110" fill="#14532d" font-weight="bold">控制端·订阅者</text>
+            <text x="665" y="132" fill="#4e7a5d" font-size="10" id="subTxt">已订阅，等待消息</text></g>
+          <!-- 状态 -->
+          <g id="nUI"><rect x="792" y="85" width="60" height="70" rx="12" fill="#fff" stroke="#16a34a" stroke-width="2"/>
+            <text x="822" y="112" font-size="20" id="uiIcon">🖥</text>
+            <text x="822" y="140" fill="#4e7a5d" font-size="9" id="uiTxt">状态</text></g>
+          <circle id="pkt" cx="68" cy="120" r="9" fill="#f59e0b" opacity="0"/>
+          <text id="pktLabel" x="430" y="35" fill="#b45309" font-size="12" text-anchor="middle"></text>
+          <text id="stageLabel" x="430" y="220" fill="#15803d" font-size="13" text-anchor="middle" font-weight="bold">点击「单步执行」开始</text>
+        </g>
+      </svg>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="small" id="simStep">⏯ 单步执行</button>
+      <button class="small" id="simRun">▶ 连续运行</button>
+      <button class="small ghost" id="simPause" disabled>⏸ 暂停</button>
+      <button class="small ghost" id="simClear">🗑 清空日志</button>
+      <span class="badge info" id="simCount">已送达消息：0 条</span>
+    </div>
+    <div class="msglog" id="msgLog" style="margin-top:10px"><div class="hd">时间　　　发布者　　　　Topic　　　　　　　　　　内容　　　　送达订阅者</div></div>
+  </section>
+
+  <!-- ============ 模块5 自动控制 ============ -->
+  <section class="mod" id="s5">
+    <h2><span class="chip">步骤 5</span> 自动控制规则联调 <span class="stbadge" id="st5">未完成</span></h2>
+    <div class="task">任务：① 设定四条规则的阈值；② 拖动传感器滑块模拟环境变化，观察执行器立即响应（水泵喷水、风扇旋转、灯亮、蜂鸣器闪烁），日志记录触发原因。让四条规则都至少触发一次即完成本步骤。</div>
+    <div class="rulecfg">
+      <div class="rc">💧 当 土壤湿度 &lt; <input type="number" id="thSoil" value="40" min="0" max="100">% → 开启水泵</div>
+      <div class="rc">🌀 当 温度 &gt; <input type="number" id="thTemp" value="32" min="0" max="60">℃ → 开启风扇</div>
+      <div class="rc">💡 当 光照 &lt; <input type="number" id="thLight" value="300" min="0" max="2000">lx → 开启补光灯</div>
+      <div class="rc">🚨 数据超合理范围（温度 0~45℃ / 土壤 5~95% / 光照 ≤1500lx）→ 蜂鸣器报警</div>
+    </div>
+    <div class="row" style="align-items:flex-start">
+      <div style="flex:1; min-width:260px">
+        <div class="slider-line"><span>温度</span><input type="range" id="cT" min="-10" max="60" value="25"><span class="val mono"><span id="cTv">25</span>℃</span></div>
+        <div class="slider-line"><span>土壤湿度</span><input type="range" id="cS" min="0" max="100" value="60"><span class="val mono"><span id="cSv">60</span>%</span></div>
+        <div class="slider-line"><span>光照</span><input type="range" id="cL" min="0" max="2000" value="600"><span class="val mono"><span id="cLv">600</span>lx</span></div>
+        <div class="row"><button class="small ghost" id="injectBad">⚡ 注入一条异常数据（温度 -100℃）</button></div>
+        <div class="row" style="margin-top:6px"><span class="note">已触发规则：</span><span class="badge warn" id="ruleHitBadge">0 / 4</span></div>
+      </div>
+      <div class="actrow" style="flex:1.2">
+        <div class="actbox"><svg viewBox="0 0 60 60" width="54"><rect x="18" y="24" width="24" height="20" rx="4" fill="#e0f2fe" stroke="#2563eb" stroke-width="2"/><g id="pumpDrops" opacity="0"><circle cx="30" cy="14" r="3" fill="#3b82f6"/><circle cx="22" cy="8" r="2.4" fill="#60a5fa"/><circle cx="38" cy="9" r="2.4" fill="#60a5fa"/></g></svg><br><b style="font-size:.8rem">水泵</b><br><span class="st badge err" id="cstPump">关闭</span></div>
+        <div class="actbox"><svg viewBox="0 0 60 60" width="54"><g id="cFanG" transform="rotate(0 30 30)"><path d="M30 30 C20 12 40 10 33 26 Z" fill="#16a34a"/><path d="M30 30 C20 12 40 10 33 26 Z" fill="#16a34a" transform="rotate(120 30 30)"/><path d="M30 30 C20 12 40 10 33 26 Z" fill="#16a34a" transform="rotate(240 30 30)"/></g><circle cx="30" cy="30" r="5" fill="#15803d"/></svg><br><b style="font-size:.8rem">风扇</b><br><span class="st badge err" id="cstFan">关闭</span></div>
+        <div class="actbox"><svg viewBox="0 0 60 60" width="54"><circle id="cBulb" cx="30" cy="24" r="12" fill="#f3f4f6" stroke="#d97706" stroke-width="2"/><rect x="24" y="37" width="12" height="9" rx="2" fill="#d1d5db"/></svg><br><b style="font-size:.8rem">补光灯</b><br><span class="st badge err" id="cstLight">关闭</span></div>
+        <div class="actbox"><svg viewBox="0 0 60 60" width="54"><circle cx="30" cy="30" r="14" fill="#fff7ed" stroke="#ea580c" stroke-width="2"/><circle id="cBuzz" cx="30" cy="30" r="4" fill="#9ca3af"/></svg><br><b style="font-size:.8rem">蜂鸣器</b><br><span class="st badge err" id="cstBuzz">正常</span></div>
+      </div>
+    </div>
+    <div class="msglog" id="ctrlLog" style="height:130px"><div class="hd">自动控制日志（时间 · 触发原因）</div></div>
+  </section>
+
+  <!-- ============ 模块6 故障排查 ============ -->
+  <section class="mod" id="s6">
+    <h2><span class="chip">步骤 6</span> 系统故障排查训练 <span class="stbadge" id="st6">未完成</span></h2>
+    <div class="task">任务：点击"抽取故障"，系统随机呈现一个异常现象。请按照 <b>设备 → 连接 → Topic → 数据 → 规则 → 执行器</b> 的顺序逐项点击检查（必须按顺序），根据线索选出故障原因。答对 1 例即完成本步骤，多多益善！</div>
+    <div class="row">
+      <button id="faultDraw">🎲 抽取故障场景</button>
+      <span class="badge ok" id="faultSolved">已排除故障：0 例</span>
+    </div>
+    <div id="faultZone" style="display:none; margin-top:12px">
+      <div class="cluebox"><b>🔧 系统异常现象：</b><span id="faultSymptom"></span></div>
+      <div class="checkchain" id="checkChain"></div>
+      <div class="cluebox" id="clueBox">依次点击上方检查项，线索会显示在这里。</div>
+      <h3 style="font-size:.88rem; color:var(--green-deep); margin-bottom:8px">你的诊断：故障原因是——</h3>
+      <div class="causeopts" id="causeOpts"></div>
+      <div class="feedback" id="faultFb"></div>
+      <div class="row" style="margin-top:8px"><button class="small ghost" id="faultRetry" style="display:none">🔄 重试本题</button></div>
+    </div>
+    <div class="msglog" id="faultLog" style="height:110px; margin-top:12px"><div class="hd">排查日志</div></div>
+  </section>
+
+  <!-- ============ 模块7 项目成果 ============ -->
+  <section class="mod" id="s7">
+    <h2><span class="chip">步骤 7</span> 项目成果与导出 <span class="stbadge" id="st7">未完成</span></h2>
+    <div class="task">任务：写一段项目小结，点击"一键生成项目成果"。系统会根据你前面 6 步的操作，自动生成系统拓扑图、设备清单、Topic 清单、控制规则表、测试日志与排查记录。可导出 / 导入项目文件。</div>
+    <h3 style="font-size:.9rem; color:var(--green-deep)">我的项目小结（可编辑补充）</h3>
+    <textarea class="summary" id="mySummary" placeholder="例：我为智能农植园选择了……本地 MQTT 服务器负责……我设计的 Topic 是……测试中我发现……"></textarea>
+    <div class="row" style="margin:10px 0">
+      <button id="genProj">📦 一键生成项目成果</button>
+      <button class="ghost" id="dlProjJson">下载 JSON</button>
+      <button class="ghost" id="dlProjTxt">下载文本</button>
+    </div>
+    <h3 style="font-size:.9rem; color:var(--green-deep)">系统拓扑图（根据你选的设备动态生成）</h3>
+    <div class="topo" id="topoBox"><div class="note" style="padding:14px">生成项目成果后，这里会画出你的系统拓扑图。</div></div>
+    <textarea class="report" id="projReport" readonly placeholder="项目成果文本将显示在这里……" style="margin-top:10px"></textarea>
+    <div class="row" style="margin-top:10px">
+      <button class="ghost small" id="expProj">⬆ 导出项目</button>
+      <label class="filebtn ghost small" style="border:1.5px solid var(--line); border-radius:10px; padding:5px 11px; font-size:.78rem; color:var(--muted); cursor:pointer">⬇ 导入项目<input type="file" id="impProj" accept=".json"></label>
+      <button class="ghost small" id="clearAll">🗑 清除本机数据</button>
+      <span class="note" id="ioMsg"></span>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<footer>本页为单文件离线交互学习工具 · 所有服务器、设备、Topic 均为虚拟教学示例 · 学习数据仅保存在本机浏览器 localStorage</footer>
+
+<script>
+(function(){
+"use strict";
+var $ = function(id){ return document.getElementById(id); };
+var LS = "u1l6_";
+
+/* ================= 全局状态 ================= */
+var state = {
+  done:{s1:false,s2:false,s3:false,s4:false,s5:false,s6:false,s7:false},
+  devices:[],            // 已选设备 id
+  topics:[],             // 项目 topic 清单
+  pairAnswers:{},
+  msgCount:0,
+  msgLog:[],             // {t,pub,topic,payload,sub}
+  ctrlLog:[],
+  ruleHits:{pump:false,fan:false,light:false,buzz:false},
+  thresholds:{soil:40,temp:32,light:300},
+  faultsSolved:[],       // 场景 id
+  faultLog:[],
+  summary:"",
+  sortDone:false
+};
+function save(){ try{ localStorage.setItem(LS+"state", JSON.stringify(state)); }catch(e){} }
+function load(){
+  try{
+    var raw=localStorage.getItem(LS+"state");
+    if(raw){ var s=JSON.parse(raw); for(var k in state){ if(s[k]!==undefined) state[k]=s[k]; } }
+  }catch(e){}
+}
+load();
+function now(){
+  var d=new Date(); function p(n){return (n<10?"0":"")+n;}
+  return p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds());
+}
+function fb(el,cls,html){ el.className="feedback show "+cls; el.innerHTML=html; }
+function markDone(step){
+  if(state.done[step]) return;
+  state.done[step]=true; save(); renderProgress();
+}
+function renderProgress(){
+  var n=0;
+  for(var k in state.done){
+    var done=state.done[k];
+    if(done) n++;
+    var nav=document.querySelector('[data-step="'+k+'"]');
+    if(nav) nav.classList.toggle("done", done);
+    var b=$("st"+k.slice(1));
+    if(b){ b.textContent=done?"已完成 ✓":"未完成"; b.classList.toggle("ok",done); }
+  }
+  $("projPct").textContent="项目完成度 "+n+" / 7";
+  $("projBar").style.width=(n/7*100)+"%";
+}
+
+/* ================= 模块1：流程图 + 排序 ================= */
+var FLOW = [
+  {name:"服务平台选择", desc:"选择消息中转站：可以用 OneNET、阿里云等网络平台，教学中更常用开源的 SIoT——无须注册、一键运行，在本地就能建 MQTT 服务器。"},
+  {name:"智能终端选择", desc:"选大脑：简单数据采集大部分开源硬件都能胜任；要联网最好选自带 Wi-Fi 的（如 ESP32、ESP8266 芯片的硬件）。"},
+  {name:"传感器与执行器选择", desc:"选五官和四肢：根据需求配传感器（感知温度、湿度、光照等）和执行器（水泵、风扇、补光灯、蜂鸣器等）。"},
+  {name:"编程语言选择", desc:"一般选功能强大又主流的 Python，配合 pinpong 库可以在计算机上直接控制开源硬件，用 siot 库收发 MQTT 消息。"},
+  {name:"Topic 设计", desc:"给每类消息起个规范的名字（如 项目名/设备名/数据类型），发布者和订阅者靠同一个 Topic 对上暗号，消息才能送达。"},
+  {name:"客户端测试", desc:"用 MQTTX 等调试工具连接服务器，先试发几条消息、订阅看看能否收到，确认通信链路畅通再接入真实设备。"},
+  {name:"系统运行", desc:"传感器持续上传数据、控制端按规则发出指令，整个物联网系统协同工作，还要持续观察日志、及时排查故障。"}
+];
+(function buildFlow(){
+  var box=$("flowChart");
+  FLOW.forEach(function(f,i){
+    var d=document.createElement("div");
+    d.className="fnode"; d.textContent=(i+1)+"."+f.name; d.dataset.i=i;
+    d.addEventListener("click", function(){
+      Array.prototype.forEach.call(box.querySelectorAll(".fnode"),function(x){x.classList.remove("sel");});
+      this.classList.add("sel");
+      $("flowDesc").innerHTML="<b>"+f.name+"：</b>"+f.desc;
+    });
+    box.appendChild(d);
+    if(i<FLOW.length-1){
+      var a=document.createElement("span"); a.className="arr"; a.textContent="→"; box.appendChild(a);
+    }
+  });
+})();
+var sortOrder=[]; // 当前顺序（存 FLOW 下标）
+function shuffle(){
+  sortOrder = FLOW.map(function(_,i){return i;});
+  do{
+    for(var i=sortOrder.length-1;i>0;i--){
+      var j=Math.floor(Math.random()*(i+1));
+      var t=sortOrder[i]; sortOrder[i]=sortOrder[j]; sortOrder[j]=t;
+    }
+  }while(sortOrder.every(function(v,i){return v===i;}));
+  renderSort(false);
+  $("sortFb").className="feedback";
+}
+var dragIdx=null;
+function renderSort(judge){
+  var box=$("sortList"); box.innerHTML="";
+  if(!sortOrder.length){ box.innerHTML='<div class="note">点击「打乱并开始挑战」。</div>'; return; }
+  var wrongs=[];
+  sortOrder.forEach(function(fi,pos){
+    var it=document.createElement("div");
+    it.className="si"; it.draggable=true; it.dataset.pos=pos;
+    var stateCls="";
+    if(judge){ stateCls = (fi===pos) ? "right" : "wrong"; if(fi!==pos) wrongs.push({pos:pos,fi:fi}); }
+    if(stateCls) it.classList.add(stateCls);
+    it.innerHTML='<span class="pos">'+(pos+1)+'</span><span>'+FLOW[fi].name+'</span>'+
+      '<span class="updn"><button class="small ghost" data-up="'+pos+'">↑</button><button class="small ghost" data-dn="'+pos+'">↓</button></span>';
+    it.addEventListener("dragstart", function(){ dragIdx=+this.dataset.pos; this.classList.add("dragging"); });
+    it.addEventListener("dragend", function(){ this.classList.remove("dragging"); });
+    it.addEventListener("dragover", function(e){ e.preventDefault(); });
+    it.addEventListener("drop", function(e){
+      e.preventDefault();
+      var to=+this.dataset.pos;
+      if(dragIdx===null||dragIdx===to) return;
+      var moved=sortOrder.splice(dragIdx,1)[0];
+      sortOrder.splice(to,0,moved);
+      dragIdx=null;
+      judgeSort();
+    });
+    box.appendChild(it);
+  });
+  Array.prototype.forEach.call(box.querySelectorAll("[data-up]"),function(b){
+    b.addEventListener("click", function(){
+      var p=+this.dataset.up; if(p===0) return;
+      var t=sortOrder[p]; sortOrder[p]=sortOrder[p-1]; sortOrder[p-1]=t;
+      judgeSort();
+    });
+  });
+  Array.prototype.forEach.call(box.querySelectorAll("[data-dn]"),function(b){
+    b.addEventListener("click", function(){
+      var p=+this.dataset.dn; if(p===sortOrder.length-1) return;
+      var t=sortOrder[p]; sortOrder[p]=sortOrder[p+1]; sortOrder[p+1]=t;
+      judgeSort();
+    });
+  });
+  return wrongs;
+}
+function judgeSort(){
+  var wrongs=renderSort(true);
+  if(!wrongs.length){
+    fb($("sortFb"),"good","🎉 全部正确！物联网系统搭建的完整流程你已经掌握：选平台 → 选终端 → 选传感器与执行器 → 选语言 → 设计 Topic → 客户端测试 → 系统运行。");
+    state.sortDone=true; markDone("s1"); save();
+  }else{
+    var msgs=wrongs.slice(0,3).map(function(w){
+      return "第 "+(w.pos+1)+" 位的「"+FLOW[w.fi].name+"」应该排在第 "+(w.fi+1)+" 步";
+    });
+    fb($("sortFb"),"bad","还有 "+wrongs.length+" 步位置不对："+msgs.join("；")+"。提示：先有平台和硬件，才能设计 Topic；测试通过后系统才能正式运行。");
+  }
+}
+$("shuffleBtn").addEventListener("click", shuffle);
+if(state.sortDone){ sortOrder=FLOW.map(function(_,i){return i;}); renderSort(true); }
+else renderSort(false);
+
+/* ================= 模块2：设备选择 ================= */
+var DEVICES = [
+  {id:"temp", name:"温度传感器", ic:"🌡", tip:"感知环境温度"},
+  {id:"humi", name:"空气湿度传感器", ic:"💨", tip:"感知空气湿度"},
+  {id:"light", name:"光照传感器", ic:"🔆", tip:"感知光照强度"},
+  {id:"soil", name:"土壤湿度传感器", ic:"🪴", tip:"判断土壤缺不缺水"},
+  {id:"mcu", name:"智能终端", ic:"🧠", tip:"系统的大脑（开源硬件）"},
+  {id:"wifi", name:"Wi-Fi 模块", ic:"📶", tip:"把终端接入网络"},
+  {id:"pump", name:"水泵", ic:"💧", tip:"执行浇灌动作"},
+  {id:"fan", name:"风扇", ic:"🌀", tip:"通风降温"},
+  {id:"led", name:"LED 补光灯", ic:"💡", tip:"光照不足时补光"},
+  {id:"buzz", name:"蜂鸣器", ic:"🚨", tip:"异常时发声报警"}
+];
+var NEEDS = [
+  {key:"monitor", name:"环境监测", check:function(s){return s.has("temp")&&s.has("humi")&&s.has("light")&&s.has("soil");},
+   miss:function(s){ var m=[]; if(!s.has("temp"))m.push("温度传感器"); if(!s.has("humi"))m.push("空气湿度传感器"); if(!s.has("light"))m.push("光照传感器"); if(!s.has("soil"))m.push("土壤湿度传感器"); return m; }},
+  {key:"water", name:"缺水浇灌", check:function(s){return s.has("soil")&&s.has("pump");},
+   miss:function(s){ var m=[]; if(!s.has("soil"))m.push("土壤湿度传感器（不知道缺不缺水）"); if(!s.has("pump"))m.push("水泵（没法浇水）"); return m; }},
+  {key:"vent", name:"高温通风", check:function(s){return s.has("temp")&&s.has("fan");},
+   miss:function(s){ var m=[]; if(!s.has("temp"))m.push("温度传感器（不知道热不热）"); if(!s.has("fan"))m.push("风扇（没法通风）"); return m; }},
+  {key:"alarm", name:"异常报警", check:function(s){return s.has("buzz");},
+   miss:function(s){ return s.has("buzz")?[]:["蜂鸣器（出了异常没人知道）"]; }}
+];
+(function buildDevices(){
+  var g=$("devGrid");
+  DEVICES.forEach(function(d){
+    var c=document.createElement("div");
+    c.className="devcard"; c.dataset.id=d.id;
+    c.innerHTML='<span class="ic">'+d.ic+'</span><b>'+d.name+'</b><span>'+d.tip+'</span><span class="tick">✓</span>';
+    c.addEventListener("click", function(){
+      var i=state.devices.indexOf(d.id);
+      if(i>=0) state.devices.splice(i,1); else state.devices.push(d.id);
+      this.classList.toggle("sel", i<0);
+      save(); evalDevices();
+    });
+    g.appendChild(c);
+  });
+})();
+function renderDeviceSel(){
+  Array.prototype.forEach.call($("devGrid").children, function(c){
+    c.classList.toggle("sel", state.devices.indexOf(c.dataset.id)>=0);
+  });
+}
+function evalDevices(){
+  var s={has:function(id){return state.devices.indexOf(id)>=0;}};
+  var bar=$("needsBar"); bar.innerHTML="";
+  var allOk=true, problems=[];
+  NEEDS.forEach(function(n){
+    var ok=n.check(s);
+    if(!ok){ allOk=false; problems.push("<b>"+n.name+"</b>无法实现：还缺 "+n.miss(s).join("、")); }
+    var d=document.createElement("span");
+    d.className="nd"+(ok?" ok":""); d.textContent=(ok?"✓ ":"✗ ")+n.name;
+    bar.appendChild(d);
+  });
+  var sysOk = s.has("mcu") && s.has("wifi");
+  if(!s.has("mcu")) problems.push("<b>没有智能终端</b>：系统没有「大脑」，传感器数据无人处理，整个系统无法运行");
+  else if(!s.has("wifi")) problems.push("<b>没有 Wi-Fi 模块</b>：终端无法联网，数据上不了 MQTT 服务器（除非终端本身自带 Wi-Fi，如 ESP32）");
+  $("devLight").classList.toggle("on", allOk&&sysOk);
+  if(state.devices.length===0){
+    fb($("devFb"),"hint","请点击设备卡片，把需要的设备加入清单。想一想：每项需求分别要「感知什么」和「执行什么」？");
+  }else if(allOk&&sysOk){
+    fb($("devFb"),"good","🎉 设备清单完整！四项需求全部满足，智能终端 + Wi-Fi 保证系统能联网运行。绿灯已亮，你已完成智能农植园的硬件选型（共选 "+state.devices.length+" 件设备）。");
+    markDone("s2");
+  }else{
+    fb($("devFb"),"bad","智能点评：<br>· "+problems.join("<br>· ")+"<br>继续补充设备吧！");
+  }
+}
+renderDeviceSel(); evalDevices();
+
+/* ================= 模块3：Topic 设计 ================= */
+function checkTopicPart(v){
+  if(v==="") return "不能为空";
+  if(/\s/.test(v)) return "不能包含空格";
+  if(/[A-Z]/.test(v)) return "应全部使用小写字母";
+  if(/\//.test(v)) return "每一段里不要再写 /（斜杠由系统自动添加）";
+  if(!/^[a-z0-9_]+$/.test(v)) return "只建议使用小写字母、数字和下划线";
+  return null;
+}
+$("tpMake").addEventListener("click", function(){
+  var parts=[$("tp1").value.trim(),$("tp2").value.trim(),$("tp3").value.trim()];
+  var names=["项目名","设备名","数据类型"];
+  var errs=[];
+  parts.forEach(function(p,i){ var e=checkTopicPart(p); if(e) errs.push(names[i]+"："+e); });
+  if(errs.length){
+    fb($("tpFb"),"bad","命名不规范：<br>· "+errs.join("<br>· ")+"<br>规范示例：<code>smartfarm/device01/temperature</code>");
+    return;
+  }
+  var topic=parts.join("/");
+  $("tpOut").textContent=topic;
+  fb($("tpFb"),"good","✔ 生成成功！Topic「<b>"+topic+"</b>」符合规范：全小写、无空格、用 / 分隔三段。发布者和订阅者都使用这个名字，消息才能正确送达。");
+});
+$("tpAdd").addEventListener("click", function(){
+  var t=$("tpOut").textContent.trim();
+  if(state.topics.indexOf(t)<0){ state.topics.push(t); save(); }
+  $("tpListNote").textContent="项目 Topic 清单："+state.topics.length+" 个（"+state.topics.join("、")+"）";
+  checkS3();
+});
+if(state.topics.length) $("tpListNote").textContent="项目 Topic 清单："+state.topics.length+" 个（"+state.topics.join("、")+"）";
+
+var PAIRS = [
+  {pub:"土壤湿度传感器", topic:"smartfarm/device01/soil", sub:"自动浇灌控制器",
+   why:"土壤湿度数据发布到 soil 主题，订阅它的浇灌控制器才能决定要不要开水泵。"},
+  {pub:"温度传感器", topic:"smartfarm/device01/temperature", sub:"通风控制器",
+   why:"温度数据发布到 temperature 主题，通风控制器订阅后判断是否开风扇。"},
+  {pub:"手机 App 控制端", topic:"smartfarm/control/pump", sub:"水泵执行终端",
+   why:"手机把「开泵」指令发布到 control/pump 主题，接了水泵的终端订阅这个主题来执行。"}
+];
+var TOPIC_OPTS = PAIRS.map(function(p){return p.topic;});
+var SUB_OPTS = PAIRS.map(function(p){return p.sub;});
+(function buildPairs(){
+  var tb=$("pairBody");
+  PAIRS.forEach(function(p,i){
+    var tr=document.createElement("tr");
+    var tOpts='<option value="">— 选择 Topic —</option>'+TOPIC_OPTS.map(function(t){return '<option>'+t+'</option>';}).join("");
+    var sOpts='<option value="">— 选择订阅者 —</option>'+SUB_OPTS.map(function(sx){return '<option>'+sx+'</option>';}).join("");
+    tr.innerHTML="<td>"+p.pub+'</td><td><select data-t="'+i+'" class="mono">'+tOpts+'</select></td><td><select data-s="'+i+'">'+sOpts+"</select></td><td><span class='badge warn' id='pj"+i+"'>待判定</span></td>";
+    tb.appendChild(tr);
+  });
+})();
+$("pairCheck").addEventListener("click", function(){
+  var allOk=true, expl=[];
+  PAIRS.forEach(function(p,i){
+    var t=document.querySelector('[data-t="'+i+'"]').value;
+    var sx=document.querySelector('[data-s="'+i+'"]').value;
+    var ok = t===p.topic && sx===p.sub;
+    var bd=$("pj"+i);
+    bd.textContent = ok?"✓ 正确":"✗ 有误";
+    bd.className = "badge "+(ok?"ok":"err");
+    if(ok){ expl.push("第"+(i+1)+"组 ✓："+p.why); }
+    else{
+      allOk=false;
+      var hint = (t!==p.topic) ? "Topic 选得不对——想想「"+p.pub+"」产生/需要的是哪类数据" : "订阅者不对——谁需要收到这个主题的消息？";
+      expl.push("第"+(i+1)+"组 ✗："+hint);
+    }
+  });
+  fb($("pairFb"), allOk?"good":"bad", (allOk?"🎉 三组全部配对成功！发布—订阅靠 Topic 对暗号：":"逐组说明：")+"<br>· "+expl.join("<br>· "));
+  if(allOk){ state.pairAnswers.ok=true; save(); checkS3(); }
+});
+$("pairReset").addEventListener("click", function(){
+  PAIRS.forEach(function(_,i){
+    document.querySelector('[data-t="'+i+'"]').value="";
+    document.querySelector('[data-s="'+i+'"]').value="";
+    var bd=$("pj"+i); bd.textContent="待判定"; bd.className="badge warn";
+  });
+  $("pairFb").className="feedback";
+});
+function checkS3(){
+  if(state.topics.length>=1 && state.pairAnswers.ok) markDone("s3");
+}
+checkS3();
+
+/* ================= 模块4：通信模拟 ================= */
+var SIM_MSGS = [
+  {sensor:"温度", val:function(){return (20+Math.random()*15).toFixed(1)+"℃";}, topic:"smartfarm/device01/temperature", sub:"通风控制器", ui:"🌀", uiTxt:"更新温度显示"},
+  {sensor:"土壤湿度", val:function(){return (25+Math.random()*50).toFixed(0)+"%";}, topic:"smartfarm/device01/soil", sub:"自动浇灌控制器", ui:"💧", uiTxt:"更新湿度显示"},
+  {sensor:"光照", val:function(){return (100+Math.random()*900).toFixed(0)+"lx";}, topic:"smartfarm/device01/light", sub:"补光控制器", ui:"💡", uiTxt:"更新光照显示"}
+];
+var simStage=0, simMsgIdx=0, simCur=null, simTimer=null;
+var STAGE_X=[68,255,460,460,665,822];
+var STAGE_TEXT=[
+  "① 传感器采集到一个新数据",
+  "② 智能终端把数据打包，以指定 Topic 发布",
+  "③ MQTT 服务器收到这条消息",
+  "④ 服务器查找订阅了该 Topic 的客户端并转发",
+  "⑤ 订阅者（控制端）收到消息",
+  "⑥ 页面/设备状态更新，一次通信完成！"
+];
+function simReset(){
+  simStage=0; simCur=null;
+  $("pkt").setAttribute("opacity","0");
+  $("pktLabel").textContent="";
+  $("stageLabel").textContent="点击「单步执行」开始";
+  $("senReading").textContent="待采集…";
+  $("termTxt").textContent="等待数据";
+  $("brokerTxt").textContent="空闲";
+  $("subTxt").textContent="已订阅，等待消息";
+  $("uiTxt").textContent="状态";
+}
+function simStepFn(){
+  if(simStage===0){
+    simCur = SIM_MSGS[simMsgIdx%SIM_MSGS.length];
+    simMsgIdx++;
+    simCur.value = simCur.val();
+    $("senReading").textContent = simCur.sensor+"："+simCur.value;
+    $("pkt").setAttribute("opacity","1");
+    $("pkt").setAttribute("cx", STAGE_X[0]);
+    $("pktLabel").textContent="";
+  }else if(simStage===1){
+    $("pkt").setAttribute("cx", STAGE_X[1]);
+    $("termTxt").textContent="发布中…";
+    $("pktLabel").textContent="消息：Topic="+simCur.topic+"　内容="+simCur.value;
+    simLogLine("发布", simCur, "");
+  }else if(simStage===2){
+    $("pkt").setAttribute("cx", STAGE_X[2]);
+    $("brokerTxt").textContent="收到 1 条消息";
+    $("termTxt").textContent="发布完成";
+  }else if(simStage===3){
+    $("brokerTxt").textContent="按 Topic 查订阅表 → "+simCur.sub;
+  }else if(simStage===4){
+    $("pkt").setAttribute("cx", STAGE_X[4]);
+    $("subTxt").textContent="收到："+simCur.value;
+  }else if(simStage===5){
+    $("pkt").setAttribute("cx", STAGE_X[5]);
+    $("uiIcon").textContent=simCur.ui;
+    $("uiTxt").textContent=simCur.uiTxt;
+    $("brokerTxt").textContent="空闲";
+    state.msgCount++;
+    state.msgLog.push({t:now(), pub:"智能终端", topic:simCur.topic, payload:simCur.value, sub:simCur.sub});
+    if(state.msgLog.length>60) state.msgLog.shift();
+    save();
+    simLogLine("送达", simCur, simCur.sub);
+    $("simCount").textContent="已送达消息："+state.msgCount+" 条";
+    markDone("s4");
+  }
+  $("stageLabel").textContent=STAGE_TEXT[simStage];
+  simStage=(simStage+1)%6;
+}
+function pad(s,n){ s=String(s); while(s.length<n) s+="　"; return s; }
+function simLogLine(kind, m, sub){
+  var el=$("msgLog");
+  var line=document.createElement("div");
+  if(kind==="发布"){
+    line.textContent="["+now()+"] 智能终端 发布 → "+m.topic+"　内容："+m.value;
+  }else{
+    line.textContent="["+now()+"] 服务器转发 → "+m.topic+"　内容："+m.value+"　✓ 送达："+sub;
+  }
+  el.appendChild(line); el.scrollTop=el.scrollHeight;
+}
+$("simStep").addEventListener("click", function(){ simPause(); simStepFn(); });
+$("simRun").addEventListener("click", function(){
+  if(simTimer) return;
+  simTimer=setInterval(simStepFn, 900);
+  $("simPause").disabled=false; $("simRun").disabled=true;
+});
+function simPause(){
+  if(simTimer){ clearInterval(simTimer); simTimer=null; }
+  $("simPause").disabled=true; $("simRun").disabled=false;
+}
+$("simPause").addEventListener("click", simPause);
+$("simClear").addEventListener("click", function(){
+  $("msgLog").innerHTML='<div class="hd">时间　　　发布者　　　　Topic　　　　　　　　　　内容　　　　送达订阅者</div>';
+  simPause(); simReset();
+});
+$("simCount").textContent="已送达消息："+state.msgCount+" 条";
+void pad;
+
+/* ================= 模块5：自动控制 ================= */
+var cState={pump:false,fan:false,light:false,buzz:false};
+var cFanAngle=0, cFanSpin=null;
+function ctrlLog(msg){
+  state.ctrlLog.push({t:now(),msg:msg});
+  if(state.ctrlLog.length>80) state.ctrlLog.shift();
+  var el=$("ctrlLog");
+  var d=document.createElement("div"); d.textContent="["+now()+"] "+msg;
+  el.appendChild(d); el.scrollTop=el.scrollHeight;
+  save();
+}
+function setC(dev,on,reason){
+  if(cState[dev]===on) return;
+  cState[dev]=on;
+  if(dev==="pump"){ $("pumpDrops").setAttribute("opacity",on?"1":"0"); $("cstPump").textContent=on?"喷水中":"关闭"; $("cstPump").className="st badge "+(on?"ok":"err"); }
+  if(dev==="fan"){ $("cstFan").textContent=on?"旋转中":"关闭"; $("cstFan").className="st badge "+(on?"ok":"err"); }
+  if(dev==="light"){ $("cBulb").setAttribute("fill",on?"#fbbf24":"#f3f4f6"); $("cstLight").textContent=on?"点亮":"关闭"; $("cstLight").className="st badge "+(on?"ok":"err"); }
+  if(dev==="buzz"){ $("cBuzz").setAttribute("fill",on?"#dc2626":"#9ca3af"); $("cBuzz").setAttribute("r",on?"8":"4"); $("cstBuzz").textContent=on?"报警中!":"正常"; $("cstBuzz").className="st badge "+(on?"err":"ok"); }
+  if(reason) ctrlLog(({pump:"水泵",fan:"风扇",light:"补光灯",buzz:"蜂鸣器"})[dev]+(on?" 开启":" 关闭")+" —— "+reason);
+  if(on){ state.ruleHits[dev]=true; save(); updHits(); }
+}
+(function fanSpin(){
+  cFanAngle=(cFanAngle+(cState.fan?14:0))%360;
+  $("cFanG").setAttribute("transform","rotate("+cFanAngle+" 30 30)");
+  cFanSpin=requestAnimationFrame(fanSpin);
+})();
+void cFanSpin;
+function updHits(){
+  var n=0; for(var k in state.ruleHits) if(state.ruleHits[k]) n++;
+  $("ruleHitBadge").textContent=n+" / 4";
+  $("ruleHitBadge").className="badge "+(n===4?"ok":"warn");
+  if(n===4) markDone("s5");
+}
+function readTh(){
+  state.thresholds={soil:+$("thSoil").value||40, temp:+$("thTemp").value||32, light:+$("thLight").value||300};
+  save();
+}
+function applyCtrl(cause){
+  readTh();
+  var T=+$("cT").value, S=+$("cS").value, L=+$("cL").value;
+  var th=state.thresholds;
+  if(S<th.soil) setC("pump",true,"土壤湿度 "+S+"% < "+th.soil+"%（"+cause+"）");
+  else setC("pump",false,cState.pump?("土壤湿度 "+S+"% 已达标"):"");
+  if(T>th.temp) setC("fan",true,"温度 "+T+"℃ > "+th.temp+"℃（"+cause+"）");
+  else setC("fan",false,cState.fan?("温度 "+T+"℃ 已回落"):"");
+  if(L<th.light) setC("light",true,"光照 "+L+"lx < "+th.light+"lx（"+cause+"）");
+  else setC("light",false,cState.light?("光照 "+L+"lx 已充足"):"");
+  var abnormal = (T<0||T>45) || (S<5||S>95) || (L>1500);
+  if(abnormal){
+    var why=[];
+    if(T<0||T>45) why.push("温度 "+T+"℃ 超出合理范围 0~45℃");
+    if(S<5||S>95) why.push("土壤湿度 "+S+"% 超出合理范围 5~95%");
+    if(L>1500) why.push("光照 "+L+"lx 超出合理范围 ≤1500lx");
+    setC("buzz",true,"数据异常："+why.join("；"));
+  }else setC("buzz",false,cState.buzz?"数据恢复合理范围":"");
+}
+[["cT","cTv"],["cS","cSv"],["cL","cLv"]].forEach(function(p){
+  $(p[0]).addEventListener("input", function(){ $(p[1]).textContent=this.value; applyCtrl("拖动滑块"); });
+});
+["thSoil","thTemp","thLight"].forEach(function(id){
+  $(id).addEventListener("change", function(){ applyCtrl("修改阈值"); });
+});
+$("injectBad").addEventListener("click", function(){
+  $("cT").value=-10; $("cTv").textContent="-10";
+  ctrlLog("⚡ 注入异常数据：温度传感器读数 -10℃（模拟接线松动/传感器故障）");
+  applyCtrl("注入异常数据");
+});
+$("thSoil").value=state.thresholds.soil; $("thTemp").value=state.thresholds.temp; $("thLight").value=state.thresholds.light;
+updHits();
+
+/* ================= 模块6：故障排查 ================= */
+var CAUSES = [
+  "MQTT 服务器未启动",
+  "发布与订阅的 Topic 不一致",
+  "设备没有连接 Wi-Fi",
+  "传感器数据超出合理范围",
+  "控制规则方向写反了",
+  "执行器被手动关闭（锁定）"
+];
+var CHECK_ORDER=["设备","连接","Topic","数据","规则","执行器"];
+var FAULTS = [
+  {id:"a", cause:0, symptom:"打开控制端，所有设备的数据都收不到，页面一片空白，发什么指令都没回应。",
+   clues:{
+     "设备":"检查设备：智能终端电源灯正常，程序在运行。未见异常。",
+     "连接":"检查连接：终端已连上 Wi-Fi，但日志反复提示「connect refused：无法连接 192.168.1.10:1883」。⚠ 可疑！",
+     "Topic":"检查 Topic：发布端与订阅端都是 smartfarm/device01/temperature，一致。",
+     "数据":"检查数据：因为连不上服务器，服务器端一条数据都没有。",
+     "规则":"检查规则：规则配置看起来正常，但从未被触发过。",
+     "执行器":"检查执行器：手动测试水泵、风扇都能动，硬件没坏。"},
+   explain:"关键线索是「connect refused 无法连接 1883 端口」——1883 是 MQTT 服务的默认端口。运行 SIoT 的那台计算机上服务器程序没启动（或窗口被关掉了），所有客户端自然全部连不上。重新运行 SIoT 服务器程序即可。"},
+  {id:"b", cause:1, symptom:"土壤都干透了，水泵却一直不工作。服务器日志里能看到湿度数据一直在上传。",
+   clues:{
+     "设备":"检查设备：传感器和水泵终端都在线。未见异常。",
+     "连接":"检查连接：两台终端 Wi-Fi 信号良好，都已连接服务器。",
+     "Topic":"检查 Topic：传感器发布到 smartfarm/device01/soil；浇灌控制端订阅的却是 smartfarm/device1/soil。⚠ 可疑！",
+     "数据":"检查数据：服务器收到的湿度值 18%，数据本身正常（确实很干）。",
+     "规则":"检查规则：当 土壤湿度 < 40% 开水泵，方向正确。",
+     "执行器":"检查执行器：手动发送开泵指令到正确主题，水泵能转。"},
+   explain:"发布方是 device01，订阅方写成了 device1，一字之差！MQTT 按 Topic 字符串精确匹配转发，两个字符串不同就是两个不同的主题，订阅者永远收不到消息。把订阅端改成 smartfarm/device01/soil 即可。"},
+  {id:"c", cause:2, symptom:"控制端上土壤湿度的数值从早上起就一直不更新，停在旧值。其他传感器都正常。",
+   clues:{
+     "设备":"检查设备：土壤湿度终端电源灯亮着，程序在跑。",
+     "连接":"检查连接：这台终端的 Wi-Fi 图标是灰色的，没有获取到 IP 地址。⚠ 可疑！",
+     "Topic":"检查 Topic：发布与订阅都是 smartfarm/device01/soil，一致。",
+     "数据":"检查数据：服务器里这个主题最后一条数据是早上 8:02 的。",
+     "规则":"检查规则：规则正常，只是收不到新数据没法判断。",
+     "执行器":"检查执行器：水泵手动能开，硬件正常。"},
+   explain:"终端本身开着机，但没连上 Wi-Fi（可能路由器重启后没重连、密码改了等），消息根本发不出去，服务器里只剩旧数据。让设备重新联网即可。这提醒我们：物联网 = 设备 + 网络，断网的设备就成了「信息孤岛」。"},
+  {id:"d", cause:3, symptom:"大棚里温度明明很舒适，蜂鸣器却响个不停，报警日志刷屏。",
+   clues:{
+     "设备":"检查设备：各终端都在线运行。",
+     "连接":"检查连接：网络一切正常。",
+     "Topic":"检查 Topic：主题一致，消息收发正常。",
+     "数据":"检查数据：温度传感器读数为 -100.0℃！大棚里不可能这么冷，明显是传感器接线松动或损坏。⚠ 可疑！",
+     "规则":"检查规则：报警规则「数据超合理范围就报警」本身没错，它忠实地执行了。",
+     "执行器":"检查执行器：蜂鸣器响说明它工作正常。"},
+   explain:"-100℃ 超出了任何正常环境的合理范围，是典型的传感器故障数据。系统的报警规则没有错——它正是靠「合理范围检查」发现了这个异常。应检修传感器接线或更换传感器。这也说明给数据设置合理范围有多重要。"},
+  {id:"e", cause:4, symptom:"天气越热风扇越不转；晚上凉快下来，风扇反而呼呼狂转。",
+   clues:{
+     "设备":"检查设备：全部在线。",
+     "连接":"检查连接：网络正常。",
+     "Topic":"检查 Topic：主题匹配，消息都能送达。",
+     "数据":"检查数据：温度读数与真实情况一致，白天 35℃、夜里 22℃。",
+     "规则":"检查规则：规则写的是「当 温度 < 30℃ 时 开启风扇」。⚠ 可疑！",
+     "执行器":"检查执行器：风扇本身能转，硬件正常。"},
+   explain:"风扇是用来降温的，应该在温度「高于」阈值时开启。规则却写成了 温度 < 30 开风扇——比较符方向反了，于是凉快时狂转、炎热时不转。改成 温度 > 30℃ 开风扇即可。写规则时一定要想清楚条件的方向！"},
+  {id:"f", cause:5, symptom:"温度 36℃，规则已触发，日志里也记录了「已发送开启风扇指令」，可风扇就是一动不动。",
+   clues:{
+     "设备":"检查设备：各终端在线。",
+     "连接":"检查连接：网络正常，指令确实送达了风扇终端。",
+     "Topic":"检查 Topic：主题一致。",
+     "数据":"检查数据：温度 36℃，真实有效。",
+     "规则":"检查规则：温度 > 32℃ 开风扇，方向正确，已正常触发。",
+     "执行器":"检查执行器：风扇终端面板上，风扇处于「手动模式·已锁定关闭」状态，自动指令被忽略。⚠ 可疑！"},
+   explain:"有人此前把风扇切到了手动模式并关闭，系统的自动指令被手动锁定覆盖了。把执行器切回自动模式即可。排查故障要查到「最后一米」——指令送到了，还要确认执行器真的执行了。"}
+];
+var curFault=null, checkedCnt=0;
+function drawFault(){
+  var pool=FAULTS.filter(function(f){return state.faultsSolved.indexOf(f.id)<0;});
+  if(!pool.length) pool=FAULTS;
+  curFault=pool[Math.floor(Math.random()*pool.length)];
+  checkedCnt=0;
+  $("faultZone").style.display="block";
+  $("faultSymptom").textContent=curFault.symptom;
+  $("clueBox").innerHTML="请按顺序点击检查项。先从「检查设备」开始。";
+  $("faultFb").className="feedback";
+  $("faultRetry").style.display="none";
+  var chain=$("checkChain"); chain.innerHTML="";
+  CHECK_ORDER.forEach(function(c,i){
+    var b=document.createElement("button");
+    b.className="ck"+(i===0?" avail":""); b.textContent=(i+1)+". 检查"+c; b.disabled=(i!==0);
+    b.dataset.i=i;
+    b.addEventListener("click", function(){
+      var idx=+this.dataset.i;
+      if(idx!==checkedCnt) return;
+      this.classList.remove("avail"); this.classList.add("donec");
+      this.disabled=true;
+      $("clueBox").innerHTML="<b>"+this.textContent+"：</b>"+curFault.clues[CHECK_ORDER[idx]];
+      checkedCnt++;
+      if(checkedCnt<CHECK_ORDER.length){
+        var nxt=chain.children[checkedCnt];
+        nxt.disabled=false; nxt.classList.add("avail");
+      }else{
+        $("clueBox").innerHTML+="<br><b>✅ 六项检查完成，现在选出故障原因吧！</b>";
+      }
+      renderCauses();
+    });
+    chain.appendChild(b);
+  });
+  renderCauses();
+  faultLogLine("抽取故障场景（"+curFault.id+"）："+curFault.symptom);
+}
+function renderCauses(){
+  var box=$("causeOpts"); box.innerHTML="";
+  CAUSES.forEach(function(c,i){
+    var b=document.createElement("button");
+    b.textContent=String.fromCharCode(65+i)+". "+c;
+    b.disabled = checkedCnt<CHECK_ORDER.length;
+    b.addEventListener("click", function(){
+      if(i===curFault.cause){
+        this.classList.add("sel-ok");
+        fb($("faultFb"),"good","🎉 诊断正确！<br>"+curFault.explain);
+        if(state.faultsSolved.indexOf(curFault.id)<0) state.faultsSolved.push(curFault.id);
+        save();
+        $("faultSolved").textContent="已排除故障："+state.faultsSolved.length+" 例";
+        faultLogLine("✓ 正确诊断为「"+CAUSES[curFault.cause]+"」");
+        markDone("s6");
+      }else{
+        this.classList.add("sel-bad");
+        fb($("faultFb"),"bad","✗ 再想想。提示：回看六条检查线索，哪一条标了 ⚠ 可疑？它指向的是哪个环节的问题？可点「重试本题」清除选择。");
+        $("faultRetry").style.display="inline-block";
+        faultLogLine("✗ 误诊为「"+CAUSES[i]+"」，重试中");
+      }
+    });
+    box.appendChild(b);
+  });
+  if(checkedCnt<CHECK_ORDER.length){
+    var tip=document.createElement("div");
+    tip.className="note"; tip.textContent="（完成全部 6 项检查后才能选择诊断结论）";
+    box.appendChild(tip);
+  }
+}
+$("faultRetry").addEventListener("click", function(){
+  Array.prototype.forEach.call($("causeOpts").querySelectorAll("button"),function(b){b.classList.remove("sel-ok","sel-bad");});
+  $("faultFb").className="feedback";
+});
+function faultLogLine(msg){
+  state.faultLog.push({t:now(),msg:msg});
+  if(state.faultLog.length>60) state.faultLog.shift();
+  var el=$("faultLog");
+  var d=document.createElement("div"); d.textContent="["+now()+"] "+msg;
+  el.appendChild(d); el.scrollTop=el.scrollHeight;
+  save();
+}
+$("faultDraw").addEventListener("click", drawFault);
+$("faultSolved").textContent="已排除故障："+state.faultsSolved.length+" 例";
+
+/* ================= 模块7：项目成果 ================= */
+function devName(id){
+  for(var i=0;i<DEVICES.length;i++) if(DEVICES[i].id===id) return DEVICES[i].name;
+  return id;
+}
+function buildTopo(){
+  var w=760, h=380;
+  var sensors=state.devices.filter(function(d){return ["temp","humi","light","soil"].indexOf(d)>=0;});
+  var acts=state.devices.filter(function(d){return ["pump","fan","led","buzz"].indexOf(d)>=0;});
+  var hasMcu=state.devices.indexOf("mcu")>=0, hasWifi=state.devices.indexOf("wifi")>=0;
+  var s='<svg viewBox="0 0 '+w+" "+h+'" width="100%" style="min-width:640px">';
+  s+='<rect x="300" y="30" width="160" height="64" rx="14" fill="#14532d"/><text x="380" y="57" text-anchor="middle" fill="#bbf7d0" font-size="13" font-weight="bold">MQTT 服务器</text><text x="380" y="78" text-anchor="middle" fill="#86efac" font-size="10">SIoT · 本地中转站</text>';
+  if(hasMcu){
+    s+='<line x1="380" y1="94" x2="380" y2="160" stroke="#16a34a" stroke-width="2.5" stroke-dasharray="6 4"/>';
+    s+='<text x="392" y="130" fill="#4e7a5d" font-size="10">'+(hasWifi?"Wi-Fi 无线连接":"⚠ 缺联网模块")+'</text>';
+    s+='<rect x="300" y="160" width="160" height="56" rx="12" fill="#fff" stroke="#16a34a" stroke-width="2"/><text x="380" y="184" text-anchor="middle" fill="#14532d" font-size="12" font-weight="bold">智能终端</text><text x="380" y="203" text-anchor="middle" fill="#4e7a5d" font-size="10">'+(hasWifi?"含 Wi-Fi 模块":"未配 Wi-Fi")+'</text>';
+  }else{
+    s+='<text x="380" y="180" text-anchor="middle" fill="#dc2626" font-size="12">⚠ 尚未选择智能终端（系统缺大脑）</text>';
+  }
+  sensors.forEach(function(id,i){
+    var x=40, y=60+i*76;
+    s+='<rect x="'+x+'" y="'+y+'" width="150" height="48" rx="10" fill="#f0fdf4" stroke="#86efac" stroke-width="1.5"/><text x="'+(x+75)+'" y="'+(y+28)+'" text-anchor="middle" fill="#166534" font-size="11">'+devName(id)+'</text>';
+    if(hasMcu) s+='<line x1="'+(x+150)+'" y1="'+(y+24)+'" x2="300" y2="188" stroke="#86efac" stroke-width="1.5"/>';
+  });
+  acts.forEach(function(id,i){
+    var x=570, y=60+i*76;
+    s+='<rect x="'+x+'" y="'+y+'" width="150" height="48" rx="10" fill="#fff7ed" stroke="#fdba74" stroke-width="1.5"/><text x="'+(x+75)+'" y="'+(y+28)+'" text-anchor="middle" fill="#9a3412" font-size="11">'+devName(id)+'</text>';
+    if(hasMcu) s+='<line x1="'+x+'" y1="'+(y+24)+'" x2="460" y2="188" stroke="#fdba74" stroke-width="1.5"/>';
+  });
+  s+='<text x="115" y="36" text-anchor="middle" fill="#166534" font-size="11" font-weight="bold">感知层（传感器）</text>';
+  s+='<text x="645" y="36" text-anchor="middle" fill="#9a3412" font-size="11" font-weight="bold">执行层（执行器）</text>';
+  s+="</svg>";
+  return s;
+}
+function projText(){
+  var L=[];
+  L.push("==========================================");
+  L.push(" 智能农植园物联网系统 · 项目成果报告");
+  L.push(" 第1单元 第6节《物联网系统的搭建》");
+  L.push(" 生成时间："+new Date().toLocaleString());
+  L.push("==========================================");
+  L.push("");
+  var doneN=0; for(var k in state.done) if(state.done[k]) doneN++;
+  L.push("【项目完成度】"+doneN+" / 7 个步骤");
+  L.push("");
+  L.push("【一】设备清单（"+state.devices.length+" 件）：");
+  if(!state.devices.length) L.push("  （尚未选择设备）");
+  state.devices.forEach(function(d){ L.push("  · "+devName(d)); });
+  L.push("");
+  L.push("【二】Topic 清单（"+state.topics.length+" 个）：");
+  if(!state.topics.length) L.push("  （尚未加入 Topic）");
+  state.topics.forEach(function(t){ L.push("  · "+t); });
+  L.push("");
+  L.push("【三】自动控制规则表：");
+  L.push("  1. 当 土壤湿度 < "+state.thresholds.soil+"% 时 开启水泵"+(state.ruleHits.pump?"（已验证触发 ✓）":""));
+  L.push("  2. 当 温度 > "+state.thresholds.temp+"℃ 时 开启风扇"+(state.ruleHits.fan?"（已验证触发 ✓）":""));
+  L.push("  3. 当 光照 < "+state.thresholds.light+"lx 时 开启补光灯"+(state.ruleHits.light?"（已验证触发 ✓）":""));
+  L.push("  4. 数据超合理范围 时 蜂鸣器报警"+(state.ruleHits.buzz?"（已验证触发 ✓）":""));
+  L.push("");
+  L.push("【四】通信测试日志：共送达 "+state.msgCount+" 条消息，最近记录：");
+  state.msgLog.slice(-6).forEach(function(m){
+    L.push("  ["+m.t+"] "+m.pub+" → "+m.topic+" → "+m.sub+"　内容："+m.payload);
+  });
+  if(!state.msgLog.length) L.push("  （尚未运行通信模拟）");
+  L.push("");
+  L.push("【五】故障排查记录：成功排除 "+state.faultsSolved.length+" 例，最近操作：");
+  state.faultLog.slice(-6).forEach(function(m){ L.push("  ["+m.t+"] "+m.msg); });
+  if(!state.faultLog.length) L.push("  （尚未进行排查训练）");
+  L.push("");
+  L.push("【六】项目小结：");
+  L.push("  "+(state.summary||"（未填写）"));
+  L.push("");
+  L.push("【七】知识要点回顾：");
+  L.push("  搭建流程：服务平台 → 智能终端 → 传感器与执行器 → 编程语言 → Topic 设计 → 客户端测试 → 系统运行。");
+  L.push("  MQTT 采用发布—订阅模式：发布者与订阅者不直接见面，靠服务器按 Topic（项目名/设备名/数据类型）转发消息。");
+  return L.join("\n");
+}
+$("mySummary").value=state.summary;
+$("mySummary").addEventListener("input", function(){ state.summary=this.value; save(); });
+$("genProj").addEventListener("click", function(){
+  state.summary=$("mySummary").value; save();
+  $("topoBox").innerHTML=buildTopo();
+  $("projReport").value=projText();
+  markDone("s7");
+});
+function download(name,text,mime){
+  var blob=new Blob([text],{type:mime});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },300);
+}
+function projJson(){
+  return {
+    lesson:"第1单元 第6节 物联网系统的搭建",
+    time:new Date().toLocaleString(),
+    done:state.done, devices:state.devices, topics:state.topics,
+    thresholds:state.thresholds, ruleHits:state.ruleHits,
+    msgCount:state.msgCount, msgLog:state.msgLog.slice(-20),
+    faultsSolved:state.faultsSolved, faultLog:state.faultLog.slice(-20),
+    summary:state.summary
+  };
+}
+$("dlProjJson").addEventListener("click", function(){
+  download("第6节_智能农植园项目.json", JSON.stringify(projJson(),null,2), "application/json;charset=utf-8");
+});
+$("dlProjTxt").addEventListener("click", function(){
+  if(!$("projReport").value) $("projReport").value=projText();
+  download("第6节_智能农植园项目报告.txt", $("projReport").value, "text/plain;charset=utf-8");
+});
+$("expProj").addEventListener("click", function(){
+  download("第6节_项目存档.json", JSON.stringify({type:"u1l6_project", state:state}, null, 2), "application/json;charset=utf-8");
+  $("ioMsg").textContent="项目已导出为 JSON 文件（本地下载，不上传）。";
+});
+$("impProj").addEventListener("change", function(){
+  var f=this.files[0]; if(!f) return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var data=JSON.parse(rd.result);
+      var st = (data && data.type==="u1l6_project" && data.state) ? data.state : data;
+      var applied=0;
+      for(var k in state){ if(st[k]!==undefined){ state[k]=st[k]; applied++; } }
+      if(!applied) throw new Error("文件中没有可识别的项目数据");
+      save();
+      $("ioMsg").textContent="导入成功！页面即将刷新以应用项目数据。";
+      setTimeout(function(){ location.reload(); }, 700);
+    }catch(e){
+      $("ioMsg").textContent="导入失败：不是有效的项目 JSON 文件。";
+    }
+  };
+  rd.readAsText(f, "utf-8");
+  this.value="";
+});
+$("clearAll").addEventListener("click", function(){
+  if(!confirm("确定清除本机保存的第6节全部学习数据吗？此操作不可恢复。")) return;
+  localStorage.removeItem(LS+"state");
+  location.reload();
+});
+
+/* ---------- 初始渲染 ---------- */
+renderProgress();
+simReset();
+})();
+</script>
+</body>
+</html>

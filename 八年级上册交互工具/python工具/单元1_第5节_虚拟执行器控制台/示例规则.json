@@ -1,0 +1,10 @@
+{
+  "lesson": "第1单元第5节 物联网的控制",
+  "说明": "智能农植园示例控制规则，可在程序菜单 文件→导入规则JSON 中载入",
+  "rules": [
+    {"sensor": "温度", "op": ">", "th": 30, "actuator": "风扇", "action": "开启", "enabled": true},
+    {"sensor": "土壤湿度", "op": "<", "th": 40, "actuator": "水泵", "action": "开启", "enabled": true},
+    {"sensor": "光照", "op": "<", "th": 300, "actuator": "LED补光灯", "action": "开启", "enabled": true},
+    {"sensor": "温度", "op": ">", "th": 42, "actuator": "蜂鸣器", "action": "开启", "enabled": true}
+  ]
+}
