@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第1单元 第1节 从互联网到物联网 · 交互学习工具</title>
+<style>
+:root{
+  --c1:#0ea5e9; --c1d:#0284c7; --c1dd:#075985; --c2:#06b6d4;
+  --bg:#f0f9ff; --card:#ffffff; --ink:#0f2b3d; --muted:#5b7a8c;
+  --ok:#16a34a; --okbg:#f0fdf4; --bad:#dc2626; --badbg:#fef2f2;
+  --warn:#d97706; --warnbg:#fffbeb; --line:#dbeeff;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--ink); line-height:1.65;
+}
+.banner{
+  background:linear-gradient(120deg,#075985 0%,#0ea5e9 55%,#06b6d4 100%);
+  color:#fff; padding:28px 24px 24px; border-bottom:4px solid #bae6fd;
+}
+.banner .inner{max-width:1060px; margin:0 auto; padding-left:150px;}
+.banner .unit{font-size:.85rem; letter-spacing:.2em; opacity:.9;}
+.banner h1{font-size:1.7rem; margin:.25em 0 .35em; font-weight:700;}
+.banner .goals{display:flex; flex-wrap:wrap; gap:8px;}
+.banner .goals span{
+  background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.35);
+  border-radius:999px; padding:3px 14px; font-size:.85rem;
+}
+.wrap{max-width:1060px; margin:0 auto; padding:20px 24px 60px; padding-left:174px;}
+nav.side{
+  position:fixed; left:14px; top:90px; width:132px; z-index:50;
+  background:var(--card); border:1px solid var(--line); border-radius:14px;
+  box-shadow:0 6px 20px rgba(2,132,199,.12); padding:10px 8px;
+}
+nav.side .nt{font-size:.75rem; color:var(--muted); text-align:center; margin-bottom:6px;}
+nav.side a{
+  display:block; text-decoration:none; color:var(--c1dd); font-size:.85rem;
+  padding:7px 10px; border-radius:9px; margin:2px 0;
+}
+nav.side a:hover{background:#e0f2fe;}
+nav.side a.cur{background:var(--c1); color:#fff; font-weight:600;}
+section.mod{
+  background:var(--card); border:1px solid var(--line); border-radius:18px;
+  box-shadow:0 8px 24px rgba(2,132,199,.08); padding:22px 24px; margin:22px 0;
+  scroll-margin-top:16px;
+}
+.mod h2{font-size:1.2rem; color:var(--c1dd); display:flex; align-items:center; gap:10px; margin-bottom:6px;}
+.mod h2 .tag{
+  background:linear-gradient(120deg,var(--c1),var(--c2)); color:#fff; font-size:.72rem;
+  border-radius:8px; padding:2px 10px; letter-spacing:.05em; white-space:nowrap;
+}
+.task{
+  background:#e8f6ff; border-left:4px solid var(--c1); border-radius:0 10px 10px 0;
+  padding:8px 14px; margin:10px 0 14px; font-size:.92rem; color:#0c4a6e;
+}
+button{
+  font-family:inherit; font-size:.9rem; cursor:pointer; border:none; border-radius:10px;
+  padding:8px 16px; background:var(--c1); color:#fff; transition:filter .15s, transform .1s;
+}
+button:hover{filter:brightness(1.08);}
+button:active{transform:scale(.97);}
+button.ghost{background:#e0f2fe; color:var(--c1dd);}
+button.warn{background:#f59e0b;}
+button.danger{background:var(--bad);}
+button:disabled{opacity:.45; cursor:not-allowed;}
+.fb{border-radius:10px; padding:10px 14px; margin-top:10px; font-size:.92rem; display:none;}
+.fb.show{display:block;}
+.fb.ok{background:var(--okbg); border:1px solid #bbf7d0; color:#14532d;}
+.fb.bad{background:var(--badbg); border:1px solid #fecaca; color:#7f1d1d;}
+.fb.warn{background:var(--warnbg); border:1px solid #fde68a; color:#78350f;}
+.fb.info{background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a8a;}
+.badge{display:inline-block; border-radius:999px; padding:1px 10px; font-size:.78rem; font-weight:600;}
+.badge.b1{background:#dcfce7; color:#166534;}
+.badge.b2{background:#fee2e2; color:#991b1b;}
+.badge.b3{background:#e0f2fe; color:#075985;}
+.row{display:flex; flex-wrap:wrap; gap:10px; align-items:center;}
+.mut{color:var(--muted); font-size:.85rem;}
+/* ---- 模块1 动画 ---- */
+.simbox{border:1px solid var(--line); border-radius:14px; padding:10px; background:linear-gradient(180deg,#f8fdff,#eef8ff);}
+.simbox svg{width:100%; height:auto; display:block;}
+.linkchips{display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 4px;}
+.linkchips .chip{
+  border-radius:999px; padding:4px 16px; font-size:.85rem; font-weight:600;
+  background:#e2e8f0; color:#64748b; border:2px solid transparent; transition:all .2s;
+}
+.linkchips .chip.on{background:linear-gradient(120deg,var(--c1),var(--c2)); color:#fff; box-shadow:0 3px 10px rgba(14,165,233,.4);}
+#simDesc{min-height:52px; background:#fff; border:1px dashed #93c5fd; border-radius:10px; padding:8px 14px; margin-top:10px; font-size:.92rem;}
+#simSteps{display:flex; gap:5px; margin-top:10px; flex-wrap:wrap;}
+#simSteps i{
+  font-style:normal; width:28px; height:28px; display:flex; align-items:center; justify-content:center;
+  border-radius:50%; background:#e2e8f0; color:#64748b; font-size:.8rem;
+}
+#simSteps i.done{background:#bae6fd; color:#075985;}
+#simSteps i.cur{background:var(--c1); color:#fff; font-weight:700;}
+/* ---- 模块2 时间轴 ---- */
+.tl{position:relative; margin:14px 0 6px; padding-left:26px;}
+.tl::before{content:""; position:absolute; left:9px; top:6px; bottom:6px; width:4px; border-radius:2px;
+  background:linear-gradient(180deg,var(--c1),var(--c2));}
+.tl .node{position:relative; margin:10px 0; cursor:pointer;}
+.tl .node .dot{
+  position:absolute; left:-24px; top:6px; width:14px; height:14px; border-radius:50%;
+  background:#fff; border:4px solid var(--c1);
+}
+.tl .node .yr{
+  display:inline-block; background:#e0f2fe; color:var(--c1dd); font-weight:700;
+  border-radius:8px; padding:2px 12px; font-size:.9rem;
+}
+.tl .node .ttl{font-weight:600; margin-left:8px;}
+.tl .node .card{
+  display:none; background:#f8fdff; border:1px solid var(--line); border-radius:10px;
+  padding:8px 14px; margin-top:6px; font-size:.9rem; color:#274b5f;
+}
+.tl .node.open .card{display:block;}
+.tl .node.open .dot{background:var(--c1);}
+.sortlist{margin:10px 0; display:flex; flex-direction:column; gap:8px;}
+.sortlist .si{
+  display:flex; align-items:center; gap:10px; background:#f8fdff;
+  border:1px solid #bae6fd; border-radius:10px; padding:8px 12px;
+}
+.sortlist .si .txt{flex:1; font-size:.92rem;}
+.sortlist .si .mv{display:flex; gap:6px;}
+.sortlist .si button{padding:3px 12px; font-size:.85rem; background:#e0f2fe; color:var(--c1dd);}
+.sortlist .si.hl{border-color:var(--bad); background:var(--badbg);}
+/* ---- 模块3 拼装 ---- */
+.tray{display:flex; flex-wrap:wrap; gap:10px; padding:12px; background:#f1f8fe; border-radius:12px; min-height:64px; border:1px dashed #7dd3fc;}
+.piece{
+  background:linear-gradient(120deg,#fff,#f0f9ff); border:2px solid var(--c1); color:var(--c1dd);
+  border-radius:10px; padding:8px 14px; font-size:.9rem; font-weight:600;
+  cursor:grab; user-select:none; touch-action:none; box-shadow:0 2px 6px rgba(2,132,199,.15);
+}
+.piece.dragging{position:fixed; z-index:999; opacity:.9; cursor:grabbing; pointer-events:none; box-shadow:0 10px 24px rgba(2,132,199,.4);}
+.piece.placed{cursor:default; border-color:var(--ok); color:#166534; background:var(--okbg);}
+.layers{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:14px;}
+.slot{
+  border:2px dashed #94a3b8; border-radius:12px; min-height:130px; padding:8px;
+  background:#fbfeff; transition:all .15s;
+}
+.slot h4{font-size:.92rem; text-align:center; color:var(--c1dd); margin-bottom:6px;}
+.slot .hint4{font-size:.75rem; color:var(--muted); text-align:center; margin-bottom:6px;}
+.slot.over{border-color:var(--c1); background:#e0f2fe; box-shadow:inset 0 0 0 3px rgba(14,165,233,.2);}
+.slot .piece{display:block; margin:6px 0; cursor:default;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+.shake{animation:shake .3s;}
+/* ---- 模块4 情境设计 ---- */
+.design{display:grid; grid-template-columns:1fr 1.1fr; gap:16px;}
+.design fieldset{border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin-bottom:10px;}
+.design legend{font-size:.88rem; font-weight:700; color:var(--c1dd); padding:0 6px;}
+.design label{display:inline-flex; align-items:center; gap:5px; margin:3px 12px 3px 0; font-size:.88rem;}
+.design select{font-family:inherit; font-size:.88rem; padding:5px 8px; border-radius:8px; border:1px solid #93c5fd;}
+.diagram{border:1px solid var(--line); border-radius:12px; background:#f8fdff; padding:8px;}
+.diagram svg{width:100%; height:auto;}
+/* ---- 模块5 练习 ---- */
+.quizbox{border:1px solid var(--line); border-radius:14px; padding:16px;}
+.qopt{display:block; width:100%; text-align:left; background:#f8fdff; color:var(--ink);
+  border:2px solid #dbeafe; margin:6px 0; border-radius:10px; padding:9px 14px; font-size:.92rem;}
+.qopt:hover{border-color:var(--c1);}
+.qopt.right{border-color:var(--ok); background:var(--okbg);}
+.qopt.wrong{border-color:var(--bad); background:var(--badbg);}
+.qopt:disabled{opacity:.75;}
+.qprog{display:flex; gap:5px; margin-bottom:10px; flex-wrap:wrap;}
+.qprog i{font-style:normal; width:26px; height:26px; border-radius:8px; display:flex; align-items:center;
+  justify-content:center; font-size:.78rem; background:#e2e8f0; color:#64748b;}
+.qprog i.cur{background:var(--c1); color:#fff;}
+.qprog i.ok{background:#bbf7d0; color:#14532d;}
+.qprog i.no{background:#fecaca; color:#7f1d1d;}
+/* ---- 模块6 ---- */
+#archive{
+  width:100%; min-height:200px; font-family:ui-monospace,Consolas,"Courier New",monospace;
+  font-size:.85rem; border:1px solid var(--line); border-radius:12px; padding:12px;
+  background:#f8fdff; white-space:pre-wrap; resize:vertical;
+}
+table.sum{border-collapse:collapse; width:100%; margin:10px 0; font-size:.9rem;}
+table.sum th,table.sum td{border:1px solid var(--line); padding:7px 10px; text-align:left;}
+table.sum th{background:#e0f2fe; color:var(--c1dd);}
+footer{max-width:1060px; margin:0 auto; padding:0 24px 40px 174px; color:var(--muted); font-size:.8rem;}
+@media (max-width:900px){
+  .banner .inner,.wrap,footer{padding-left:24px;}
+  nav.side{position:static; width:auto; margin:14px 24px 0; display:flex; flex-wrap:wrap; gap:4px;}
+  nav.side .nt{display:none;}
+  nav.side a{flex:1 1 auto; text-align:center;}
+  .layers{grid-template-columns:repeat(2,1fr);}
+  .design{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<header class="banner">
+  <div class="inner">
+    <div class="unit">第1单元 · 物联网入门 · 智能农植园项目</div>
+    <h1>第1节 从互联网到物联网</h1>
+    <div class="goals">
+      <span>① 说出物联网的定义与起源大事记</span>
+      <span>② 理解感知—传输—处理—应用四个环节</span>
+      <span>③ 能为真实情境设计简单物联网方案</span>
+    </div>
+  </div>
+</header>
+
+<nav class="side" id="sideNav">
+  <div class="nt">模块导航</div>
+  <a href="#m1">① 原理模拟</a>
+  <a href="#m2">② 发展时间轴</a>
+  <a href="#m3">③ 四层拼装</a>
+  <a href="#m4">④ 情境设计</a>
+  <a href="#m5">⑤ 辨析练习</a>
+  <a href="#m6">⑥ 学习档案</a>
+</nav>
+
+<main class="wrap">
+
+<!-- ================= 模块1 ================= -->
+<section class="mod" id="m1">
+  <h2><span class="tag">原理模拟</span>共享单车租车全流程动画</h2>
+  <div class="task">任务：点击「播放」观看一次完整的租车流程；再用「单步」逐步观察，弄清每一步中<b>感知 / 传输 / 处理 / 应用</b>哪个环节在工作。看完全部 7 步即算完成本模块。</div>
+  <div class="linkchips" id="linkChips">
+    <span class="chip" data-k="感知">感知</span>
+    <span class="chip" data-k="传输">传输</span>
+    <span class="chip" data-k="处理">处理</span>
+    <span class="chip" data-k="应用">应用</span>
+  </div>
+  <div class="simbox">
+    <svg viewBox="0 0 900 320" aria-label="共享单车流程动画">
+      <defs>
+        <linearGradient id="gCloud" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#7dd3fc"/><stop offset="1" stop-color="#0ea5e9"/>
+        </linearGradient>
+      </defs>
+      <!-- 连线 -->
+      <path id="lnPC" d="M 150 170 C 250 80 330 70 420 70" fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="7 6"/>
+      <path id="lnCL" d="M 560 70 C 660 70 720 90 760 160" fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="7 6"/>
+      <text x="265" y="90" font-size="13" fill="#64748b">4G/5G 移动网络</text>
+      <text x="640" y="60" font-size="13" fill="#64748b">4G/5G 移动网络</text>
+      <!-- 手机 -->
+      <g id="gPhone">
+        <rect x="80" y="150" width="76" height="140" rx="12" fill="#0f2b3d" stroke="#0ea5e9" stroke-width="3"/>
+        <rect x="88" y="164" width="60" height="104" rx="4" fill="#e0f2fe"/>
+        <circle cx="118" cy="280" r="6" fill="#7dd3fc"/>
+        <text id="phoneTxt" x="118" y="212" font-size="11" fill="#075985" text-anchor="middle">共享单车App</text>
+        <text x="118" y="310" font-size="14" fill="#075985" text-anchor="middle" font-weight="bold">用户手机</text>
+      </g>
+      <!-- 云平台 -->
+      <g id="gCloud2">
+        <path d="M 430 88 a 26 26 0 0 1 8 -50 a 34 34 0 0 1 64 -8 a 26 26 0 0 1 28 42 a 20 20 0 0 1 -14 16 z" fill="url(#gCloud)" stroke="#0284c7" stroke-width="3"/>
+        <text x="490" y="66" font-size="14" fill="#fff" text-anchor="middle" font-weight="bold">云平台</text>
+        <text x="490" y="112" font-size="12" fill="#075985" text-anchor="middle">账户验证 · 车辆管理 · 计费</text>
+      </g>
+      <!-- 单车 -->
+      <g id="gBike">
+        <circle cx="740" cy="255" r="34" fill="none" stroke="#0f2b3d" stroke-width="5"/>
+        <circle cx="850" cy="255" r="34" fill="none" stroke="#0f2b3d" stroke-width="5"/>
+        <path d="M 740 255 L 782 190 L 838 190 L 850 255 L 795 255 L 782 190 M 740 255 L 795 255" fill="none" stroke="#0ea5e9" stroke-width="5" stroke-linejoin="round"/>
+        <rect x="770" y="163" width="24" height="20" rx="4" fill="#fff" stroke="#0f2b3d" stroke-width="2"/>
+        <path d="M772 166h4v4h-4zM778 166h4v4h-4zM772 172h4v4h-4zM784 172h4v4h-4zM778 178h4v2h-4z" fill="#0f2b3d"/>
+        <text x="795" y="155" font-size="12" fill="#475569" text-anchor="middle">二维码</text>
+        <!-- 智能锁 -->
+        <g id="gLock">
+          <rect x="838" y="196" width="34" height="26" rx="6" fill="#334155" stroke="#0f2b3d" stroke-width="2"/>
+          <path id="lockArc" d="M 845 196 v -8 a 10 10 0 0 1 20 0 v 8" fill="none" stroke="#0f2b3d" stroke-width="4"/>
+          <text x="855" y="240" font-size="12" fill="#475569" text-anchor="middle">智能锁</text>
+        </g>
+        <text x="795" y="310" font-size="14" fill="#075985" text-anchor="middle" font-weight="bold">共享单车（物联网终端）</text>
+      </g>
+      <!-- 数据包 -->
+      <circle id="pkt" r="9" fill="#f59e0b" stroke="#b45309" stroke-width="2" visibility="hidden"/>
+      <text id="pktT" font-size="11" fill="#92400e" text-anchor="middle" visibility="hidden">数据</text>
+    </svg>
+  </div>
+  <div class="row" style="margin-top:12px">
+    <button id="btnPlay">▶ 播放</button>
+    <button id="btnStep" class="ghost">⏭ 单步</button>
+    <button id="btnReset" class="ghost">↺ 重置</button>
+    <span class="mut" id="simState">未开始</span>
+  </div>
+  <div id="simSteps"></div>
+  <div id="simDesc">点击「播放」或「单步」开始演示。</div>
+  <div class="fb" id="simFb"></div>
+</section>
+
+<!-- ================= 模块2 ================= -->
+<section class="mod" id="m2">
+  <h2><span class="tag">时间轴</span>物联网的起源与发展</h2>
+  <div class="task">任务①：依次点击时间轴上的每个节点，展开阅读事件卡片。任务②：完成下方“事件排序还原”小挑战——用「上移 / 下移」按钮把被打乱的事件按时间先后排好，再点「检查排序」。</div>
+  <div class="tl" id="tlBox"></div>
+  <div class="fb info show" id="tlRead">已阅读 0 / 7 个事件节点。</div>
+  <h3 style="margin:16px 0 4px; font-size:1rem; color:var(--c1dd)">🧩 挑战：把打乱的大事记还原成正确顺序</h3>
+  <div class="sortlist" id="sortList"></div>
+  <div class="row">
+    <button id="btnSortCheck">✔ 检查排序</button>
+    <button id="btnSortShuffle" class="ghost">🔀 重新打乱</button>
+    <span class="mut" id="sortTries"></span>
+  </div>
+  <div class="fb" id="sortFb"></div>
+</section>
+
+<!-- ================= 模块3 ================= -->
+<section class="mod" id="m3">
+  <h2><span class="tag">结构拼装</span>“感知—传输—处理—应用”四层结构拼装</h2>
+  <div class="task">任务：按住下方元件卡片，拖动到它所属的层级槽位中松手（支持鼠标与触屏）。放对会变绿并解释原因；放错会弹回并告诉你为什么不属于该层。把 8 个元件全部放对即完成。</div>
+  <div class="tray" id="tray"></div>
+  <div class="layers">
+    <div class="slot" data-layer="感知"><h4>感知层</h4><div class="hint4">系统的“眼睛与皮肤”，负责采集数据</div></div>
+    <div class="slot" data-layer="传输"><h4>传输层</h4><div class="hint4">数据的“公路”，负责把信息送出去</div></div>
+    <div class="slot" data-layer="处理"><h4>处理层</h4><div class="hint4">系统的“大脑”，存储、分析并做决策</div></div>
+    <div class="slot" data-layer="应用"><h4>应用层</h4><div class="hint4">面向用户呈现结果、执行动作</div></div>
+  </div>
+  <div class="fb" id="dragFb"></div>
+  <div class="row" style="margin-top:10px">
+    <button id="btnDragReset" class="ghost">↺ 重新拼装</button>
+    <span class="mut" id="dragScore"></span>
+  </div>
+</section>
+
+<!-- ================= 模块4 ================= -->
+<section class="mod" id="m4">
+  <h2><span class="tag">情境设计</span>桥梁健康监测系统设计器</h2>
+  <div class="task">任务：教材提到虎门大桥安装了数百个传感器，监测桥面裂缝与受力、车辆运载、桥面沉降等。请你为一座大桥设计监测系统：勾选传感器、选择网络方式、平台功能与报警动作，右侧示意图会实时更新。设计完点「评估我的方案」看看是否合理。</div>
+  <div class="design">
+    <div>
+      <fieldset><legend>① 选择传感器（感知层）</legend>
+        <label><input type="checkbox" class="dSensor" value="加速度传感器">加速度传感器（振动）</label>
+        <label><input type="checkbox" class="dSensor" value="位移传感器">位移传感器（沉降）</label>
+        <label><input type="checkbox" class="dSensor" value="应变传感器">应变传感器（受力）</label>
+        <label><input type="checkbox" class="dSensor" value="温度传感器">温度传感器</label>
+        <label><input type="checkbox" class="dSensor" value="摄像头">摄像头（车流）</label>
+      </fieldset>
+      <fieldset><legend>② 网络方式（传输层）</legend>
+        <select id="dNet">
+          <option value="">——请选择——</option>
+          <option value="4G/5G移动网络">4G/5G 移动网络</option>
+          <option value="有线光纤">有线光纤</option>
+          <option value="Wi-Fi">Wi-Fi（近距离）</option>
+        </select>
+      </fieldset>
+      <fieldset><legend>③ 平台功能（处理层）</legend>
+        <label><input type="checkbox" class="dPlat" value="数据存储">数据存储</label>
+        <label><input type="checkbox" class="dPlat" value="实时曲线">实时曲线</label>
+        <label><input type="checkbox" class="dPlat" value="阈值分析">阈值分析</label>
+        <label><input type="checkbox" class="dPlat" value="历史报表">历史报表</label>
+      </fieldset>
+      <fieldset><legend>④ 报警动作（应用层）</legend>
+        <label><input type="checkbox" class="dAct" value="短信通知管理员">短信通知管理员</label>
+        <label><input type="checkbox" class="dAct" value="现场声光报警">现场声光报警</label>
+        <label><input type="checkbox" class="dAct" value="自动限行提示">自动限行提示</label>
+      </fieldset>
+      <div class="row">
+        <button id="btnEval">🔍 评估我的方案</button>
+        <button id="btnDesignReset" class="ghost">↺ 清空重选</button>
+      </div>
+      <div class="fb" id="designFb"></div>
+    </div>
+    <div class="diagram">
+      <svg id="bridgeSvg" viewBox="0 0 460 330" aria-label="桥梁监测示意图">
+        <rect x="0" y="0" width="460" height="330" fill="#f0f9ff"/>
+        <rect x="0" y="250" width="460" height="80" fill="#bae6fd"/>
+        <rect x="20" y="236" width="420" height="14" rx="4" fill="#475569"/>
+        <rect x="105" y="120" width="12" height="118" fill="#334155"/>
+        <rect x="335" y="120" width="12" height="118" fill="#334155"/>
+        <path d="M111 122 C 180 200 280 200 341 122" fill="none" stroke="#64748b" stroke-width="3"/>
+        <path d="M111 122 L 30 236 M341 122 L 430 236" fill="none" stroke="#64748b" stroke-width="3"/>
+        <text x="230" y="322" font-size="12" fill="#075985" text-anchor="middle">某大桥 · 健康监测系统示意图（自动生成）</text>
+        <g id="svgSensors"></g>
+        <g id="svgNet" visibility="hidden">
+          <line x1="230" y1="228" x2="230" y2="80" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="6 5"/>
+          <text id="svgNetTxt" x="238" y="160" font-size="12" fill="#b45309">网络</text>
+        </g>
+        <g id="svgCloud" visibility="hidden">
+          <path d="M 195 66 a 18 18 0 0 1 6 -34 a 24 24 0 0 1 46 -6 a 18 18 0 0 1 20 30 a 14 14 0 0 1 -10 10 z" fill="#0ea5e9" stroke="#0284c7" stroke-width="2"/>
+          <text x="232" y="52" font-size="12" fill="#fff" text-anchor="middle">云平台</text>
+          <text id="svgPlatTxt" x="232" y="86" font-size="10" fill="#075985" text-anchor="middle"></text>
+        </g>
+        <g id="svgAlarm" visibility="hidden">
+          <line x1="272" y1="46" x2="360" y2="46" stroke="#dc2626" stroke-width="2" stroke-dasharray="5 4"/>
+          <circle cx="380" cy="46" r="16" fill="#fee2e2" stroke="#dc2626" stroke-width="2.5"/>
+          <text x="380" y="51" font-size="13" text-anchor="middle" fill="#dc2626">⚠</text>
+          <text id="svgActTxt" x="380" y="78" font-size="10" fill="#991b1b" text-anchor="middle">报警</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 模块5 ================= -->
+<section class="mod" id="m5">
+  <h2><span class="tag">即时反馈练习</span>“互联网 vs 物联网”辨析闯关</h2>
+  <div class="task">任务：共 8 题，逐题作答。答完立即给出原因解释；不会做可先看「提示①」，还不会再看「提示②」。答错可以换一个选项重试（该题不再计满分）。全部完成后查看得分与错题回顾。</div>
+  <div class="quizbox">
+    <div class="qprog" id="qProg"></div>
+    <div id="qBody"></div>
+    <div class="row" style="margin-top:10px">
+      <button id="btnHint" class="warn">💡 提示①</button>
+      <button id="btnNext" class="ghost" disabled>下一题 →</button>
+      <button id="btnQuizRestart" class="ghost">↺ 全部重做</button>
+      <span class="mut" id="qScore"></span>
+    </div>
+    <div class="fb" id="qHintBox"></div>
+    <div class="fb" id="qFb"></div>
+    <div id="qReview"></div>
+  </div>
+</section>
+
+<!-- ================= 模块6 ================= -->
+<section class="mod" id="m6">
+  <h2><span class="tag">成果输出</span>学习小结与成果导出 · 我的物联网学习档案</h2>
+  <div class="task">任务：完成前面各模块后，点「生成学习档案」自动汇总你的时间轴排序、四层拼装、桥梁设计方案与练习得分；可复制或下载保存，交给老师或放入项目文件夹。</div>
+  <table class="sum" id="sumTable">
+    <tr><th style="width:32%">模块</th><th>完成情况</th></tr>
+  </table>
+  <div class="row" style="margin:8px 0">
+    <button id="btnGen">📋 生成学习档案</button>
+    <button id="btnCopy" class="ghost">复制文本</button>
+    <button id="btnTxt" class="ghost">下载 .txt</button>
+    <button id="btnJson" class="ghost">下载 .json</button>
+    <button id="btnClear" class="danger">🗑 清除本机学习数据</button>
+  </div>
+  <textarea id="archive" placeholder="点击「生成学习档案」后，这里会出现你的学习小结……" readonly></textarea>
+  <div class="fb" id="expFb"></div>
+</section>
+</main>
+<footer>本页为单机交互学习工具，配合清华大学出版社《信息科技》八年级上册第1单元第1节使用。所有数据仅保存在本机浏览器 localStorage 中。</footer>
+
+<script>
+(function(){
+"use strict";
+var PRE = "u1l1_";
+function $(s){ return document.querySelector(s); }
+function $all(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); }
+function save(k,v){ try{ localStorage.setItem(PRE+k, JSON.stringify(v)); }catch(e){} }
+function load(k,d){ try{ var v=localStorage.getItem(PRE+k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+function fb(el, cls, html){ el.className = "fb show " + cls; el.innerHTML = html; }
+function hideFb(el){ el.className = "fb"; el.innerHTML=""; }
+function nowStr(){ var d=new Date(); function p(n){return (n<10?"0":"")+n;} return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes()); }
+
+/* ============ 模块1：共享单车流程动画 ============ */
+var SIM_STEPS = [
+ {t:"① 扫码识别车辆", links:["感知"], d:"用户打开 App，用手机摄像头扫描车上的二维码，系统由此“感知”到你要租的是哪一辆车。二维码是物联网常用的数据采集方式之一。",
+  anim:{kind:"pkt", from:[795,173], to:[118,210], label:"车辆编号"}},
+ {t:"② 发送租车请求", links:["传输"], d:"手机把“用户账号 + 车辆编号”打包，通过 4G/5G 移动网络发送到云平台。单车遍布城市各处，Wi-Fi 覆盖不到，所以要用移动网络。",
+  anim:{kind:"pkt", from:[130,160], to:[440,70], label:"租车请求"}},
+ {t:"③ 云平台验证", links:["处理"], d:"云平台服务器核对账户余额、检查车辆状态、确定计费规则——这是“处理”环节，用到云计算与大数据技术。",
+  anim:{kind:"pulse", target:"gCloud2"}},
+ {t:"④ 下发开锁指令", links:["传输"], d:"验证通过后，云平台把“开锁指令”通过移动网络发送给这辆单车的智能锁。",
+  anim:{kind:"pkt", from:[560,72], to:[852,205], label:"开锁指令"}},
+ {t:"⑤ 智能锁自动打开", links:["应用"], d:"智能锁收到指令后执行开锁动作——物联网让“远程控制物品”成为现实，这正是面向用户的“应用”。",
+  anim:{kind:"unlock"}},
+ {t:"⑥ 骑行中定位上报", links:["感知","传输"], d:"骑行过程中，车上的导航定位模块不断“感知”车辆位置，并周期性地把位置数据传回云平台，这样别人才能在地图上看到附近的车。",
+  anim:{kind:"pkt", from:[795,240], to:[500,95], label:"位置数据"}},
+ {t:"⑦ 关锁结算计费", links:["处理","应用"], d:"用户关锁后，传感器感知到锁已闭合并上报；云平台按骑行时间计算费用（处理），并把账单推送到手机 App 提示付费（应用）。一次租车“交易”完成！",
+  anim:{kind:"bill"}}
+];
+var sim = { idx:-1, t:0, playing:false, once:false, seen:load("sim",{seen:0}).seen||0, raf:0, last:0 };
+var pkt=$("#pkt"), pktT=$("#pktT");
+var stepBar=$("#simSteps");
+SIM_STEPS.forEach(function(s,i){ var el=document.createElement("i"); el.textContent=i+1; stepBar.appendChild(el); });
+function chipOn(links){
+  $all("#linkChips .chip").forEach(function(c){ c.classList.toggle("on", links.indexOf(c.dataset.k)>=0); });
+}
+function setLock(open){
+  $("#lockArc").setAttribute("d", open ? "M 845 196 v -8 a 10 10 0 0 1 20 -6" : "M 845 196 v -8 a 10 10 0 0 1 20 0 v 8");
+  $("#lockArc").setAttribute("stroke", open ? "#16a34a" : "#0f2b3d");
+}
+function simDraw(){
+  var bar = stepBar.children;
+  for(var i=0;i<bar.length;i++){ bar[i].className = i<sim.idx?"done":(i===sim.idx?"cur":""); }
+  if(sim.idx<0){ chipOn([]); $("#simDesc").textContent="点击「播放」或「单步」开始演示。"; return; }
+  var st = SIM_STEPS[sim.idx];
+  chipOn(st.links);
+  $("#simDesc").innerHTML = "<b>"+st.t+"</b>（本步环节：" + st.links.join(" + ") + "）<br>" + st.d;
+  var a = st.anim, tt = Math.min(sim.t,1);
+  pkt.setAttribute("visibility","hidden"); pktT.setAttribute("visibility","hidden");
+  $("#gCloud2").style.filter=""; $("#phoneTxt").textContent="共享单车App";
+  if(a.kind==="pkt"){
+    var x = a.from[0]+(a.to[0]-a.from[0])*tt, y = a.from[1]+(a.to[1]-a.from[1])*tt - Math.sin(tt*Math.PI)*40;
+    pkt.setAttribute("cx",x); pkt.setAttribute("cy",y); pkt.setAttribute("visibility","visible");
+    pktT.setAttribute("x",x); pktT.setAttribute("y",y-14); pktT.textContent=a.label; pktT.setAttribute("visibility","visible");
+  }else if(a.kind==="pulse"){
+    $("#gCloud2").style.filter = "drop-shadow(0 0 " + (6+10*Math.sin(tt*Math.PI*4)*Math.sin(tt*Math.PI*4)) + "px #0ea5e9)";
+  }else if(a.kind==="unlock"){
+    setLock(tt>0.4);
+    if(tt>0.4) $("#phoneTxt").textContent="已开锁，请骑行";
+  }else if(a.kind==="bill"){
+    setLock(false);
+    $("#gCloud2").style.filter = tt<0.5 ? "drop-shadow(0 0 8px #0ea5e9)" : "";
+    if(tt>=0.5){
+      var t2=(tt-0.5)*2, x2=440+(118-440)*t2, y2=70+(200-70)*t2 - Math.sin(t2*Math.PI)*30;
+      pkt.setAttribute("cx",x2); pkt.setAttribute("cy",y2); pkt.setAttribute("visibility","visible");
+      pktT.setAttribute("x",x2); pktT.setAttribute("y",y2-14); pktT.textContent="账单 1.5元"; pktT.setAttribute("visibility","visible");
+    }
+    if(tt>=0.98) $("#phoneTxt").textContent="本次费用1.5元";
+  }
+}
+function simTick(ts){
+  if(!sim.playing){ sim.raf=0; return; }
+  if(!sim.last) sim.last=ts;
+  var dt=(ts-sim.last)/1000; sim.last=ts;
+  sim.t += dt/2.4;
+  if(sim.t>=1){
+    sim.t=1; simDraw();
+    sim.seen = Math.max(sim.seen, sim.idx+1);
+    save("sim",{seen:sim.seen});
+    if(sim.idx >= SIM_STEPS.length-1){
+      sim.playing=false; sim.raf=0;
+      $("#btnPlay").textContent="▶ 播放";
+      $("#simState").textContent="演示完成";
+      fb($("#simFb"),"ok","🎉 完整流程演示完毕！一次租车经历了 <b>感知 → 传输 → 处理 → 应用</b> 的多次循环。你可以点「重置」再看一遍，或用「单步」细看某一步。");
+      updateSummary();
+      return;
+    }
+    if(sim.once){ sim.playing=false; sim.once=false; sim.raf=0; $("#simState").textContent="已暂停（第"+(sim.idx+1)+"步完成）"; return; }
+    sim.idx++; sim.t=0;
+  }
+  simDraw();
+  sim.raf = requestAnimationFrame(simTick);
+}
+function simStart(once){
+  if(sim.idx >= SIM_STEPS.length-1 && sim.t>=1){ return; }
+  if(!sim.playing){
+    if(sim.idx<0 || sim.t>=1){ sim.idx = sim.idx<0?0:sim.idx+1; sim.t=0; }
+    sim.playing=true; sim.once=!!once; sim.last=0;
+    $("#simState").textContent = once?"单步执行中…":"播放中…";
+    $("#btnPlay").textContent = "⏸ 暂停";
+    hideFb($("#simFb"));
+    if(!sim.raf) sim.raf=requestAnimationFrame(simTick);
+  }
+}
+$("#btnPlay").addEventListener("click",function(){
+  if(sim.playing){ sim.playing=false; sim.once=false; $("#simState").textContent="已暂停"; this.textContent="▶ 播放"; }
+  else{ simStart(false); this.textContent="⏸ 暂停"; }
+});
+$("#btnStep").addEventListener("click",function(){
+  if(sim.playing && !sim.once) { sim.playing=false; }
+  simStart(true); $("#btnPlay").textContent="▶ 播放";
+});
+$("#btnReset").addEventListener("click",function(){
+  sim.playing=false; sim.once=false; sim.idx=-1; sim.t=0; sim.last=0;
+  setLock(false); $("#phoneTxt").textContent="共享单车App";
+  pkt.setAttribute("visibility","hidden"); pktT.setAttribute("visibility","hidden");
+  $("#gCloud2").style.filter="";
+  $("#simState").textContent="已重置"; $("#btnPlay").textContent="▶ 播放";
+  hideFb($("#simFb")); simDraw();
+});
+simDraw();
+
+/* ============ 模块2：时间轴 + 排序 ============ */
+var EVENTS = [
+ {y:1982, ttl:"卡内基梅隆大学的自动可乐贩卖机", d:"几个程序员给贩卖机装上微动开关并连接到学校服务器，人们在自己的计算机上就能查看可乐的数量和冷热情况。这台贩卖机被命名为 Only（唯一），被视为物联网起源的另一种说法。"},
+ {y:1991, ttl:"剑桥大学“特洛伊咖啡壶”", d:"为了实时了解咖啡壶的工作状态，特洛伊计算机实验室的工程师在咖啡壶旁安装摄像头，把画面传到实验室的计算机上——网络的触角第一次从计算机延伸到了“物品”。1993 年该系统以 1 帧/秒发布到互联网，近 200 万人点击，成为历史上第一个直播网站。"},
+ {y:1995, ttl:"比尔·盖茨《未来之路》提出构想", d:"比尔·盖茨在《未来之路》一书中提出“物联网”构想，指出互联网仅仅实现了计算机的联网，而没有实现万事万物的互联；还预言没有智能家居系统的住宅将像不能上网的住宅一样不符合潮流。当时并未受到关注。"},
+ {y:1999, ttl:"美国麻省理工学院自动识别中心", d:"MIT 自动识别中心首次提出“万物皆可通过网络互联”，阐明了物联网的基本含义。"},
+ {y:2005, ttl:"国际电信联盟正式提出物联网概念", d:"在突尼斯举行的信息社会世界峰会上，国际电信联盟（ITU）发布《ITU 互联网报告 2005：物联网》，正式提出物联网概念：世界上所有的物品——从轮胎到牙刷、从房屋到纸巾——都可以通过互联网主动进行数据交换。"},
+ {y:2008, ttl:"物联网概念开始流行", d:"2008 年以后，为促进科技发展并寻找新的经济增长点，各国政府将物联网作为下一代的技术规划，物联网一夜之间成为热门的新名词。"},
+ {y:2009, ttl:"“感知中国”概念提出", d:"2009 年 8 月，“感知中国”概念的提出，把中国物联网领域的研究和应用开发推向了高潮。"}
+];
+var tlBox=$("#tlBox"), tlRead=load("tlRead",[]);
+EVENTS.forEach(function(e,i){
+  var n=document.createElement("div"); n.className="node";
+  n.innerHTML='<span class="dot"></span><span class="yr">'+e.y+'年</span><span class="ttl">'+e.ttl+'</span><div class="card">'+e.d+'</div>';
+  n.addEventListener("click",function(){
+    n.classList.toggle("open");
+    if(tlRead.indexOf(i)<0){ tlRead.push(i); save("tlRead",tlRead); }
+    $("#tlRead").innerHTML = "已阅读 <b>"+tlRead.length+"</b> / "+EVENTS.length+" 个事件节点。" + (tlRead.length>=EVENTS.length?" ✔ 全部读完，去完成排序挑战吧！":"");
+    updateSummary();
+  });
+  tlBox.appendChild(n);
+});
+$("#tlRead").innerHTML = "已阅读 <b>"+tlRead.length+"</b> / "+EVENTS.length+" 个事件节点。"+(tlRead.length>=EVENTS.length?" ✔ 全部读完，去完成排序挑战吧！":"");
+
+var SORT_ITEMS = [
+ {y:1991, s:"剑桥大学工程师用摄像头远程观察“特洛伊咖啡壶”"},
+ {y:1995, s:"比尔·盖茨在《未来之路》中提出“物联网”构想"},
+ {y:1999, s:"美国麻省理工学院自动识别中心提出“万物皆可通过网络互联”"},
+ {y:2005, s:"国际电信联盟发布《ITU 互联网报告 2005：物联网》，正式提出物联网概念"},
+ {y:2008, s:"各国将物联网列入技术规划，概念开始流行"},
+ {y:2009, s:"“感知中国”概念提出，我国物联网研究掀起高潮"}
+];
+var sortOrder=[], sortTries=load("sortTries",0), sortDone=load("sortDone",false);
+function shuffleSort(){
+  sortOrder = SORT_ITEMS.map(function(_,i){return i;});
+  do{
+    for(var i=sortOrder.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=sortOrder[i]; sortOrder[i]=sortOrder[j]; sortOrder[j]=t; }
+  }while(sortOrder.every(function(v,i){return v===i;}));
+  renderSort();
+}
+function renderSort(hlPair){
+  var box=$("#sortList"); box.innerHTML="";
+  sortOrder.forEach(function(idx,pos){
+    var it=SORT_ITEMS[idx];
+    var el=document.createElement("div"); el.className="si"+(hlPair && (pos===hlPair[0]||pos===hlPair[1])?" hl":"");
+    el.innerHTML='<span class="badge b3">'+(pos+1)+'</span><span class="txt">'+it.s+'</span>'+
+      '<span class="mv"><button data-p="'+pos+'" data-d="-1"'+(pos===0?" disabled":"")+'>▲ 上移</button>'+
+      '<button data-p="'+pos+'" data-d="1"'+(pos===sortOrder.length-1?" disabled":"")+'>▼ 下移</button></span>';
+    box.appendChild(el);
+  });
+  $all("#sortList button").forEach(function(b){
+    b.addEventListener("click",function(){
+      var p=parseInt(this.dataset.p,10), d=parseInt(this.dataset.d,10);
+      var t=sortOrder[p]; sortOrder[p]=sortOrder[p+d]; sortOrder[p+d]=t;
+      hideFb($("#sortFb")); renderSort();
+    });
+  });
+  $("#sortTries").textContent = "已检查 "+sortTries+" 次" + (sortDone?"，✔ 已完成":"");
+}
+$("#btnSortCheck").addEventListener("click",function(){
+  sortTries++; save("sortTries",sortTries);
+  var bad=-1;
+  for(var i=0;i<sortOrder.length-1;i++){
+    if(SORT_ITEMS[sortOrder[i]].y > SORT_ITEMS[sortOrder[i+1]].y){ bad=i; break; }
+  }
+  if(bad<0){
+    sortDone=true; save("sortDone",true);
+    save("sortResult", sortOrder.map(function(i){return SORT_ITEMS[i].y+"年";}).join(" → "));
+    fb($("#sortFb"),"ok","🎉 <b>祝贺你！排序完全正确。</b>物联网从 1991 年的咖啡壶雏形，到 2005 年概念正式提出，再到 2009 年“感知中国”，经历了从设想到热潮的过程。");
+  }else{
+    var a=SORT_ITEMS[sortOrder[bad]], b=SORT_ITEMS[sortOrder[bad+1]];
+    fb($("#sortFb"),"bad","还差一点：第 "+(bad+1)+" 条「"+a.s.slice(0,16)+"…（"+a.y+"年）」和第 "+(bad+2)+" 条「"+b.s.slice(0,16)+"…（"+b.y+"年）」<b>顺序颠倒了</b>——"+b.y+" 年的事件应排在 "+a.y+" 年之前。调整后再检查一次。");
+  }
+  renderSort(bad>=0?[bad,bad+1]:null);
+  $("#sortTries").textContent = "已检查 "+sortTries+" 次" + (sortDone?"，✔ 已完成":"");
+  updateSummary();
+});
+$("#btnSortShuffle").addEventListener("click",function(){ hideFb($("#sortFb")); shuffleSort(); });
+shuffleSort();
+
+/* ============ 模块3：四层拼装（pointer 拖拽） ============ */
+var PIECES = [
+ {n:"温度传感器", l:"感知", why:"它直接采集环境温度数据，是系统获取外界信息的“皮肤”。"},
+ {n:"摄像头", l:"感知", why:"它采集图像画面——“特洛伊咖啡壶”正是用摄像头感知咖啡壶状态的。"},
+ {n:"Wi-Fi", l:"传输", why:"Wi-Fi 是一种无线网络技术，负责把数据传出去。家里的物联网电饭煲、电冰箱多用它联网。"},
+ {n:"4G/5G", l:"传输", why:"移动网络覆盖广，共享单车这类分散在城市各处的设备靠它传输数据。"},
+ {n:"云平台服务器", l:"处理", why:"服务器存储并分析“大量、动态、实时”的感知数据，做出决策，是系统的大脑。"},
+ {n:"大数据分析程序", l:"处理", why:"对海量数据进行统计和挖掘属于数据处理环节，常与云计算、人工智能技术配合。"},
+ {n:"手机App", l:"应用", why:"App 面向用户呈现结果（如地图上显示附近单车、账单提示），是应用环节的窗口。"},
+ {n:"自动喷灌器", l:"应用", why:"它根据系统决策执行“浇水”动作，把处理结果变成对现实世界的控制，属于面向需求的应用。"}
+];
+var placedMap = load("layers",{});
+var dragFb=$("#dragFb"), tray=$("#tray");
+function renderPieces(){
+  tray.innerHTML="";
+  var placedCount=0;
+  $all(".slot .piece").forEach(function(p){ p.parentNode.removeChild(p); });
+  PIECES.forEach(function(p,i){
+    var el=document.createElement("div"); el.className="piece"; el.textContent=p.n; el.dataset.i=i;
+    if(placedMap[p.n]===p.l){
+      el.classList.add("placed");
+      $all(".slot").some(function(s){ if(s.dataset.layer===p.l){ s.appendChild(el); return true;} return false; });
+      placedCount++;
+    }else{
+      attachDrag(el); tray.appendChild(el);
+    }
+  });
+  $("#dragScore").textContent = "已放对 "+placedCount+" / "+PIECES.length+" 个元件";
+  if(placedCount===PIECES.length){
+    fb(dragFb,"ok","🎉 全部拼装正确！一个完整的物联网系统正是这样分工协作的：<b>感知层</b>采集 → <b>传输层</b>搬运 → <b>处理层</b>决策 → <b>应用层</b>服务与执行。");
+  }
+}
+function attachDrag(el){
+  el.addEventListener("pointerdown",function(ev){
+    ev.preventDefault();
+    var rect=el.getBoundingClientRect();
+    var ox=ev.clientX-rect.left, oy=ev.clientY-rect.top;
+    var ph=document.createElement("div"); ph.style.width=rect.width+"px"; ph.style.height=rect.height+"px"; ph.style.visibility="hidden";
+    el.parentNode.insertBefore(ph, el);
+    el.classList.add("dragging");
+    el.style.width=rect.width+"px";
+    el.style.left=(ev.clientX-ox)+"px"; el.style.top=(ev.clientY-oy)+"px";
+    document.body.appendChild(el);
+    function mv(e2){
+      el.style.left=(e2.clientX-ox)+"px"; el.style.top=(e2.clientY-oy)+"px";
+      var under=document.elementFromPoint(e2.clientX,e2.clientY);
+      $all(".slot").forEach(function(s){ s.classList.toggle("over", !!(under && s.contains(under))); });
+    }
+    function up(e2){
+      document.removeEventListener("pointermove",mv);
+      document.removeEventListener("pointerup",up);
+      el.classList.remove("dragging"); el.style.width=""; el.style.left=""; el.style.top="";
+      $all(".slot").forEach(function(s){ s.classList.remove("over"); });
+      el.style.display="none";
+      var under=document.elementFromPoint(e2.clientX,e2.clientY);
+      el.style.display="";
+      var slot=null;
+      $all(".slot").some(function(s){ if(under && s.contains(under)){ slot=s; return true;} return false; });
+      var p=PIECES[parseInt(el.dataset.i,10)];
+      if(slot){
+        if(slot.dataset.layer===p.l){
+          placedMap[p.n]=p.l; save("layers",placedMap);
+          fb(dragFb,"ok","✔ 「"+p.n+"」属于<b>"+p.l+"层</b>。"+p.why);
+          if(ph.parentNode) ph.parentNode.removeChild(ph);
+          if(el.parentNode) el.parentNode.removeChild(el);
+          renderPieces(); updateSummary(); return;
+        }else{
+          fb(dragFb,"bad","✘ 「"+p.n+"」不属于<b>"+slot.dataset.layer+"层</b>。提示："+p.why+" 想一想它应放在哪一层，再试一次。");
+          el.classList.add("shake");
+          setTimeout(function(){ el.classList.remove("shake"); },350);
+        }
+      }
+      ph.parentNode.insertBefore(el, ph);
+      ph.parentNode.removeChild(ph);
+    }
+    document.addEventListener("pointermove",mv);
+    document.addEventListener("pointerup",up);
+  });
+}
+$("#btnDragReset").addEventListener("click",function(){
+  placedMap={}; save("layers",placedMap); hideFb(dragFb); renderPieces();
+});
+renderPieces();
+
+/* ============ 模块4：桥梁监测设计器 ============ */
+var SENSOR_POS = {"加速度传感器":[150,205,"#dc2626"],"位移传感器":[230,214,"#7c3aed"],"应变传感器":[310,205,"#0891b2"],"温度传感器":[70,228,"#d97706"],"摄像头":[390,228,"#16a34a"]};
+function designState(){
+  return {
+    sensors: $all(".dSensor").filter(function(c){return c.checked;}).map(function(c){return c.value;}),
+    net: $("#dNet").value,
+    plats: $all(".dPlat").filter(function(c){return c.checked;}).map(function(c){return c.value;}),
+    acts: $all(".dAct").filter(function(c){return c.checked;}).map(function(c){return c.value;})
+  };
+}
+function drawDesign(){
+  var st=designState();
+  var g=$("#svgSensors"); g.innerHTML="";
+  st.sensors.forEach(function(s){
+    var p=SENSOR_POS[s];
+    var c=document.createElementNS("http://www.w3.org/2000/svg","circle");
+    c.setAttribute("cx",p[0]); c.setAttribute("cy",p[1]); c.setAttribute("r",7);
+    c.setAttribute("fill",p[2]); c.setAttribute("stroke","#fff"); c.setAttribute("stroke-width",2);
+    g.appendChild(c);
+    var t=document.createElementNS("http://www.w3.org/2000/svg","text");
+    t.setAttribute("x",p[0]); t.setAttribute("y",p[1]-12); t.setAttribute("font-size",10);
+    t.setAttribute("text-anchor","middle"); t.setAttribute("fill",p[2]); t.textContent=s;
+    g.appendChild(t);
+  });
+  $("#svgNet").setAttribute("visibility", st.net?"visible":"hidden");
+  $("#svgNetTxt").textContent = st.net||"";
+  $("#svgCloud").setAttribute("visibility", (st.plats.length>0)?"visible":"hidden");
+  $("#svgPlatTxt").textContent = st.plats.join("·");
+  $("#svgAlarm").setAttribute("visibility", (st.acts.length>0)?"visible":"hidden");
+  $("#svgActTxt").textContent = st.acts.length? st.acts.join("、").slice(0,14) : "";
+}
+$all(".dSensor,.dPlat,.dAct").forEach(function(c){ c.addEventListener("change",function(){ drawDesign(); hideFb($("#designFb")); }); });
+$("#dNet").addEventListener("change",function(){ drawDesign(); hideFb($("#designFb")); });
+$("#btnEval").addEventListener("click",function(){
+  var st=designState(), probs=[], goods=[];
+  var core=["加速度传感器","位移传感器","应变传感器"].filter(function(s){return st.sensors.indexOf(s)>=0;});
+  if(st.sensors.length===0) probs.push("还没有选择任何传感器——没有感知层，系统就成了“瞎子”，无法获取桥梁状态。");
+  else if(core.length<2) probs.push("桥梁健康的核心指标是振动、沉降与受力，建议至少选 2 种结构类传感器（加速度 / 位移 / 应变），目前只选了 "+core.length+" 种。");
+  else goods.push("结构类传感器搭配合理，能从多个维度反映桥梁健康（教材：往往以组为单位进行多维度感知）。");
+  if(!st.net) probs.push("还没有选择网络方式——数据无法传出去，感知就失去了意义。");
+  else if(st.net==="Wi-Fi") probs.push("Wi-Fi 覆盖范围小，大桥跨度长、传感器分散，更适合 4G/5G 或有线光纤。请再斟酌网络方式。");
+  else goods.push("选用 "+st.net+"，适合大桥这种长距离、多点位的场景。");
+  if(st.plats.length===0) probs.push("云平台一个功能都没勾选——传来的数据没人存储和分析，等于白传。");
+  else if(st.plats.indexOf("阈值分析")<0) probs.push("建议勾选「阈值分析」：只有对数据设置安全阈值并自动分析，超限时系统才知道该报警。");
+  else goods.push("平台具备 "+st.plats.join("、")+"，能完成数据的存储与分析处理。");
+  if(st.acts.length===0) probs.push("没有任何报警动作——就算分析出险情也无法通知任何人，缺少“应用”环节的闭环。");
+  else goods.push("配置了 "+st.acts.join("、")+"，风险能够及时触达管理人员。");
+  var html="";
+  if(goods.length){ html+="<b>做得好：</b><br>· "+goods.join("<br>· "); }
+  if(probs.length){ html+=(html?"<br>":"")+"<b>需要完善：</b><br>· "+probs.join("<br>· "); }
+  if(probs.length===0){
+    fb($("#designFb"),"ok","🎉 <b>方案合理！</b><br>"+html+"<br>你的系统已经具备了完整的“感知 → 传输 → 处理 → 应用”链路，与教材中虎门大桥监测系统的思路一致。");
+    save("designDone",true);
+  }else{
+    fb($("#designFb"),"warn",html+"<br><span class='mut'>按提示补全后再评估一次。</span>");
+  }
+  save("design",st); updateSummary();
+});
+$("#btnDesignReset").addEventListener("click",function(){
+  $all(".dSensor,.dPlat,.dAct").forEach(function(c){ c.checked=false; });
+  $("#dNet").value=""; hideFb($("#designFb")); drawDesign();
+});
+(function(){ // 恢复上次设计
+  var st=load("design",null);
+  if(st){
+    $all(".dSensor").forEach(function(c){ c.checked = st.sensors.indexOf(c.value)>=0; });
+    $all(".dPlat").forEach(function(c){ c.checked = st.plats.indexOf(c.value)>=0; });
+    $all(".dAct").forEach(function(c){ c.checked = st.acts.indexOf(c.value)>=0; });
+    $("#dNet").value = st.net||"";
+  }
+  drawDesign();
+})();
+
+/* ============ 模块5：辨析练习 ============ */
+var QUIZ = [
+ {q:"“物联网”（IoT）最贴切的通俗理解是：", o:["速度更快的互联网","物物相连的互联网","专门给手机用的网络","代替互联网的新网络"], a:1,
+  e:"物联网指各类事物通过传感和控制设备，按约定标准或开放协议与互联网连接，实现信息传递与交流，可以理解为“物物相连的互联网”，目标是让万物沟通对话。",
+  h:["回想教材里对物联网下的定义：关键词是“物物相连”。","物联网不是取代互联网，而是把互联网的触角从计算机延伸到物品。"]},
+ {q:"互联网与物联网的关系，下列说法正确的是：", o:["物联网和互联网毫无关系","物联网是在互联网基础上增加了对“物”的感知","互联网是物联网的一个应用","有了物联网就不再需要互联网"], a:1,
+  e:"从本质来看，物联网是在互联网的基础上增加了对“物”的感知。原来静止的“物”一旦可以感知，就仿佛拥有了“生命”。",
+  h:["物联网的信息传输借助的正是互联网技术。","想想“把互联网的触角从计算机延伸到物品”这句话。"]},
+ {q:"1991 年“特洛伊咖啡壶”系统用来感知咖啡壶状态的设备是：", o:["温度传感器","摄像头","二维码","微动开关"], a:1,
+  e:"剑桥大学的工程师在咖啡壶旁安装了一个摄像头，把画面传到实验室的计算机上。微动开关是 1982 年可乐贩卖机用的。",
+  h:["工程师们想“看看”咖啡煮好了没有。","能拍画面的设备是什么？"]},
+ {q:"使用共享单车时“扫描车身二维码识别车辆”属于物联网的哪个环节？", o:["感知","传输","处理","应用"], a:0,
+  e:"物联网系统一般利用传感器、射频识别（RFID）、二维码等方式对物品进行数据采集，扫码获取车辆身份信息属于感知环节。",
+  h:["这个动作是在“采集数据”还是在“搬运数据”？","教材把二维码与传感器、RFID 并列为数据采集方式。"]},
+ {q:"共享单车的联网为什么采用移动网络（4G/5G）而不是 Wi-Fi？", o:["移动网络免费","Wi-Fi 速度太快没必要","单车分布在城市各处，Wi-Fi 覆盖范围有限","移动网络更省电"], a:2,
+  e:"由于自行车遍布在城市的不同角落，Wi-Fi 无法覆盖这么大的范围，所以只能采用移动网络技术。而位置固定的电饭煲、电冰箱一般用 Wi-Fi。",
+  h:["想想家里 Wi-Fi 信号能覆盖多远。","关键差别在于设备是“固定在家里”还是“分散在全城”。"]},
+ {q:"云平台“根据骑行时间计算车费”属于哪个环节？", o:["感知","传输","处理","以上都不是"], a:2,
+  e:"对传输到服务器的数据进行分析、计算并给出结果（如计算车费、查找附近车辆），属于处理环节，涉及云计算、大数据等技术。",
+  h:["“计算”这个词提示了什么？","感知负责采集，传输负责搬运，那么分析计算归谁？"]},
+ {q:"下列活动中，属于典型物联网应用的是：", o:["用浏览器看新闻","给同学发电子邮件","智能水表自动远程抄表","在线观看网课视频"], a:2,
+  e:"看新闻、发邮件、看网课都是人与信息之间的传统互联网应用；智能水表让“物”（水表）被感知并联网上报数据，属于物联网在能源领域的应用。",
+  h:["判断标准：有没有让某个“物品”被感知、被联网？","教材能源领域的典型应用有智慧井盖、智能水表、智能电表。"]},
+ {q:"2019 年长宁地震时，震中附近的手机、电视自动弹出预警信息。这体现了物联网在哪方面的价值？", o:["休闲娱乐","自然灾害监测与预警","网上购物","远程办公"], a:1,
+  e:"地震预警系统通过传感器感知地震波，经网络秒级传输并自动向手机、电视、大喇叭推送警报，为人们赢得宝贵逃生时间。物联网技术在滑坡、泥石流、桥梁等监测预警中都有重要作用。",
+  h:["弹出的是“地震预警”信息。","教材拓展阅读的标题是《物联网在灾害预警中的应用》。"]}
+];
+var quiz = load("quiz", {idx:0, ans:{}, hintUsed:{}, done:false});
+var qHintLevel=0;
+function quizScore(){
+  var s=0; QUIZ.forEach(function(_,i){ var a=quiz.ans[i]; if(a && a.correct && a.firstTry) s+=1; else if(a && a.correct) s+=0.5; });
+  return s;
+}
+function renderQuiz(){
+  var prog=$("#qProg"); prog.innerHTML="";
+  QUIZ.forEach(function(_,i){
+    var el=document.createElement("i"); el.textContent=i+1;
+    var a=quiz.ans[i];
+    if(i===quiz.idx && !quiz.done) el.className="cur";
+    else if(a && a.correct && a.firstTry) el.className="ok";
+    else if(a && a.correct) el.className="ok";
+    else if(a && a.tried && !a.correct) el.className="no";
+    prog.appendChild(el);
+  });
+  var body=$("#qBody");
+  hideFb($("#qHintBox")); qHintLevel=0; $("#btnHint").textContent="💡 提示①"; $("#btnHint").disabled=false;
+  $("#qReview").innerHTML="";
+  if(quiz.done){
+    body.innerHTML="<p style='font-size:1.05rem'><b>练习完成！</b>你的得分：<span class='badge b1' style='font-size:1rem'>"+quizScore()+" / "+QUIZ.length+" 分</span>（一次答对计 1 分，重试后答对计 0.5 分）</p>";
+    var wrongs=[];
+    QUIZ.forEach(function(q,i){ var a=quiz.ans[i]; if(!a || !a.firstTry){ wrongs.push({q:q,i:i}); } });
+    if(wrongs.length){
+      var html="<h3 style='margin:12px 0 6px;font-size:.95rem;color:var(--c1dd)'>错题回顾（"+wrongs.length+" 题未一次答对）</h3>";
+      wrongs.forEach(function(w){
+        html+="<div class='fb warn show' style='margin-top:6px'><b>第"+(w.i+1)+"题：</b>"+w.q.q+"<br><b>正确答案：</b>"+w.q.o[w.q.a]+"<br><b>解释：</b>"+w.q.e+"</div>";
+      });
+      $("#qReview").innerHTML=html;
+    }else{
+      $("#qReview").innerHTML="<div class='fb ok show'>👍 全部一次答对，太棒了！</div>";
+    }
+    $("#btnNext").disabled=true; $("#btnHint").disabled=true;
+    hideFb($("#qFb"));
+  }else{
+    var q=QUIZ[quiz.idx];
+    var html="<p><b>第 "+(quiz.idx+1)+" 题 / 共 "+QUIZ.length+" 题</b>　"+q.q+"</p>";
+    q.o.forEach(function(o,i){ html+="<button class='qopt' data-o='"+i+"'>"+String.fromCharCode(65+i)+". "+o+"</button>"; });
+    body.innerHTML=html;
+    var a=quiz.ans[quiz.idx];
+    $("#btnNext").disabled = !(a && a.correct);
+    if(a && a.correct){
+      $all(".qopt").forEach(function(b){ b.disabled=true; if(parseInt(b.dataset.o,10)===q.a) b.classList.add("right"); });
+      fb($("#qFb"),"ok","✔ 已答对。"+q.e);
+    }else{ hideFb($("#qFb")); }
+    $all(".qopt").forEach(function(b){
+      b.addEventListener("click",function(){
+        var pick=parseInt(this.dataset.o,10);
+        var rec=quiz.ans[quiz.idx]||{tried:false, correct:false, firstTry:true};
+        if(pick===q.a){
+          rec.correct=true; if(rec.tried) rec.firstTry=false;
+          quiz.ans[quiz.idx]=rec; save("quiz",quiz);
+          $all(".qopt").forEach(function(bb){ bb.disabled=true; });
+          this.classList.add("right");
+          fb($("#qFb"),"ok","✔ 回答正确！"+q.e);
+          $("#btnNext").disabled=false;
+        }else{
+          rec.tried=true; rec.firstTry=false;
+          quiz.ans[quiz.idx]=rec; save("quiz",quiz);
+          this.classList.add("wrong"); this.disabled=true;
+          fb($("#qFb"),"bad","✘ 不对哦。想一想：「"+q.o[pick]+"」为什么不合适？可以点「提示」，然后换一个选项再试。");
+        }
+        renderProgOnly(); updateScoreLabel(); updateSummary();
+      });
+    });
+  }
+  updateScoreLabel();
+}
+function renderProgOnly(){
+  var prog=$("#qProg").children;
+  QUIZ.forEach(function(_,i){
+    var a=quiz.ans[i]; var el=prog[i]; el.className="";
+    if(i===quiz.idx && !quiz.done) el.className="cur";
+    if(a && a.correct) el.className=(i===quiz.idx&&!quiz.done)?"cur ok":"ok";
+    else if(a && a.tried) el.className=(i===quiz.idx&&!quiz.done)?"cur":"no";
+  });
+}
+function updateScoreLabel(){
+  $("#qScore").textContent="当前得分："+quizScore()+" / "+QUIZ.length;
+}
+$("#btnHint").addEventListener("click",function(){
+  var q=QUIZ[quiz.idx];
+  if(qHintLevel===0){ fb($("#qHintBox"),"info","💡 提示①："+q.h[0]); qHintLevel=1; this.textContent="💡 提示②"; }
+  else{ fb($("#qHintBox"),"info","💡 提示①："+q.h[0]+"<br>💡 提示②："+q.h[1]); this.disabled=true; }
+  quiz.hintUsed[quiz.idx]=qHintLevel+ (qHintLevel===1?0:1); save("quiz",quiz);
+});
+$("#btnNext").addEventListener("click",function(){
+  if(quiz.idx>=QUIZ.length-1){ quiz.done=true; }
+  else quiz.idx++;
+  save("quiz",quiz); renderQuiz(); updateSummary();
+});
+$("#btnQuizRestart").addEventListener("click",function(){
+  quiz={idx:0, ans:{}, hintUsed:{}, done:false}; save("quiz",quiz); renderQuiz(); updateSummary();
+});
+renderQuiz();
+
+/* ============ 模块6：学习档案 ============ */
+function collect(){
+  var simD=load("sim",{seen:0});
+  var tlR=load("tlRead",[]);
+  var sd=load("sortDone",false), stx=load("sortTries",0);
+  var lay=load("layers",{});
+  var layN=Object.keys(lay).length;
+  var des=load("design",null), desOk=load("designDone",false);
+  var qz=load("quiz",{ans:{},done:false});
+  var qDoneN=Object.keys(qz.ans).filter(function(k){return qz.ans[k].correct;}).length;
+  var score=0; QUIZ.forEach(function(_,i){ var a=qz.ans[i]; if(a&&a.correct&&a.firstTry)score+=1; else if(a&&a.correct)score+=0.5; });
+  return {
+    生成时间: nowStr(),
+    课时: "第1单元 第1节 从互联网到物联网",
+    原理模拟: "已观看 "+simD.seen+" / "+SIM_STEPS.length+" 步"+(simD.seen>=SIM_STEPS.length?"（完成）":""),
+    时间轴阅读: "已阅读 "+tlR.length+" / "+EVENTS.length+" 个事件",
+    排序挑战: sd? ("已完成（共检查 "+stx+" 次）") : ("未完成（已检查 "+stx+" 次）"),
+    四层拼装: "已放对 "+layN+" / "+PIECES.length+" 个元件"+(layN>=PIECES.length?"（完成）":""),
+    拼装明细: lay,
+    桥梁设计方案: des? {传感器:des.sensors, 网络:des.net, 平台功能:des.plats, 报警动作:des.acts, 评估:desOk?"已通过合理性评估":"尚未通过评估"} : "未设计",
+    练习得分: score+" / "+QUIZ.length+"（已答对 "+qDoneN+" 题"+(qz.done?"，已完成全部":"")+"）"
+  };
+}
+function updateSummary(){
+  var c=collect();
+  var t=$("#sumTable");
+  t.innerHTML="<tr><th style='width:32%'>模块</th><th>完成情况</th></tr>"+
+   "<tr><td>① 原理模拟</td><td>"+c.原理模拟+"</td></tr>"+
+   "<tr><td>② 时间轴 + 排序</td><td>"+c.时间轴阅读+"；排序挑战："+c.排序挑战+"</td></tr>"+
+   "<tr><td>③ 四层拼装</td><td>"+c.四层拼装+"</td></tr>"+
+   "<tr><td>④ 情境设计</td><td>"+(typeof c.桥梁设计方案==="string"? c.桥梁设计方案 : ("已设计（"+c.桥梁设计方案.评估+"）"))+"</td></tr>"+
+   "<tr><td>⑤ 辨析练习</td><td>"+c.练习得分+"</td></tr>";
+}
+function archiveText(){
+  var c=collect();
+  var lines=[];
+  lines.push("======= 我的物联网学习档案 =======");
+  lines.push("课时：" + c.课时);
+  lines.push("生成时间：" + c.生成时间);
+  lines.push("");
+  lines.push("【原理模拟·共享单车流程】" + c.原理模拟);
+  lines.push("【时间轴阅读】" + c.时间轴阅读);
+  lines.push("【事件排序挑战】" + c.排序挑战);
+  lines.push("【四层结构拼装】" + c.四层拼装);
+  Object.keys(c.拼装明细).forEach(function(k){ lines.push("    · " + k + " → " + c.拼装明细[k] + "层"); });
+  if(typeof c.桥梁设计方案==="object"){
+    lines.push("【桥梁监测设计方案】" + c.桥梁设计方案.评估);
+    lines.push("    传感器：" + (c.桥梁设计方案.传感器.join("、")||"无"));
+    lines.push("    网络方式：" + (c.桥梁设计方案.网络||"未选"));
+    lines.push("    平台功能：" + (c.桥梁设计方案.平台功能.join("、")||"无"));
+    lines.push("    报警动作：" + (c.桥梁设计方案.报警动作.join("、")||"无"));
+  }else{
+    lines.push("【桥梁监测设计方案】未设计");
+  }
+  lines.push("【辨析练习】" + c.练习得分);
+  lines.push("");
+  lines.push("一句话收获：物联网 = 在互联网基础上给“物”装上感官，经过 感知→传输→处理→应用 四个环节，让万物沟通对话。");
+  return lines.join("\n");
+}
+function download(name, content, mime){
+  var blob=new Blob([content],{type:mime});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },300);
+}
+$("#btnGen").addEventListener("click",function(){
+  updateSummary();
+  $("#archive").value=archiveText();
+  fb($("#expFb"),"ok","档案已生成，可复制或下载。");
+});
+$("#btnCopy").addEventListener("click",function(){
+  var ta=$("#archive");
+  if(!ta.value) ta.value=archiveText();
+  ta.removeAttribute("readonly"); ta.select();
+  var ok=false;
+  try{ ok=document.execCommand("copy"); }catch(e){ ok=false; }
+  ta.setAttribute("readonly","");
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value); ok=true; }
+  fb($("#expFb"), ok?"ok":"warn", ok?"已复制到剪贴板。":"复制可能未成功，请手动全选文本框内容复制。");
+});
+$("#btnTxt").addEventListener("click",function(){
+  download("物联网学习档案_第1单元第1节.txt", archiveText(), "text/plain;charset=utf-8");
+  fb($("#expFb"),"ok","已下载 .txt 文件。");
+});
+$("#btnJson").addEventListener("click",function(){
+  download("物联网学习档案_第1单元第1节.json", JSON.stringify(collect(),null,2), "application/json;charset=utf-8");
+  fb($("#expFb"),"ok","已下载 .json 文件。");
+});
+$("#btnClear").addEventListener("click",function(){
+  var keys=[]; for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k && k.indexOf(PRE)===0) keys.push(k); }
+  keys.forEach(function(k){ localStorage.removeItem(k); });
+  fb($("#expFb"),"warn","已清除本机本课时的全部学习数据（共 "+keys.length+" 条）。刷新页面后从头开始。");
+  $("#archive").value="";
+});
+updateSummary();
+
+/* ============ 侧边导航高亮 ============ */
+var navLinks=$all("nav.side a");
+function navHl(){
+  var ids=["m1","m2","m3","m4","m5","m6"], cur=0;
+  ids.forEach(function(id,i){
+    var el=document.getElementById(id);
+    if(el && el.getBoundingClientRect().top < window.innerHeight*0.4) cur=i;
+  });
+  navLinks.forEach(function(a,i){ a.classList.toggle("cur", i===cur); });
+}
+window.addEventListener("scroll", navHl); navHl();
+})();
+</script>
+</body>
+</html>
