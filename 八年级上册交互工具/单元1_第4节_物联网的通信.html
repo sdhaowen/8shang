@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>单元1 第4节 物联网的通信 · 通信舞台</title>
+<style>
+:root{
+  --vio:#8b5cf6; --vio-deep:#7c3aed; --vio-dark:#5b21b6; --vio-ink:#3b0764;
+  --vio-soft:#ede9fe; --vio-mist:#f5f3ff;
+  --ink:#3f3b46; --ink-light:#7a7484;
+  --ok:#16a34a; --ok-bg:#dcfce7; --bad:#dc2626; --bad-bg:#fee2e2;
+  --info:#0369a1; --info-bg:#e0f2fe; --warn-bg:#fef9c3; --warn:#a16207;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+  color:var(--ink);min-height:100vh;
+  background:linear-gradient(160deg,#f5f3ff 0%,#ede9fe 45%,#e9d5ff 100%);
+  background-attachment:fixed;
+}
+code,.mono{font-family:ui-monospace,Consolas,"Courier New",monospace}
+#wrap{max-width:1100px;margin:0 auto;padding:16px 18px 70px}
+header.page{
+  background:linear-gradient(120deg,#7c3aed,#8b5cf6 60%,#a78bfa);
+  color:#fff;border-radius:18px;padding:20px 24px;margin-bottom:14px;
+  box-shadow:0 8px 24px rgba(124,58,237,.28);
+}
+header.page .unit{font-size:13px;opacity:.85;letter-spacing:2px}
+header.page h1{font-size:24px;margin:4px 0 10px}
+header.page ul{list-style:none;display:flex;flex-wrap:wrap;gap:8px}
+header.page li{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);
+  font-size:13px;padding:4px 12px;border-radius:999px}
+/* ===== 横向步骤条 ===== */
+#stepbar{
+  position:sticky;top:8px;z-index:40;display:flex;gap:0;overflow-x:auto;
+  background:#fff;border-radius:16px;padding:8px;box-shadow:0 6px 18px rgba(124,58,237,.18);
+  margin-bottom:14px;border:1px solid #ddd6fe;
+}
+.step{
+  flex:1;min-width:118px;display:flex;align-items:center;gap:8px;justify-content:center;
+  border:none;background:transparent;cursor:pointer;padding:9px 6px;border-radius:12px;
+  font-family:inherit;font-size:13.5px;color:var(--ink-light);position:relative;transition:.2s;
+}
+.step .num{
+  width:26px;height:26px;border-radius:50%;background:#ede9fe;color:var(--vio-deep);
+  display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none;
+  border:2px solid #ddd6fe;transition:.2s;
+}
+.step:not(:last-child)::after{
+  content:"";position:absolute;right:-2px;top:50%;width:4px;height:4px;border-radius:50%;
+  background:#ddd6fe;transform:translateY(-50%);
+}
+.step:hover{background:var(--vio-mist)}
+.step.active{background:linear-gradient(120deg,var(--vio-deep),var(--vio));color:#fff;font-weight:600;
+  box-shadow:0 4px 12px rgba(124,58,237,.35)}
+.step.active .num{background:#fff;color:var(--vio-deep);border-color:#fff}
+.step.done .num{background:var(--vio);color:#fff;border-color:var(--vio)}
+/* ===== 舞台 ===== */
+.stage{display:none;animation:rise .28s ease}
+.stage.show{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.card{background:#fff;border:1px solid #e6e0f8;border-radius:16px;
+  box-shadow:0 4px 18px rgba(124,58,237,.10);padding:16px 18px;margin-bottom:14px}
+.card h2{font-size:19px;color:var(--vio-dark);margin-bottom:4px}
+.task{background:var(--vio-mist);border-left:4px solid var(--vio);border-radius:0 10px 10px 0;
+  padding:8px 12px;font-size:14px;margin:8px 0 12px;color:var(--vio-ink)}
+.btn{border:none;border-radius:10px;padding:8px 16px;font-size:14px;cursor:pointer;transition:.15s;
+  background:var(--vio);color:#fff;font-family:inherit}
+.btn:hover{background:var(--vio-deep)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--vio-deep);border:1.5px solid var(--vio)}
+.btn.ghost:hover{background:var(--vio-mist)}
+.btn.gray{background:#e9e7ef;color:var(--ink)}
+.btn.gray:hover{background:#dcd9e6}
+.btn.danger{background:var(--bad)}
+.btn.small{padding:5px 10px;font-size:13px;border-radius:8px}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12.5px;font-weight:600}
+.badge.ok{background:var(--ok-bg);color:var(--ok)}
+.badge.bad{background:var(--bad-bg);color:var(--bad)}
+.badge.info{background:var(--info-bg);color:var(--info)}
+.badge.vio{background:var(--vio-soft);color:var(--vio-deep)}
+.badge.warn{background:var(--warn-bg);color:var(--warn)}
+.feedback{border-radius:10px;padding:9px 12px;font-size:14px;margin-top:8px;line-height:1.65;display:none}
+.feedback.show{display:block}
+.feedback.good{background:var(--ok-bg);color:#14532d;border:1px solid #86efac}
+.feedback.err{background:var(--bad-bg);color:#7f1d1d;border:1px solid #fca5a5}
+.feedback.hint{background:var(--info-bg);color:#0c4a6e;border:1px solid #7dd3fc}
+.row{display:flex;flex-wrap:wrap;gap:14px}
+.col{flex:1;min-width:260px}
+canvas{display:block;max-width:100%}
+select,input[type=text]{font-family:inherit;font-size:14px;padding:6px 9px;border:1.5px solid #ddd6fe;
+  border-radius:8px;background:#fff;color:var(--ink)}
+select:focus,input[type=text]:focus{outline:2px solid #c4b5fd}
+.pill-opts{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.pill-opts button{border:1.5px solid #ddd6fe;background:#fff;border-radius:999px;padding:6px 14px;
+  cursor:pointer;font-size:13.5px;font-family:inherit;transition:.15s;color:var(--ink)}
+.pill-opts button:hover{border-color:var(--vio)}
+.pill-opts button.sel{background:var(--vio);border-color:var(--vio);color:#fff}
+.pill-opts button.right{background:var(--ok);border-color:var(--ok);color:#fff}
+.pill-opts button.wrong{background:var(--bad);border-color:var(--bad);color:#fff}
+.logbox{background:#1e1b2e;color:#c4b5fd;border-radius:10px;padding:10px 12px;font-size:12.5px;
+  max-height:190px;overflow:auto;line-height:1.75;font-family:ui-monospace,Consolas,monospace}
+.logbox .lt{color:#818cf8}
+.logbox .ok{color:#86efac}
+.logbox .er{color:#fca5a5}
+.small-note{font-size:12.5px;color:var(--ink-light);margin-top:6px;line-height:1.6}
+.scn-card{border:1px solid #e6e0f8;border-radius:12px;padding:10px 12px;margin-bottom:10px;background:#fdfcff}
+.scn-card .st{font-size:14.5px;font-weight:600;margin-bottom:4px}
+.quiz-q{border:1px solid #e6e0f8;border-radius:12px;padding:12px 14px;margin-bottom:12px;background:#fdfcff}
+.quiz-q .qt{font-size:14.5px;font-weight:600;margin-bottom:6px}
+.progress-wrap{background:#e9e4f9;border-radius:999px;height:12px;overflow:hidden;margin:6px 0}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--vio-deep),var(--vio));width:0;transition:width .4s;border-radius:999px}
+.topic-chip{display:inline-block;background:#fff;border:1.5px solid #ddd6fe;border-radius:8px;
+  padding:4px 10px;margin:3px;font-family:ui-monospace,Consolas,monospace;font-size:13px;transition:.2s}
+.topic-chip.hit{background:#dcfce7;border-color:var(--ok);color:#14532d;font-weight:700}
+.topic-chip.miss{opacity:.45}
+.tree-line{font-family:ui-monospace,Consolas,monospace;font-size:13.5px;line-height:1.9;white-space:pre}
+table.plain{border-collapse:collapse;width:100%;font-size:13.5px;margin-top:8px}
+table.plain th,table.plain td{border:1px solid #e6e0f8;padding:6px 9px;text-align:left}
+table.plain th{background:var(--vio-mist);color:var(--vio-dark)}
+@media(max-width:760px){
+  #wrap{padding:10px 8px 60px}
+  .step{min-width:96px;font-size:12px}
+}
+</style>
+</head>
+<body>
+<div id="wrap">
+<header class="page">
+  <div class="unit">第1单元 物联网入门 · 第4节</div>
+  <h1>物联网的通信 —— 通信大舞台</h1>
+  <ul>
+    <li>① 能按距离、速率、功耗、移动性为场景选通信方式</li>
+    <li>② 理解数据打包传输与 MQTT 发布/订阅机制</li>
+    <li>③ 会设计规范的 Topic 主题并理解通配符</li>
+  </ul>
+</header>
+
+<!-- ===== 横向步骤条 ===== -->
+<nav id="stepbar">
+  <button class="step active" data-stage="st1"><span class="num">1</span>通信方式</button>
+  <button class="step" data-stage="st2"><span class="num">2</span>数据包</button>
+  <button class="step" data-stage="st3"><span class="num">3</span>MQTT舞台</button>
+  <button class="step" data-stage="st4"><span class="num">4</span>Topic实验</button>
+  <button class="step" data-stage="st5"><span class="num">5</span>对比练习</button>
+  <button class="step" data-stage="st6"><span class="num">6</span>成果档案</button>
+</nav>
+
+<!-- ============ 舞台1：通信方式选择器 ============ -->
+<section class="stage show" id="st1">
+  <div class="card">
+    <h2>第1幕 · 有线/无线通信方式选择器</h2>
+    <div class="task">任务：先看下方"四种通信方式能力对比图"，再为 6 个真实场景各选一种最合适的通信方式。选择后系统按<b>传输距离、速率、功耗、移动性</b>四个维度打分并说明理由。目标：拿到 12 分满分！</div>
+    <canvas id="cmpChart" width="960" height="270" style="width:100%;background:#fff;border:1px solid #e6e0f8;border-radius:12px"></canvas>
+    <div class="small-note">柱高代表能力强弱（功耗一栏柱越高代表越省电）。有线以太网速率高但设备被"拴"住；蓝牙省电但距离短；蜂窝移动网络走到哪连到哪，但更耗电。教材还介绍了更省电的 NB-IoT、LoRa 等新选择。</div>
+    <div id="scnList" style="margin-top:12px"></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:6px">
+      <span class="badge vio" id="scnScore">得分 0 / 12</span>
+      <button class="btn ghost" id="scnReset">🔄 清空重选</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 舞台2：数据包传输动画 ============ -->
+<section class="stage" id="st2">
+  <div class="card">
+    <h2>第2幕 · 数据是怎样"打包旅行"的</h2>
+    <div class="task">任务：点"运行"观察一条传感器数据被拆成 3 个带序号的数据包、走不同路线到达服务器并重组的过程。然后打开<b>"丢包"</b>和<b>"延迟"</b>干扰开关分别再跑一遍，观察"重传"和"乱序到达再排序"，并阅读解说日志。</div>
+    <canvas id="pkCanvas" width="960" height="330" style="width:100%;background:#fff;border:1px solid #e6e0f8;border-radius:12px"></canvas>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;align-items:center">
+      <button class="btn" id="pkRun">▶ 运行</button>
+      <button class="btn ghost" id="pkStep">⏭ 单步</button>
+      <button class="btn gray" id="pkReset">重置</button>
+      <label style="font-size:14px;display:flex;align-items:center;gap:5px;margin-left:10px">
+        <input type="checkbox" id="pkLoss" style="width:16px;height:16px;accent-color:#8b5cf6">干扰：丢包</label>
+      <label style="font-size:14px;display:flex;align-items:center;gap:5px">
+        <input type="checkbox" id="pkDelay" style="width:16px;height:16px;accent-color:#8b5cf6">干扰：延迟</label>
+      <span class="badge vio" id="pkRuns">完整运行 0 次</span>
+    </div>
+    <div class="logbox" id="pkLog" style="margin-top:10px">解说日志：点击"运行"开始…</div>
+    <div class="feedback show hint" style="margin-top:10px">为什么要拆包？——大数据分成小包，坏了只需重发一小块；每个包写上<b>序号</b>和<b>目的地址</b>，即使走不同路线、先后乱序到达，服务器也能按序号拼回原样。这正是网络通信可靠的秘密。</div>
+  </div>
+</section>
+
+<!-- ============ 舞台3：MQTT 发布订阅舞台 ============ -->
+<section class="stage" id="st3">
+  <div class="card">
+    <h2>第3幕 · MQTT 发布—订阅全过程（核心）</h2>
+    <div class="task">任务：①先给右侧"手机"和"水泵控制器"勾选要订阅的 Topic；②点左侧任一"发布"按钮，观察消息如何先到 MQTT 服务器（代理broker），再被<b>按 Topic 匹配</b>转发；③试着制造一次"订阅端收不到消息"的情况并解释原因；④切换"单步"模式逐段观察。全过程都会写入日志。</div>
+    <svg id="mqSvg" viewBox="0 0 960 400" style="width:100%;background:linear-gradient(180deg,#fdfcff,#f5f3ff);border:1px solid #e6e0f8;border-radius:12px">
+      <defs>
+        <marker id="mqArr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#c4b5fd"/>
+        </marker>
+      </defs>
+      <!-- 连线 -->
+      <line x1="170" y1="105" x2="400" y2="200" stroke="#ddd6fe" stroke-width="2.5" marker-end="url(#mqArr)"/>
+      <line x1="170" y1="300" x2="400" y2="215" stroke="#ddd6fe" stroke-width="2.5" marker-end="url(#mqArr)"/>
+      <line x1="560" y1="200" x2="790" y2="105" stroke="#ddd6fe" stroke-width="2.5" marker-end="url(#mqArr)"/>
+      <line x1="560" y1="215" x2="790" y2="300" stroke="#ddd6fe" stroke-width="2.5" marker-end="url(#mqArr)"/>
+      <!-- 温度传感器 -->
+      <g id="mqTemp">
+        <rect x="60" y="60" width="115" height="86" rx="12" fill="#fff" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="117" y="88" text-anchor="middle" font-size="26">🌡️</text>
+        <text x="117" y="112" text-anchor="middle" font-size="13" fill="#5b21b6" font-weight="bold">温度传感器</text>
+        <text x="117" y="130" text-anchor="middle" font-size="11" fill="#7a7484">发布者(publish)</text>
+      </g>
+      <!-- 湿度传感器 -->
+      <g id="mqHumi">
+        <rect x="60" y="255" width="115" height="86" rx="12" fill="#fff" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="117" y="283" text-anchor="middle" font-size="26">💧</text>
+        <text x="117" y="307" text-anchor="middle" font-size="13" fill="#5b21b6" font-weight="bold">湿度传感器</text>
+        <text x="117" y="325" text-anchor="middle" font-size="11" fill="#7a7484">发布者(publish)</text>
+      </g>
+      <!-- Broker -->
+      <g id="mqBroker">
+        <rect id="mqBrokerBox" x="400" y="140" width="160" height="130" rx="16" fill="#ede9fe" stroke="#7c3aed" stroke-width="2.5"/>
+        <text x="480" y="178" text-anchor="middle" font-size="30">🖥️</text>
+        <text x="480" y="205" text-anchor="middle" font-size="14" fill="#5b21b6" font-weight="bold">MQTT服务器</text>
+        <text x="480" y="224" text-anchor="middle" font-size="12" fill="#7a7484">消息代理 broker</text>
+        <text id="mqBrokerMsg" x="480" y="250" text-anchor="middle" font-size="11.5" fill="#7c3aed"></text>
+      </g>
+      <!-- 手机 -->
+      <g id="mqPhone">
+        <rect x="785" y="60" width="115" height="86" rx="12" fill="#fff" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="842" y="88" text-anchor="middle" font-size="26">📱</text>
+        <text x="842" y="112" text-anchor="middle" font-size="13" fill="#5b21b6" font-weight="bold">手机订阅端</text>
+        <text id="mqPhoneMsg" x="842" y="130" text-anchor="middle" font-size="11" fill="#16a34a"></text>
+      </g>
+      <!-- 水泵 -->
+      <g id="mqPump">
+        <rect x="785" y="255" width="115" height="86" rx="12" fill="#fff" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="842" y="283" text-anchor="middle" font-size="26">🚿</text>
+        <text x="842" y="307" text-anchor="middle" font-size="13" fill="#5b21b6" font-weight="bold">水泵控制器</text>
+        <text id="mqPumpMsg" x="842" y="325" text-anchor="middle" font-size="11" fill="#16a34a"></text>
+      </g>
+      <!-- 手机也可发布控制指令的连线 -->
+      <line x1="790" y1="125" x2="565" y2="185" stroke="#ede9fe" stroke-width="1.5" stroke-dasharray="4 4"/>
+      <circle id="mqDot" cx="-20" cy="-20" r="8" fill="#8b5cf6" opacity="0"/>
+      <text id="mqDotLabel" x="-20" y="-20" font-size="11" fill="#5b21b6" font-weight="bold" text-anchor="middle"></text>
+    </svg>
+    <div class="row" style="margin-top:12px">
+      <div class="col" style="min-width:300px">
+        <div style="font-weight:600;color:var(--vio-dark);margin-bottom:6px">① 订阅设置（勾选后即向服务器登记）</div>
+        <table class="plain">
+          <thead><tr><th>订阅端</th><th class="mono">farm/sensor/temp</th><th class="mono">farm/sensor/humi</th><th class="mono">farm/control/pump</th></tr></thead>
+          <tbody>
+            <tr><td>📱 手机</td>
+              <td style="text-align:center"><input type="checkbox" id="subPhoneTemp" checked style="width:16px;height:16px;accent-color:#8b5cf6"></td>
+              <td style="text-align:center"><input type="checkbox" id="subPhoneHumi" style="width:16px;height:16px;accent-color:#8b5cf6"></td>
+              <td style="text-align:center"><input type="checkbox" id="subPhonePump" style="width:16px;height:16px;accent-color:#8b5cf6"></td></tr>
+            <tr><td>🚿 水泵控制器</td>
+              <td style="text-align:center"><input type="checkbox" id="subPumpTemp" style="width:16px;height:16px;accent-color:#8b5cf6"></td>
+              <td style="text-align:center"><input type="checkbox" id="subPumpHumi" style="width:16px;height:16px;accent-color:#8b5cf6"></td>
+              <td style="text-align:center"><input type="checkbox" id="subPumpPump" checked style="width:16px;height:16px;accent-color:#8b5cf6"></td></tr>
+          </tbody>
+        </table>
+        <div style="font-weight:600;color:var(--vio-dark);margin:12px 0 6px">② 发布消息</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn" id="mqPubTemp">🌡️ 温度传感器发布</button>
+          <button class="btn" id="mqPubHumi">💧 湿度传感器发布</button>
+          <button class="btn ghost" id="mqPubPump">📱 手机发布"开泵"指令</button>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <label style="font-size:14px;display:flex;gap:5px;align-items:center">
+            <input type="checkbox" id="mqStepMode" style="width:16px;height:16px;accent-color:#8b5cf6">单步模式</label>
+          <button class="btn small ghost" id="mqNext" disabled>⏭ 下一步</button>
+          <button class="btn small gray" id="mqClearLog">清空日志</button>
+        </div>
+      </div>
+      <div class="col">
+        <div style="font-weight:600;color:var(--vio-dark);margin-bottom:6px">③ 通信日志</div>
+        <div class="logbox" id="mqLog" style="max-height:250px">日志：先设置订阅，再发布消息…</div>
+        <div class="feedback" id="mqFb"></div>
+      </div>
+    </div>
+    <div class="feedback show hint" style="margin-top:10px">关键理解：发布者与订阅者<b>互不认识</b>，全靠服务器按 Topic "牵线"。只要发布和订阅的是<b>同一个主题</b>，就能沟通——这就是教材说的"物与物的连接变得十分灵活和便捷"。（本页 Topic 均为虚构教学示例）</div>
+  </div>
+</section>
+
+<!-- ============ 舞台4：Topic 主题树 ============ -->
+<section class="stage" id="st4">
+  <div class="card">
+    <h2>第4幕 · Topic 主题树搭建实验</h2>
+    <div class="task">任务：①用下面四个层级（项目/位置/设备/物理量）拼出合法的 Topic 并加入你的清单，注意命名规范（用 / 分层、不用空格与中文、见名知义）；②在"通配符实验"里点不同匹配模式，观察哪些 Topic 被点亮，理解 <code>+</code> 与 <code>#</code> 的含义。</div>
+    <div class="row">
+      <div class="col" style="min-width:300px">
+        <div style="font-weight:600;color:var(--vio-dark);margin-bottom:6px">① 逐层拼装 Topic</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+          <select id="tpL1"><option>farm</option><option>home</option><option>school</option><option value="__c">自定义…</option></select><b>/</b>
+          <select id="tpL2"><option>green1</option><option>green2</option><option>gate</option><option value="__c">自定义…</option></select><b>/</b>
+          <select id="tpL3"><option>sensor</option><option>pump</option><option>light</option><option value="__c">自定义…</option></select><b>/</b>
+          <select id="tpL4"><option>temp</option><option>humi</option><option>soil</option><option>state</option><option value="__c">自定义…</option></select>
+        </div>
+        <div style="margin-top:8px">
+          <input type="text" id="tpCustom" placeholder="选了'自定义…'时在这里输入该层名称（小写字母/数字/下划线）" style="width:100%">
+        </div>
+        <div style="margin:10px 0 4px;font-size:14px">拼出的 Topic：<code id="tpPreview" style="background:#ede9fe;padding:3px 10px;border-radius:6px;font-weight:700">farm/green1/sensor/temp</code></div>
+        <div class="feedback" id="tpValid"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn" id="tpAdd">➕ 加入我的Topic清单</button>
+          <button class="btn gray" id="tpClearMine">清空我的清单</button>
+        </div>
+        <div style="font-weight:600;color:var(--vio-dark);margin:14px 0 4px">主题树（含你添加的）</div>
+        <div class="tree-line" id="tpTree" style="background:#fdfcff;border:1px solid #e6e0f8;border-radius:10px;padding:10px 12px;overflow:auto;max-height:240px"></div>
+      </div>
+      <div class="col">
+        <div style="font-weight:600;color:var(--vio-dark);margin-bottom:6px">② 通配符实验：哪些 Topic 会被匹配？</div>
+        <div class="pill-opts" id="tpPatBtns">
+          <button data-p="farm/+/sensor/temp" class="sel mono">farm/+/sensor/temp</button>
+          <button data-p="farm/#" class="mono">farm/#</button>
+          <button data-p="farm/green1/#" class="mono">farm/green1/#</button>
+          <button data-p="+/+/sensor/humi" class="mono">+/+/sensor/humi</button>
+        </div>
+        <div style="display:flex;gap:6px;margin:6px 0">
+          <input type="text" id="tpPatInput" placeholder="或自己输入匹配模式，如 farm/+/pump/state" style="flex:1" class="mono">
+          <button class="btn small" id="tpPatTry">试一试</button>
+        </div>
+        <div id="tpChips" style="background:#fdfcff;border:1px solid #e6e0f8;border-radius:10px;padding:8px;min-height:120px"></div>
+        <div class="feedback show hint" id="tpPatExplain" style="margin-top:8px"></div>
+        <div class="quiz-q" style="margin-top:10px">
+          <div class="qt">检验：<code>farm/+/sensor/temp</code> 能匹配 <code>farm/green1/sensor/temp</code> 吗？能匹配 <code>farm/green1/green2/sensor/temp</code> 吗？</div>
+          <div class="pill-opts" id="tpQOpts">
+            <button data-i="0">都能</button><button data-i="1">能前者，不能后者</button>
+            <button data-i="2">能后者，不能前者</button><button data-i="3">都不能</button>
+          </div>
+          <div class="feedback" id="tpQFb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 舞台5：MQTT vs HTTP + 练习 ============ -->
+<section class="stage" id="st5">
+  <div class="card">
+    <h2>第5幕 · MQTT 与 HTTP 通信模式对比</h2>
+    <div class="task">任务：点击"运行对比"，左边演示 HTTP 的"请求—响应"（客户端必须不停地问），右边演示 MQTT 的"发布—订阅"（服务器有新数据主动推）。数一数两边各发了多少条报文，再看下方报文开销对比，回答练习题。</div>
+    <canvas id="vsCanvas" width="960" height="300" style="width:100%;background:#fff;border:1px solid #e6e0f8;border-radius:12px"></canvas>
+    <div style="display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap">
+      <button class="btn" id="vsRun">▶ 运行对比</button>
+      <button class="btn gray" id="vsReset">重置</button>
+      <span class="badge info" id="vsResult">等待运行…</span>
+    </div>
+    <div class="feedback show hint" style="margin-top:10px">教材数据：MQTT 为数据传递而设计，报文头非常短（最小报文仅 <b>2 字节</b>），在 3G 网络测试中吞吐量比 HTTP 快 <b>93 倍</b>；HTTP 要"实时"就得不断发起连接，消耗大量带宽和资源。</div>
+  </div>
+  <div class="card">
+    <h2>随堂练习（8题）</h2>
+    <div class="task">任务：逐题作答。每题有两级提示（先给思路，再给关键线索），答错会解释原因，可换答案重试。</div>
+    <div class="progress-wrap"><div class="progress-bar" id="quizBar"></div></div>
+    <div id="quizArea"></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span class="badge vio" id="quizScore">得分 0 / 8</span>
+      <button class="btn ghost" id="quizRetry">🔄 重做全部练习</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 舞台6：成果档案 ============ -->
+<section class="stage" id="st6">
+  <div class="card">
+    <h2>第6幕 · 通信设计档案</h2>
+    <div class="task">任务：点"生成通信设计档案"，自动汇总场景选择、Topic 设计清单、发布订阅实验日志摘要与练习得分；下载保存后可交给老师。</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="btn" id="repGen">📝 生成通信设计档案</button>
+      <button class="btn ghost" id="repTxt">⬇ 下载 .txt</button>
+      <button class="btn ghost" id="repJson">⬇ 下载 .json</button>
+      <button class="btn danger" id="repClear">🗑 清除本机学习数据</button>
+    </div>
+    <pre id="repView" class="mono" style="background:#fdfcff;border:1px solid #e6e0f8;border-radius:12px;padding:14px;font-size:13px;line-height:1.8;white-space:pre-wrap;min-height:140px">点击"生成通信设计档案"查看汇总…</pre>
+    <div class="feedback" id="repFb"></div>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+'use strict';
+/* ================= 状态 ================= */
+var LS_KEY='u1l4_state_v1';
+function defState(){return{
+  scn:{choices:{},score:0},
+  pk:{runs:0,lossSeen:false,delaySeen:false},
+  mq:{log:[],pubCount:0},
+  topics:[],
+  tpQuiz:null,
+  vs:{ran:false},
+  quiz:{answers:{},score:0}
+};}
+var state;
+try{state=JSON.parse(localStorage.getItem(LS_KEY))||defState();}catch(e){state=defState();}
+if(!state.scn)state=defState();
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){}}
+function $(id){return document.getElementById(id);}
+function setFb(el,cls,html){el.className='feedback show '+cls;el.innerHTML=html;}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function nowStr(){var d=new Date();return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2)+':'+('0'+d.getSeconds()).slice(-2);}
+function download(name,text,mime){
+  var blob=new Blob([text],{type:mime||'text/plain;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},300);
+}
+/* ================= 步骤导航 ================= */
+var steps=document.querySelectorAll('.step');
+steps.forEach(function(b){
+  b.addEventListener('click',function(){
+    steps.forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');b.classList.add('done');
+    document.querySelectorAll('.stage').forEach(function(s){s.classList.remove('show');});
+    $(b.dataset.stage).classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(b.dataset.stage==='st1')drawCmpChart();
+    if(b.dataset.stage==='st2')pkDraw();
+    if(b.dataset.stage==='st5')vsDraw(0);
+  });
+});
+
+/* ================= 舞台1：通信方式选择器 ================= */
+var METHODS=['有线以太网/串口','Wi-Fi','蓝牙','蜂窝移动网络(4G/5G)'];
+var MCOLORS=['#64748b','#0ea5e9','#8b5cf6','#f59e0b'];
+/* 维度: 距离 速率 省电 移动性 (1~5) */
+var MATTR=[[2,5,4,1],[3,4,2,3],[1,2,5,3],[5,4,1,5]];
+var ATTRN=['传输距离','速率','省电程度','移动性'];
+function drawCmpChart(){
+  var cv=$('cmpChart'),c=cv.getContext('2d');
+  c.clearRect(0,0,cv.width,cv.height);
+  var groups=4,bars=4,gw=200,x0=60,y0=210,bh=150;
+  c.font='13px system-ui';c.textAlign='center';
+  for(var g=0;g<groups;g++){
+    var gx=x0+g*(gw+30);
+    c.fillStyle='#5b21b6';c.font='bold 14px system-ui';
+    c.fillText(ATTRN[g],gx+gw/2,240);
+    for(var m=0;m<bars;m++){
+      var v=MATTR[m][g];
+      var bw=34,bx=gx+m*(bw+14),h=bh*v/5;
+      c.fillStyle=MCOLORS[m];
+      c.fillRect(bx,y0-h,bw,h);
+      c.fillStyle='#7a7484';c.font='11px system-ui';
+      c.fillText(v,bx+bw/2,y0-h-5);
+    }
+  }
+  /* 图例 */
+  var lx=70;
+  for(var m2=0;m2<4;m2++){
+    c.fillStyle=MCOLORS[m2];c.fillRect(lx,16,14,14);
+    c.fillStyle='#3f3b46';c.font='12.5px system-ui';c.textAlign='left';
+    c.fillText(METHODS[m2],lx+18,28);
+    lx+=c.measureText(METHODS[m2]).width+52;
+  }
+  c.textAlign='center';
+}
+var SCN=[
+  {t:'场景1：固定安装的高清监控摄像头，全天不间断传输视频',
+   score:[2,1,0,0],
+   why:['✔ 最佳！高清视频需要高速率、稳定连接，摄像头位置固定不需要移动性——教材指出这类设备"一般还会保留有线网络接口"。',
+        '△ 可行。Wi-Fi 速率也够，但稳定性略逊于有线，高峰期可能卡顿。位置固定时有线更稳。',
+        '✘ 不合适。蓝牙速率低、距离只有几米，扛不动全天候高清视频流。',
+        '✘ 不划算。速率虽够，但摄像头根本不移动，用蜂窝网络白白增加流量成本与功耗。']},
+  {t:'场景2：随身佩戴的运动手环，把步数实时同步到手机',
+   score:[0,0,2,1],
+   why:['✘ 不合适。手环随身移动，不可能拖着线走。',
+        '✘ 不合适。Wi-Fi 功耗偏大，小小的手环电池撑不住，且离开家就没了热点。',
+        '✔ 最佳！蓝牙"速率快、功耗低、安全性高"（教材原话），几米内连手机正合适。',
+        '△ 可行但奢侈。要给手环插卡交流量费，功耗也大，通常只有高端手表才用。']},
+  {t:'场景3：远离城区的田间土壤湿度传感器，每小时上报一次数据',
+   score:[0,0,0,2],
+   why:['✘ 不现实。往田里拉几公里网线成本太高还容易损坏。',
+        '✘ 不合适。田间没有 Wi-Fi 覆盖。',
+        '✘ 不合适。蓝牙只有几米距离，数据传不回城里。',
+        '✔ 最佳！蜂窝网络覆盖广，田间也有信号；数据量小、频率低，流量花费很少。教材提到更省电的 NB-IoT 正是为这类场景设计的。']},
+  {t:'场景4：教室里智能终端与 1 米外的物联网网关互联调试',
+   score:[1,1,2,0],
+   why:['△ 可行。近距离可用串口线/USB 直连，教材上一节写程序用的正是串口，但插拔线缆稍麻烦。',
+        '△ 可行。同一 Wi-Fi 下也能互联，但要先配置网络，短距调试略繁琐。',
+        '✔ 最佳！短距离设备互联正是蓝牙的主场：免布线、低功耗、配对即连。',
+        '✘ 不合适。1 米的距离绕道运营商基站，延迟高又费流量，完全没必要。']},
+  {t:'场景5：家里的智能音箱连接互联网播放在线音乐',
+   score:[1,2,0,0],
+   why:['△ 可行。插网线最稳定，但音箱常要挪位置，拖线不方便。',
+        '✔ 最佳！家里 Wi-Fi 覆盖好、速率高，音箱不出门，Wi-Fi 是智能家居联网的主流方式。',
+        '✘ 不合适。蓝牙不能直接上互联网，只能从手机"转播"，那就不是音箱自己在线播放了。',
+        '✘ 不划算。家里有现成 Wi-Fi，再给音箱办电话卡纯属浪费。']},
+  {t:'场景6：共享单车智能锁，随时随地上报位置并接收开锁指令',
+   score:[0,0,1,2],
+   why:['✘ 不可能。满街跑的单车没法连线。',
+        '✘ 不可靠。城市里 Wi-Fi 覆盖零散，教材说"城市中依旧存在一些无信号区域"。',
+        '△ 部分可行。教材提到很多单车用"手机蓝牙发送开锁指令"，但上报位置仍需真正的网络。',
+        '✔ 最佳！单车"泛在、移动"，只有蜂窝移动网络能做到随时随地在线。']}
+];
+function scnBuild(){
+  var list=$('scnList');list.innerHTML='';
+  SCN.forEach(function(s,si){
+    var d=document.createElement('div');d.className='scn-card';
+    d.innerHTML='<div class="st">'+s.t+'</div><div class="pill-opts">'+
+      METHODS.map(function(m,mi){return '<button data-i="'+mi+'">'+m+'</button>';}).join('')+
+      '</div><div class="feedback"></div>';
+    var btns=d.querySelectorAll('.pill-opts button'),fb=d.querySelector('.feedback');
+    btns.forEach(function(b){b.addEventListener('click',function(){
+      btns.forEach(function(x){x.classList.remove('sel','right','wrong');});
+      var mi=+b.dataset.i,sc=s.score[mi];
+      b.classList.add(sc===2?'right':(sc===1?'sel':'wrong'));
+      var tag=sc===2?'good':(sc===1?'hint':'err');
+      var head=sc===2?'（+2分）':(sc===1?'（+1分，还有更优选择，可再试）':'（0分，重新想想四个维度，可重选）');
+      setFb(fb,tag,'<b>'+head+'</b> '+s.why[mi]);
+      state.scn.choices[si]={pick:mi,sc:sc};
+      scnScore();save();
+    });});
+    /* 恢复历史选择 */
+    var old=state.scn.choices[si];
+    if(old){
+      var b0=btns[old.pick];
+      b0.classList.add(old.sc===2?'right':(old.sc===1?'sel':'wrong'));
+      setFb(fb,old.sc===2?'good':(old.sc===1?'hint':'err'),s.why[old.pick]);
+    }
+    list.appendChild(d);
+  });
+  scnScore();
+}
+function scnScore(){
+  var t=0;Object.keys(state.scn.choices).forEach(function(k){t+=state.scn.choices[k].sc;});
+  state.scn.score=t;
+  $('scnScore').textContent='得分 '+t+' / 12';
+  $('scnScore').className='badge '+(t>=12?'ok':'vio');
+}
+$('scnReset').addEventListener('click',function(){
+  state.scn.choices={};state.scn.score=0;save();scnBuild();
+});
+scnBuild();drawCmpChart();
+
+/* ================= 舞台2：数据包动画 ================= */
+var PK={
+  nodes:{sensor:[90,165],r1:[420,70],r2:[420,255],server:[800,165]},
+  packets:[],simT:0,running:false,finished:false,arrived:[],events:[],lossPlan:-1,
+  msg:'土壤湿度=42%'
+};
+function pkLog(html,cls){
+  var lb=$('pkLog');
+  if(lb.textContent.indexOf('解说日志：点击')===0)lb.innerHTML='';
+  lb.innerHTML+='<div><span class="lt">['+PK.simT.toFixed(1)+'s]</span> <span class="'+(cls||'')+'">'+html+'</span></div>';
+  lb.scrollTop=lb.scrollHeight;
+}
+function pkInit(){
+  PK.simT=0;PK.finished=false;PK.arrived=[];
+  var delay=$('pkDelay').checked,loss=$('pkLoss').checked;
+  PK.lossPlan=loss?2:-1;
+  PK.packets=[];
+  for(var i=1;i<=3;i++){
+    PK.packets.push({
+      seq:i,route:i%2===1?'r1':'r2',
+      speed:delay?(0.55+Math.random()*0.9):1,
+      launch:(i-1)*0.7,leg:0,prog:0,state:'wait',retrans:false,lostAt:-1
+    });
+  }
+  $('pkLog').innerHTML='';
+  pkLog('传感器要发送数据「'+PK.msg+'」→ 拆分成 3 个数据包（每个包写上序号 + 目的地址 srv-01）'+(loss?'；⚡已开启丢包干扰':'')+(delay?'；⚡已开启延迟干扰':''));
+}
+function pkTick(dt){
+  if(PK.finished)return;
+  PK.simT+=dt;
+  PK.packets.forEach(function(p){
+    if(p.state==='wait'&&PK.simT>=p.launch){p.state='fly';pkLog('📦 '+p.seq+'号包出发，走路由'+(p.route==='r1'?'甲(上路)':'乙(下路)'));}
+    if(p.state==='lost'&&PK.simT>=p.launch){
+      p.state='fly';p.leg=0;p.prog=0;
+      pkLog('🔁 超时未收到确认，发送方<b>重传 '+p.seq+' 号包</b>','er');
+    }
+    if(p.state!=='fly')return;
+    p.prog+=dt*0.55*p.speed;
+    if(PK.lossPlan===p.seq&&!p.retrans&&p.leg===1&&p.prog>=0.5){
+      p.state='lost';p.lostAt=PK.simT;
+      pkLog('❌ '+p.seq+'号包在路上<b>丢失</b>了！服务器等不到它…','er');
+      p.retrans=true;p.launch=PK.simT+1.6;
+      return;
+    }
+    if(p.prog>=1){
+      p.prog=0;p.leg++;
+      if(p.leg>=2){
+        p.state='done';
+        PK.arrived.push(p.seq);
+        var inOrder=true;
+        for(var k=1;k<PK.arrived.length;k++)if(PK.arrived[k]<PK.arrived[k-1])inOrder=false;
+        pkLog('✅ '+p.seq+'号包到达服务器。已收到：['+PK.arrived.join(',')+']'+(inOrder?'':' —— <b>乱序到达</b>，服务器按序号重新排列'),'ok');
+        if(PK.arrived.length===3){
+          PK.finished=true;
+          pkLog('🎉 三个包齐了！服务器按序号 1→2→3 重组，还原出「'+PK.msg+'」。传输完成！','ok');
+          PK.running=false;$('pkRun').textContent='▶ 运行';
+          state.pk.runs++;
+          if($('pkLoss').checked)state.pk.lossSeen=true;
+          if($('pkDelay').checked)state.pk.delaySeen=true;
+          $('pkRuns').textContent='完整运行 '+state.pk.runs+' 次';
+          save();
+        }
+      }
+    }
+  });
+}
+function pkPos(p){
+  var a,b;
+  if(p.leg===0){a=PK.nodes.sensor;b=PK.nodes[p.route];}
+  else{a=PK.nodes[p.route];b=PK.nodes.server;}
+  return [a[0]+(b[0]-a[0])*p.prog, a[1]+(b[1]-a[1])*p.prog];
+}
+function pkDraw(){
+  var cv=$('pkCanvas'),c=cv.getContext('2d');
+  c.clearRect(0,0,cv.width,cv.height);
+  /* 线路 */
+  c.strokeStyle='#ddd6fe';c.lineWidth=2.5;
+  [['sensor','r1'],['sensor','r2'],['r1','server'],['r2','server']].forEach(function(e){
+    var a=PK.nodes[e[0]],b=PK.nodes[e[1]];
+    c.beginPath();c.moveTo(a[0],a[1]);c.lineTo(b[0],b[1]);c.stroke();
+  });
+  /* 节点 */
+  function node(p,emoji,label,sub){
+    c.fillStyle='#fff';c.strokeStyle='#8b5cf6';c.lineWidth=2;
+    var w2=62,h2=44;
+    c.beginPath();
+    if(c.roundRect)c.roundRect(p[0]-w2,p[1]-h2,w2*2,h2*2,12);
+    else c.rect(p[0]-w2,p[1]-h2,w2*2,h2*2);
+    c.fill();c.stroke();
+    c.font='24px system-ui';c.textAlign='center';c.fillStyle='#000';
+    c.fillText(emoji,p[0],p[1]-8);
+    c.font='bold 13px system-ui';c.fillStyle='#5b21b6';
+    c.fillText(label,p[0],p[1]+14);
+    c.font='11px system-ui';c.fillStyle='#7a7484';
+    c.fillText(sub,p[0],p[1]+32);
+  }
+  node(PK.nodes.sensor,'🌱','土壤传感器','发送端');
+  node(PK.nodes.r1,'🔀','路由甲','转发节点');
+  node(PK.nodes.r2,'🔀','路由乙','转发节点');
+  node(PK.nodes.server,'🖥️','服务器','srv-01 · 重组');
+  /* 服务器重组槽位 */
+  for(var s=1;s<=3;s++){
+    var sx=PK.nodes.server[0]-45+(s-1)*32,sy=PK.nodes.server[1]+58;
+    var got=PK.arrived.indexOf(s)>=0;
+    c.fillStyle=got?'#8b5cf6':'#f1eefc';
+    c.strokeStyle='#c4b5fd';c.lineWidth=1.5;
+    c.beginPath();
+    if(c.roundRect)c.roundRect(sx,sy,26,26,6);else c.rect(sx,sy,26,26);
+    c.fill();c.stroke();
+    c.fillStyle=got?'#fff':'#a99fc4';c.font='bold 13px system-ui';
+    c.fillText(s,sx+13,sy+18);
+  }
+  c.font='11px system-ui';c.fillStyle='#7a7484';
+  c.fillText('重组区（按序号）',PK.nodes.server[0],PK.nodes.server[1]+100);
+  /* 数据包 */
+  PK.packets.forEach(function(p){
+    if(p.state!=='fly'&&p.state!=='lost')return;
+    var pos=pkPos(p);
+    if(p.state==='lost'){
+      c.font='20px system-ui';c.fillStyle='#dc2626';
+      c.fillText('✖',pos[0],pos[1]+6);
+      return;
+    }
+    c.fillStyle=p.retrans?'#f59e0b':'#7c3aed';
+    c.strokeStyle='#fff';c.lineWidth=2;
+    c.beginPath();
+    if(c.roundRect)c.roundRect(pos[0]-16,pos[1]-13,32,26,7);else c.rect(pos[0]-16,pos[1]-13,32,26);
+    c.fill();c.stroke();
+    c.fillStyle='#fff';c.font='bold 13px system-ui';c.textAlign='center';
+    c.fillText(p.seq,pos[0],pos[1]+5);
+    c.font='9px system-ui';c.fillStyle='#5b21b6';
+    c.fillText('→srv-01',pos[0],pos[1]+24);
+  });
+  /* 状态行 */
+  c.font='13px system-ui';c.fillStyle='#5b21b6';c.textAlign='left';
+  c.fillText('模拟时间：'+PK.simT.toFixed(1)+' 秒'+(PK.finished?' · 已完成':(PK.running?' · 运行中':'')),18,24);
+  c.textAlign='center';
+}
+var pkLastTs=null;
+function pkLoop(ts){
+  if(PK.running){
+    if(pkLastTs!=null)pkTick(Math.min(0.05,(ts-pkLastTs)/1000)*1.6);
+    pkDraw();
+  }
+  pkLastTs=ts;
+  requestAnimationFrame(pkLoop);
+}
+$('pkRun').addEventListener('click',function(){
+  if(PK.running){PK.running=false;this.textContent='▶ 运行';return;}
+  if(PK.finished||!PK.packets.length)pkInit();
+  PK.running=true;this.textContent='⏸ 暂停';
+});
+$('pkStep').addEventListener('click',function(){
+  if(PK.finished||!PK.packets.length)pkInit();
+  PK.running=false;$('pkRun').textContent='▶ 运行';
+  pkTick(0.3);pkDraw();
+});
+$('pkReset').addEventListener('click',function(){
+  PK.running=false;$('pkRun').textContent='▶ 运行';
+  pkInit();pkDraw();
+});
+$('pkLoss').addEventListener('change',function(){$('pkReset').click();});
+$('pkDelay').addEventListener('change',function(){$('pkReset').click();});
+$('pkRuns').textContent='完整运行 '+state.pk.runs+' 次';
+pkInit();pkDraw();requestAnimationFrame(pkLoop);
+
+/* ================= 舞台3：MQTT 舞台 ================= */
+var MQPOS={temp:[175,103],humi:[175,298],broker:[480,205],phone:[787,103],pump:[787,298]};
+var mqQueue=[],mqAnim=null,mqBusy=false;
+function mqSubs(){
+  return {
+    phone:{name:'📱手机',topics:[
+      $('subPhoneTemp').checked?'farm/sensor/temp':null,
+      $('subPhoneHumi').checked?'farm/sensor/humi':null,
+      $('subPhonePump').checked?'farm/control/pump':null].filter(Boolean)},
+    pump:{name:'🚿水泵控制器',topics:[
+      $('subPumpTemp').checked?'farm/sensor/temp':null,
+      $('subPumpHumi').checked?'farm/sensor/humi':null,
+      $('subPumpPump').checked?'farm/control/pump':null].filter(Boolean)}
+  };
+}
+function mqLogAdd(html,cls){
+  var lb=$('mqLog');
+  if(lb.textContent.indexOf('日志：先设置')===0)lb.innerHTML='';
+  var line='['+nowStr()+'] '+html;
+  lb.innerHTML+='<div class="'+(cls||'')+'">'+line+'</div>';
+  lb.scrollTop=lb.scrollHeight;
+  state.mq.log.push(line.replace(/<[^>]+>/g,''));
+  if(state.mq.log.length>60)state.mq.log.shift();
+  save();
+}
+['subPhoneTemp','subPhoneHumi','subPhonePump','subPumpTemp','subPumpHumi','subPumpPump'].forEach(function(id){
+  $(id).addEventListener('change',function(){
+    var who=id.indexOf('Phone')>0?'📱手机':'🚿水泵控制器';
+    var tp={Temp:'farm/sensor/temp',Humi:'farm/sensor/humi',Pump:'farm/control/pump'}[id.slice(-4)];
+    mqLogAdd(who+(this.checked?' 向服务器<b>订阅</b>了 ':' <b>取消订阅</b> ')+'<code>'+tp+'</code>','lt');
+  });
+});
+function mqMoveDot(from,to,color,label,done){
+  mqAnim={from:from,to:to,t:0,color:color,label:label,done:done};
+}
+function mqRunNext(){
+  if(mqAnim)return;
+  if(!mqQueue.length){mqBusy=false;$('mqNext').disabled=true;return;}
+  if($('mqStepMode').checked){
+    $('mqNext').disabled=false;
+  }else{
+    var fn=mqQueue.shift();fn();
+  }
+}
+$('mqNext').addEventListener('click',function(){
+  if(mqAnim||!mqQueue.length)return;
+  var fn=mqQueue.shift();fn();
+  this.disabled=true;
+});
+function mqTick(){
+  var dot=$('mqDot'),lbl=$('mqDotLabel');
+  if(mqAnim){
+    mqAnim.t+=0.016;
+    var k=Math.min(1,mqAnim.t/1.1);
+    var x=mqAnim.from[0]+(mqAnim.to[0]-mqAnim.from[0])*k;
+    var y=mqAnim.from[1]+(mqAnim.to[1]-mqAnim.from[1])*k;
+    dot.setAttribute('cx',x);dot.setAttribute('cy',y);
+    dot.setAttribute('fill',mqAnim.color);dot.setAttribute('opacity','1');
+    lbl.setAttribute('x',x);lbl.setAttribute('y',y-14);
+    lbl.textContent=mqAnim.label;
+    if(k>=1){
+      var cb=mqAnim.done;mqAnim=null;
+      dot.setAttribute('opacity','0');lbl.textContent='';
+      if(cb)cb();
+      mqRunNext();
+    }
+  }
+  requestAnimationFrame(mqTick);
+}
+requestAnimationFrame(mqTick);
+function mqFlash(elId,color){
+  var el=$(elId);var old=el.getAttribute('stroke');
+  el.setAttribute('stroke',color);el.setAttribute('stroke-width','4');
+  setTimeout(function(){el.setAttribute('stroke',old);el.setAttribute('stroke-width','2.5');},900);
+}
+function mqShowMsg(textId,txt,color){
+  var el=$(textId);el.textContent=txt;el.setAttribute('fill',color||'#16a34a');
+  setTimeout(function(){if(el.textContent===txt)el.textContent='';},3200);
+}
+function mqPublish(pubKey,pubName,topic,payload){
+  if(mqBusy){setFb($('mqFb'),'hint','上一条消息还在路上，稍等它送完～');return;}
+  mqBusy=true;
+  state.mq.pubCount++;save();
+  var subs=mqSubs();
+  mqQueue=[];
+  /* 阶段1：发布→服务器 */
+  mqQueue.push(function(){
+    mqLogAdd(pubName+' <b>发布</b> Topic=<code>'+topic+'</code>，内容「'+payload+'」','lt');
+    mqMoveDot(MQPOS[pubKey],MQPOS.broker,'#8b5cf6','PUB '+topic,function(){
+      mqFlash('mqBrokerBox','#7c3aed');
+      $('mqBrokerMsg').textContent='收到消息，正在按Topic匹配…';
+    });
+  });
+  /* 阶段2：服务器匹配 */
+  mqQueue.push(function(){
+    var hitPhone=subs.phone.topics.indexOf(topic)>=0;
+    var hitPump=subs.pump.topics.indexOf(topic)>=0;
+    var hits=[];
+    if(hitPhone)hits.push('📱手机');
+    if(hitPump)hits.push('🚿水泵控制器');
+    $('mqBrokerMsg').textContent=hits.length?('匹配到：'+hits.join('、')):'没有订阅端匹配';
+    mqLogAdd('🖥️服务器检查订阅表：<code>'+topic+'</code> → '+(hits.length?('转发给 '+hits.join('、')):'<b>无人订阅，消息不转发</b>'),hits.length?'ok':'er');
+    if(!hitPhone)mqShowMsg('mqPhoneMsg','✗ 未订阅该Topic，收不到','#9ca3af');
+    if(!hitPump)mqShowMsg('mqPumpMsg','✗ 未订阅该Topic，收不到','#9ca3af');
+    /* 阶段3：转发（可能0/1/2条） */
+    if(hitPhone)mqQueue.unshift(function(){
+      mqMoveDot(MQPOS.broker,MQPOS.phone,'#16a34a',topic,function(){
+        mqShowMsg('mqPhoneMsg','✓ 收到：'+payload,'#16a34a');
+        mqLogAdd('📱手机 <b>收到</b>「'+payload+'」','ok');
+      });
+    });
+    if(hitPump){
+      var f=function(){
+        mqMoveDot(MQPOS.broker,MQPOS.pump,'#16a34a',topic,function(){
+          mqShowMsg('mqPumpMsg','✓ 收到：'+payload,'#16a34a');
+          mqLogAdd('🚿水泵控制器 <b>收到</b>「'+payload+'」'+(topic==='farm/control/pump'?' → 执行开泵动作！':''),'ok');
+        });
+      };
+      if(hitPhone)mqQueue.splice(1,0,f);else mqQueue.unshift(f);
+    }
+    if(!hits.length){
+      setFb($('mqFb'),'err','这条消息<b>没有任何订阅端收到</b>！因为没有谁订阅了 <code>'+topic+'</code>。这说明：发布/订阅要想沟通，双方必须使用<b>同一个主题</b>。勾选对应订阅再发一次试试。');
+    }else{
+      setFb($('mqFb'),'good','消息经服务器按 Topic 匹配后送达 '+hits.join('、')+'。发布者并不知道谁在听——是服务器在"牵线"。');
+    }
+    mqRunNext();
+  });
+  var first=mqQueue.shift();first();
+}
+$('mqPubTemp').addEventListener('click',function(){
+  mqPublish('temp','🌡️温度传感器','farm/sensor/temp','温度 '+(20+Math.round(Math.random()*120)/10)+'℃');
+});
+$('mqPubHumi').addEventListener('click',function(){
+  mqPublish('humi','💧湿度传感器','farm/sensor/humi','土壤湿度 '+(30+Math.round(Math.random()*40))+'%');
+});
+$('mqPubPump').addEventListener('click',function(){
+  mqPublish('phone','📱手机','farm/control/pump','指令：开泵浇水 30 秒');
+});
+$('mqClearLog').addEventListener('click',function(){
+  $('mqLog').innerHTML='日志：先设置订阅，再发布消息…';
+  state.mq.log=[];save();
+});
+$('mqStepMode').addEventListener('change',function(){
+  setFb($('mqFb'),'hint',this.checked?'已开启单步模式：发布后每个阶段停一停，点"⏭ 下一步"继续。':'已切回连续模式，动画自动播放。');
+});
+
+/* ================= 舞台4：Topic 主题树 ================= */
+var BASE_TOPICS=['farm/green1/sensor/temp','farm/green1/sensor/humi','farm/green2/sensor/temp',
+  'farm/green2/pump/state','farm/gate/light/state','home/room1/sensor/temp'];
+function topicMatch(pattern,topic){
+  var p=pattern.split('/'),t=topic.split('/');
+  for(var i=0;i<p.length;i++){
+    if(p[i]==='#')return true;
+    if(i>=t.length)return false;
+    if(p[i]==='+')continue;
+    if(p[i]!==t[i])return false;
+  }
+  return p.length===t.length;
+}
+function allTopics(){return BASE_TOPICS.concat(state.topics.filter(function(t){return BASE_TOPICS.indexOf(t)<0;}));}
+function tpLevels(){
+  var ids=['tpL1','tpL2','tpL3','tpL4'];
+  return ids.map(function(id){
+    var v=$(id).value;
+    if(v==='__c')v=$('tpCustom').value.trim();
+    return v;
+  });
+}
+function tpValidate(parts){
+  var errs=[];
+  var full=parts.join('/');
+  parts.forEach(function(seg,i){
+    var lv='第'+(i+1)+'层';
+    if(!seg)errs.push(lv+'为空——每一层都要有名字。');
+    else{
+      if(/\s/.test(seg))errs.push(lv+'「'+esc(seg)+'」含空格——Topic 中不能用空格。');
+      if(/[\u4e00-\u9fa5]/.test(seg))errs.push(lv+'「'+esc(seg)+'」含中文——设备程序普遍按英文处理 Topic，请改用英文/拼音小写。');
+      if(/[+#\/]/.test(seg))errs.push(lv+'含 + # / 等保留字符——它们是通配符/分隔符，不能出现在名字里。');
+      if(/[A-Z]/.test(seg))errs.push(lv+'「'+esc(seg)+'」含大写字母——建议统一小写，避免大小写混淆。');
+    }
+  });
+  return {ok:errs.length===0,errs:errs,full:full};
+}
+function tpRefreshPreview(){
+  var parts=tpLevels();
+  var v=tpValidate(parts);
+  $('tpPreview').textContent=v.full;
+  if(v.ok)setFb($('tpValid'),'good','✔ 命名规范：层级用 / 分隔、全小写、无空格中文，见名知义（项目/位置/设备/量）。');
+  else setFb($('tpValid'),'err','✘ 还不规范：<br>· '+v.errs.join('<br>· '));
+  return v;
+}
+['tpL1','tpL2','tpL3','tpL4'].forEach(function(id){$(id).addEventListener('change',tpRefreshPreview);});
+$('tpCustom').addEventListener('input',tpRefreshPreview);
+$('tpAdd').addEventListener('click',function(){
+  var v=tpRefreshPreview();
+  if(!v.ok){setFb($('tpValid'),'err','✘ 请先按提示修正命名，再加入清单：<br>· '+v.errs.join('<br>· '));return;}
+  if(allTopics().indexOf(v.full)>=0){setFb($('tpValid'),'hint','这个 Topic 已在清单/示例中，换一层名字试试（比如换位置或物理量）。');return;}
+  state.topics.push(v.full);save();
+  tpDrawTree();tpDrawChips(tpCurrentPattern);
+  setFb($('tpValid'),'good','✔ 已加入清单：<code>'+v.full+'</code>，主题树已更新。到右边用通配符试试能不能匹配到它！');
+});
+$('tpClearMine').addEventListener('click',function(){
+  state.topics=[];save();tpDrawTree();tpDrawChips(tpCurrentPattern);
+  setFb($('tpValid'),'hint','已清空你添加的 Topic（示例 Topic 保留）。');
+});
+function tpDrawTree(){
+  var root={};
+  allTopics().forEach(function(t){
+    var segs=t.split('/'),node=root;
+    segs.forEach(function(s){node[s]=node[s]||{};node=node[s];});
+  });
+  var lines=[];
+  function walk(node,prefix){
+    var keys=Object.keys(node);
+    keys.forEach(function(k,i){
+      var last=i===keys.length-1;
+      lines.push(prefix+(last?'└─ ':'├─ ')+k);
+      walk(node[k],prefix+(last?'    ':'│   '));
+    });
+  }
+  walk(root,'');
+  $('tpTree').textContent=lines.join('\n')||'（空）';
+}
+var tpCurrentPattern='farm/+/sensor/temp';
+var TP_EXPL={
+  'farm/+/sensor/temp':'「+」匹配<b>恰好一层</b>：位置层无论是 green1、green2 还是 gate 都行，但层数必须一样多。所以能匹配 farm/green1/sensor/temp，却不能匹配层数不同的 Topic。',
+  'farm/#':'「#」匹配<b>后面所有层级</b>（多层），只能放在末尾。farm 项目下的一切消息都会被订到——好比订阅了整个农植园。',
+  'farm/green1/#':'「#」放在 farm/green1 后：只订 1 号大棚下的全部消息，2 号大棚的收不到。',
+  '+/+/sensor/humi':'前两层各用一个「+」：任何项目、任何位置的 sensor/humi 都匹配，常用来跨项目收集同一种量。'
+};
+function tpDrawChips(pattern){
+  tpCurrentPattern=pattern;
+  var box=$('tpChips');box.innerHTML='';
+  var hits=0;
+  allTopics().forEach(function(t){
+    var m=topicMatch(pattern,t);
+    if(m)hits++;
+    var sp=document.createElement('span');
+    sp.className='topic-chip '+(m?'hit':'miss');
+    sp.textContent=(m?'✓ ':'')+t;
+    box.appendChild(sp);
+  });
+  var ex=TP_EXPL[pattern]||('自定义模式 <code>'+esc(pattern)+'</code>：「+」匹配恰好一层，「#」匹配末尾所有层。');
+  setFb($('tpPatExplain'),'hint','模式 <code>'+esc(pattern)+'</code> 命中 <b>'+hits+'</b> 个 Topic。'+ex);
+}
+document.querySelectorAll('#tpPatBtns button').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('#tpPatBtns button').forEach(function(x){x.classList.remove('sel');});
+    b.classList.add('sel');
+    tpDrawChips(b.dataset.p);
+  });
+});
+$('tpPatTry').addEventListener('click',function(){
+  var p=$('tpPatInput').value.trim();
+  if(!p){setFb($('tpPatExplain'),'err','请先输入一个匹配模式，如 farm/+/pump/state');return;}
+  if(/#./.test(p.replace(/#$/,''))&&p.indexOf('#')>=0&&!/#$/.test(p)){
+    setFb($('tpPatExplain'),'err','「#」只能放在模式的最末尾，例如 farm/# 。请修改后再试。');return;
+  }
+  document.querySelectorAll('#tpPatBtns button').forEach(function(x){x.classList.remove('sel');});
+  tpDrawChips(p);
+});
+(function(){
+  var btns=document.querySelectorAll('#tpQOpts button'),fb=$('tpQFb');
+  btns.forEach(function(b){b.addEventListener('click',function(){
+    btns.forEach(function(x){x.classList.remove('right','wrong');});
+    var ok=b.dataset.i==='1';
+    b.classList.add(ok?'right':'wrong');
+    state.tpQuiz=ok;save();
+    setFb(fb,ok?'good':'err',ok?
+      '✔ 正确！「+」只顶替<b>恰好一层</b>。farm/green1/sensor/temp 共4层能对上；farm/green1/green2/sensor/temp 有5层，多出一层，「+」吃不下。':
+      '✘ 再想想。提示：数一数两个 Topic 各有几层，再数一数模式 farm/+/sensor/temp 有几层——「+」只匹配一层，层数必须相等。答完可以在左边点亮实验验证。');
+  });});
+})();
+tpRefreshPreview();tpDrawTree();tpDrawChips('farm/+/sensor/temp');
+
+/* ================= 舞台5：HTTP vs MQTT 对比 ================= */
+var vsTimer=null,vsT=0;
+function vsDraw(t){
+  var cv=$('vsCanvas'),c=cv.getContext('2d');
+  c.clearRect(0,0,cv.width,cv.height);
+  c.font='bold 15px system-ui';c.textAlign='center';
+  c.fillStyle='#0369a1';c.fillText('HTTP：请求—响应（客户端必须不停地问）',240,26);
+  c.fillStyle='#7c3aed';c.fillText('MQTT：发布—订阅（服务器有新数据主动推）',720,26);
+  c.strokeStyle='#e6e0f8';c.beginPath();c.moveTo(480,10);c.lineTo(480,210);c.stroke();
+  function actor(x,y,emoji,label){
+    c.font='26px system-ui';c.fillStyle='#000';c.fillText(emoji,x,y);
+    c.font='12px system-ui';c.fillStyle='#5b21b6';c.fillText(label,x,y+18);
+  }
+  actor(80,70,'📱','客户端');actor(400,70,'🖥️','Web服务器');
+  actor(560,70,'📱','订阅端');actor(880,70,'🖥️','MQTT服务器');
+  /* HTTP：8轮问答，每轮1.2秒；仅第3、7轮有新数据 */
+  var httpMsgs=0,httpNew=0;
+  for(var r=0;r<8;r++){
+    var t0=r*1.2;
+    var y=92+r*13;
+    var hasNew=(r===2||r===6);
+    if(t>=t0){
+      httpMsgs++;
+      var k1=Math.min(1,(t-t0)/0.5);
+      c.strokeStyle='#94a3b8';c.lineWidth=1.6;
+      c.beginPath();c.moveTo(110,y);c.lineTo(110+260*k1,y);c.stroke();
+      if(k1>=1){c.fillStyle='#64748b';c.font='10px system-ui';c.fillText('请求：有新数据吗？',240,y-3);}
+    }
+    if(t>=t0+0.6){
+      httpMsgs++;
+      var k2=Math.min(1,(t-t0-0.6)/0.5);
+      c.strokeStyle=hasNew?'#16a34a':'#cbd5e1';c.lineWidth=hasNew?2.4:1.6;
+      c.beginPath();c.moveTo(370,y+6);c.lineTo(370-260*k2,y+6);c.stroke();
+      if(k2>=1){
+        c.fillStyle=hasNew?'#16a34a':'#94a3b8';c.font='10px system-ui';
+        c.fillText(hasNew?'响应：新数据！':'响应：没有',240,y+16);
+        if(hasNew)httpNew++;
+      }
+    }
+  }
+  /* MQTT：订阅1次 + 2次推送（与HTTP的新数据时刻对应） */
+  var mqttMsgs=0,mqttNew=0;
+  if(t>=0.2){
+    mqttMsgs++;
+    var ks=Math.min(1,(t-0.2)/0.5);
+    c.strokeStyle='#8b5cf6';c.lineWidth=1.8;
+    c.beginPath();c.moveTo(590,95);c.lineTo(590+260*ks,95);c.stroke();
+    if(ks>=1){c.fillStyle='#7c3aed';c.font='10px system-ui';c.fillText('订阅 farm/sensor/temp（只需一次）',720,90);}
+  }
+  [2.4,7.2].forEach(function(t0,i){
+    var y=125+i*30;
+    if(t>=t0){
+      mqttMsgs++;
+      var k=Math.min(1,(t-t0)/0.5);
+      c.strokeStyle='#16a34a';c.lineWidth=2.4;
+      c.beginPath();c.moveTo(850,y);c.lineTo(850-260*k,y);c.stroke();
+      if(k>=1){c.fillStyle='#16a34a';c.font='10px system-ui';c.fillText('推送：新数据！',720,y-4);mqttNew++;}
+    }
+  });
+  /* 长连接示意 */
+  c.strokeStyle='#ddd6fe';c.setLineDash([5,4]);c.lineWidth=1.4;
+  c.beginPath();c.moveTo(590,200);c.lineTo(850,200);c.stroke();c.setLineDash([]);
+  c.fillStyle='#a78bfa';c.font='10px system-ui';c.fillText('一条长连接保持在线（报文极小）',720,214);
+  /* 计数 */
+  c.font='bold 13px system-ui';
+  c.fillStyle='#0369a1';c.fillText('HTTP 已发报文 '+httpMsgs+' 条，获得新数据 '+httpNew+' 次',240,222);
+  c.fillStyle='#7c3aed';c.fillText('MQTT 已发报文 '+mqttMsgs+' 条，获得新数据 '+mqttNew+' 次',720,222);
+  /* 报文开销条形 */
+  c.textAlign='left';c.font='12.5px system-ui';
+  c.fillStyle='#3f3b46';c.fillText('单条报文头开销示意：',60,250);
+  c.fillStyle='#0369a1';c.fillRect(220,240,500,14);
+  c.fillStyle='#fff';c.font='11px system-ui';c.fillText('HTTP 报文头 · 常达几百字节',230,251);
+  c.fillStyle='#3f3b46';c.font='12.5px system-ui';c.fillText('MQTT：',60,274);
+  c.fillStyle='#7c3aed';c.fillRect(220,264,16,14);
+  c.fillStyle='#3f3b46';c.font='11px system-ui';c.fillText('最小仅 2 字节（教材：3G 下吞吐量比 HTTP 快 93 倍）',244,275);
+  c.textAlign='center';
+  return {httpMsgs:httpMsgs,mqttMsgs:mqttMsgs,done:t>=9.6};
+}
+$('vsRun').addEventListener('click',function(){
+  if(vsTimer)return;
+  vsT=0;
+  var self=this;self.disabled=true;
+  vsTimer=setInterval(function(){
+    vsT+=0.08;
+    var r=vsDraw(vsT);
+    if(r.done){
+      clearInterval(vsTimer);vsTimer=null;self.disabled=false;
+      $('vsResult').textContent='结果：同样拿到 2 次新数据，HTTP 用了 '+r.httpMsgs+' 条报文，MQTT 只用 '+r.mqttMsgs+' 条！';
+      $('vsResult').className='badge ok';
+      state.vs.ran=true;save();
+    }
+  },40);
+});
+$('vsReset').addEventListener('click',function(){
+  if(vsTimer){clearInterval(vsTimer);vsTimer=null;$('vsRun').disabled=false;}
+  vsT=0;vsDraw(0);
+  $('vsResult').textContent='等待运行…';$('vsResult').className='badge info';
+});
+vsDraw(0);
+
+/* ================= 练习 ================= */
+var QUIZ=[
+  {q:'成千上万辆共享单车分散在城市各处、随时移动，它们联网上报数据最适合用？',
+   o:['有线以太网','教室 Wi-Fi','蓝牙','蜂窝移动网络'],a:3,
+   e:'单车"泛在、移动"，只有覆盖广、支持移动的蜂窝移动网络能随时随地在线。',
+   h1:'想一想：单车会骑到郊区，哪种网络到了郊区还有信号？',
+   h2:'关键词：覆盖广 + 可移动。有线和蓝牙都被距离"拴住"，Wi-Fi 覆盖零散。'},
+  {q:'关于串口通信，教材的评价是？',
+   o:['速度极快，适合传视频','通用性好，但速度慢，适合低速小数据量','必须无线连接','只能单向传输'],a:1,
+   e:'串口"通信线路简单、通用性好"，但比以太网慢得多，适合低速率、小数据量，如给开源硬件传程序。',
+   h1:'回想给智能终端写程序时用的就是串口，它传的数据大吗？',
+   h2:'教材原句："其通信速度比以太网慢得多，只适合低速率和小数据量的通信"。'},
+  {q:'ZigBee 技术最突出的优点是？',
+   o:['传输距离上千公里','组网方便，节点还能帮别的节点中转数据','比 5G 还快','不需要电源'],a:1,
+   e:'ZigBee 每个节点既是终端又能当"中继器"转发数据，所以组网非常方便。',
+   h1:'ZigBee 节点除了自己收发数据，还能帮邻居做什么？',
+   h2:'教材说它"类似于网络中继器"，最大优点是"组网非常方便"。'},
+  {q:'MQTT 系统中，负责接收发布消息并按主题转发给订阅者的角色是？',
+   o:['传感器','订阅端','服务器（代理 broker）','路由器'],a:2,
+   e:'MQTT 服务器通常被称为"代理（broker）"，所有消息都由它中转分发。',
+   h1:'回想第3幕舞台正中间的那个角色。',
+   h2:'英文名 broker，中文叫"代理"，客户端只能发布(publish)或订阅(subscribe)。'},
+  {q:'MQTT 中发布者和订阅者素不相识，它们能沟通的前提是？',
+   o:['互相知道 IP 地址','发送和订阅同一个主题(Topic)','使用同一部手机','必须有线连接'],a:1,
+   e:'教材："只要它们发送和订阅的是同一个主题（Topic ID），即可相互沟通。"双方通过服务器中转，无需直接联系。',
+   h1:'第3幕里，什么情况下订阅端一条消息都收不到？',
+   h2:'服务器是按什么来决定把消息转发给谁的？——按 Topic 匹配。'},
+  {q:'模式 farm/+/temp 能匹配下面哪个 Topic？',
+   o:['farm/temp','farm/green1/temp','farm/green1/soil/temp','home/green1/temp'],a:1,
+   e:'「+」匹配恰好一层：farm/green1/temp 共3层逐层对上。farm/temp 少一层、farm/green1/soil/temp 多一层、home 开头第一层就不同。',
+   h1:'先数层数：模式有 3 层，各选项分别有几层？',
+   h2:'层数相同后，再逐层比对：第1层要等于 farm，第2层随便（+），第3层要等于 temp。'},
+  {q:'HTTP 若要实现"实时"获取传感器数据，必须不断发起连接；MQTT 更适合物联网的原因是？',
+   o:['MQTT 只能在电脑上用','MQTT 靠长连接和极小报文（最小2字节）维持实时通信','MQTT 不需要网络','MQTT 只能传文字'],a:1,
+   e:'MQTT 为数据传递而设计：简短报文即可维持长连接，最小报文仅 2 字节，3G 下吞吐量比 HTTP 快 93 倍。',
+   h1:'回看第5幕对比动画：拿到同样的新数据，两边各发了几条报文？',
+   h2:'教材两个关键数字：最小报文 2 字节、吞吐量快 93 倍。'},
+  {q:'手环不能直接上互联网，先用蓝牙连手机，再由手机把数据发到云服务器。这里手机充当了？',
+   o:['MQTT 服务器','物联网网关','传感器','电子标签'],a:1,
+   e:'教材：一些设备因技术限制不能直接联网，"物联网网关就成为连接这些设备的重要纽带"——手机在这里做协议转换和中转，就是网关角色。',
+   h1:'这个角色"一头连设备、一头连互联网"，教材拓展阅读里叫什么？',
+   h2:'教材图1.4.1：终端先蓝牙连到它，再由它与云服务器通信——物联网网___。'}
+];
+function quizBuild(){
+  var area=$('quizArea');area.innerHTML='';
+  QUIZ.forEach(function(item,qi){
+    var d=document.createElement('div');d.className='quiz-q';
+    d.innerHTML='<div class="qt">'+(qi+1)+'. '+item.q+'</div><div class="pill-opts">'+
+      item.o.map(function(o,oi){return '<button data-i="'+oi+'">'+o+'</button>';}).join('')+
+      '</div><div style="display:flex;gap:8px"><button class="btn small gray qh1">💡 提示1</button><button class="btn small gray qh2">💡💡 提示2</button></div><div class="feedback"></div>';
+    var fb=d.querySelector('.feedback');
+    var btns=d.querySelectorAll('.pill-opts button');
+    btns.forEach(function(b){b.addEventListener('click',function(){
+      if(state.quiz.answers[qi]===true)return;
+      btns.forEach(function(x){x.classList.remove('right','wrong');});
+      var ok=+b.dataset.i===item.a;
+      b.classList.add(ok?'right':'wrong');
+      if(ok){setFb(fb,'good','✔ 正确！'+item.e);state.quiz.answers[qi]=true;}
+      else{
+        setFb(fb,'err','✘ 不对。想想再试：可先点"提示1"，还不行点"提示2"。');
+        if(state.quiz.answers[qi]!==true)state.quiz.answers[qi]=false;
+      }
+      quizScore();save();
+    });});
+    d.querySelector('.qh1').addEventListener('click',function(){setFb(fb,'hint','💡 提示1：'+item.h1);});
+    d.querySelector('.qh2').addEventListener('click',function(){setFb(fb,'hint','💡💡 提示2：'+item.h2);});
+    area.appendChild(d);
+  });
+  quizScore();
+}
+function quizScore(){
+  var s=0,done=0;
+  QUIZ.forEach(function(_,qi){
+    if(state.quiz.answers[qi]===true)s++;
+    if(state.quiz.answers[qi]!==undefined&&state.quiz.answers[qi]!==null)done++;
+  });
+  state.quiz.score=s;
+  $('quizScore').textContent='得分 '+s+' / '+QUIZ.length;
+  $('quizBar').style.width=(done/QUIZ.length*100)+'%';
+}
+$('quizRetry').addEventListener('click',function(){
+  state.quiz.answers={};state.quiz.score=0;save();quizBuild();
+});
+quizBuild();
+
+/* ================= 舞台6：成果档案 ================= */
+function buildReport(){
+  var lines=[];
+  lines.push('====== 第1单元 第4节《物联网的通信》通信设计档案 ======');
+  lines.push('生成时间：'+new Date().toLocaleString('zh-CN'));
+  lines.push('');
+  lines.push('【第1幕 通信方式选择】得分 '+state.scn.score+'/12');
+  SCN.forEach(function(s,si){
+    var ch=state.scn.choices[si];
+    lines.push('  · '+s.t.split('：')[1].slice(0,18)+'… → '+(ch?METHODS[ch.pick]+'（'+ch.sc+'分）':'未选择'));
+  });
+  lines.push('【第2幕 数据包实验】完整运行 '+state.pk.runs+' 次；观察过丢包重传：'+(state.pk.lossSeen?'是':'否')+'；观察过延迟乱序：'+(state.pk.delaySeen?'是':'否'));
+  lines.push('【第3幕 MQTT 实验】共发布消息 '+state.mq.pubCount+' 条。最近日志摘要：');
+  var recent=state.mq.log.slice(-8);
+  if(recent.length)recent.forEach(function(l){lines.push('  | '+l);});
+  else lines.push('  |（暂无日志）');
+  lines.push('【第4幕 Topic 设计清单】'+(state.topics.length?'':'（尚未添加）'));
+  state.topics.forEach(function(t){lines.push('  · '+t);});
+  lines.push('  通配符检测题：'+(state.tpQuiz===true?'答对':(state.tpQuiz===false?'答错待重试':'未作答')));
+  lines.push('【第5幕】MQTT/HTTP 对比动画：'+(state.vs.ran?'已完整观看':'未运行')+'；随堂练习得分 '+state.quiz.score+'/'+QUIZ.length);
+  lines.push('');
+  lines.push('我学到了：按距离/速率/功耗/移动性选通信方式；数据分包带序号传输、可重传重组；');
+  lines.push('MQTT 由服务器(代理)按 Topic 匹配转发消息，发布订阅同题即可沟通，报文小、适合物联网。');
+  return lines.join('\n');
+}
+$('repGen').addEventListener('click',function(){
+  $('repView').textContent=buildReport();
+  setFb($('repFb'),'good','档案已生成，可下载保存。');
+});
+$('repTxt').addEventListener('click',function(){
+  download('第4节_物联网的通信_通信设计档案.txt',buildReport());
+  setFb($('repFb'),'good','.txt 已开始下载。');
+});
+$('repJson').addEventListener('click',function(){
+  download('第4节_物联网的通信_学习数据.json',JSON.stringify({lesson:'第1单元第4节 物联网的通信',time:new Date().toISOString(),data:state},null,2),'application/json');
+  setFb($('repFb'),'good','.json 已开始下载。');
+});
+$('repClear').addEventListener('click',function(){
+  if(!confirm('确定清除本页在本机保存的全部学习数据吗？此操作不可恢复。'))return;
+  localStorage.removeItem(LS_KEY);
+  state=defState();
+  $('repView').textContent='数据已清除。重新学习后可再次生成档案。';
+  setFb($('repFb'),'hint','本机学习数据已全部清除。');
+  scnBuild();quizBuild();tpDrawTree();tpDrawChips('farm/+/sensor/temp');
+  $('pkRuns').textContent='完整运行 0 次';
+  $('mqLog').innerHTML='日志：先设置订阅，再发布消息…';
+});
+})();
+</script>
+</body>
+</html>
