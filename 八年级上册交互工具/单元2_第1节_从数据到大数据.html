@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>单元2 第1节 从数据到大数据 · 交互学习工具</title>
+<style>
+  :root{
+    --teal:#14b8a6; --teal-d:#0f766e; --teal-dd:#134e4a; --teal-l:#99f6e4; --teal-bg:#f0fdfa;
+    --ink:#0f172a; --gray:#64748b; --card:#ffffff;
+    --ok:#16a34a; --warn:#d97706; --bad:#dc2626; --blue:#0284c7;
+    --shadow:0 6px 24px rgba(15,118,110,.12);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(20,184,166,.10), transparent 40%),
+      radial-gradient(circle at 88% 90%, rgba(2,132,199,.08), transparent 40%),
+      var(--teal-bg);
+    color:var(--ink); line-height:1.65;
+  }
+  code,.mono{font-family:ui-monospace,Consolas,"Courier New",monospace;}
+  /* ===== 顶部 ===== */
+  header.hero{
+    background:linear-gradient(120deg,var(--teal-dd) 0%,var(--teal-d) 45%,var(--teal) 100%);
+    color:#fff; padding:26px 5vw 60px; position:relative; overflow:hidden;
+  }
+  header.hero::after{
+    content:""; position:absolute; inset:auto 0 -2px 0; height:38px;
+    background:radial-gradient(60px 38px at 10% 100%, var(--teal-bg) 98%, transparent),
+               radial-gradient(60px 38px at 30% 100%, var(--teal-bg) 98%, transparent),
+               radial-gradient(60px 38px at 50% 100%, var(--teal-bg) 98%, transparent),
+               radial-gradient(60px 38px at 70% 100%, var(--teal-bg) 98%, transparent),
+               radial-gradient(60px 38px at 90% 100%, var(--teal-bg) 98%, transparent);
+    opacity:.35;
+  }
+  .unit-tag{display:inline-block; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.4);
+    padding:2px 14px; border-radius:999px; font-size:13px; letter-spacing:2px;}
+  header.hero h1{font-size:clamp(24px,3.6vw,38px); margin:10px 0 6px; letter-spacing:1px;}
+  header.hero .sub{opacity:.92; font-size:14px; max-width:900px;}
+  .goals{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px;}
+  .goals span{background:rgba(255,255,255,.14); border-left:4px solid var(--teal-l);
+    padding:6px 12px; border-radius:8px; font-size:13.5px;}
+  /* ===== 贯穿页面中部的横向时间轴（画卷主轴，吸顶） ===== */
+  .scroll-axis{
+    position:sticky; top:0; z-index:60; background:rgba(240,253,250,.94);
+    backdrop-filter:blur(6px); border-bottom:2px solid var(--teal-l);
+    padding:8px 3vw 4px;
+  }
+  .axis-track{position:relative; height:58px; max-width:1200px; margin:0 auto;}
+  .axis-track::before{
+    content:""; position:absolute; left:2%; right:2%; top:18px; height:6px; border-radius:3px;
+    background:repeating-linear-gradient(90deg,var(--teal) 0 26px, var(--teal-l) 26px 34px);
+  }
+  .axis-stations{position:absolute; inset:0; display:flex; justify-content:space-between; padding:0 2%;}
+  .station{position:relative; width:16%; text-align:center; cursor:pointer; border:none; background:none;
+    font-family:inherit;}
+  .station .dot{
+    width:26px; height:26px; border-radius:50%; margin:6px auto 2px; background:#fff;
+    border:4px solid var(--teal); color:var(--teal-d); font-weight:700; font-size:12.5px;
+    display:flex; align-items:center; justify-content:center; transition:all .25s;
+  }
+  .station .lbl{font-size:12px; color:var(--gray); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .station.active .dot{background:var(--teal); color:#fff; transform:scale(1.22); box-shadow:0 0 0 6px rgba(20,184,166,.22);}
+  .station.active .lbl{color:var(--teal-d); font-weight:700;}
+  .station.done .dot{border-color:var(--ok); color:var(--ok);}
+  /* ===== 画卷主体：卡片沿中轴上下交错 ===== */
+  main.scroll-paper{max-width:1200px; margin:0 auto; padding:26px 3vw 40px; position:relative;}
+  main.scroll-paper::before{ /* 纵向装订线，连接各交错卡片 */
+    content:""; position:absolute; top:0; bottom:0; left:50%;
+    border-left:3px dashed rgba(20,184,166,.35);
+  }
+  section.mod{
+    position:relative; background:var(--card); border-radius:18px; box-shadow:var(--shadow);
+    padding:22px 24px 26px; margin:44px 0; width:88%; scroll-margin-top:96px;
+    border-top:6px solid var(--teal);
+  }
+  section.mod:nth-of-type(odd){margin-right:auto; margin-left:0;}
+  section.mod:nth-of-type(even){margin-left:auto; margin-right:0; border-top-color:var(--blue);}
+  section.mod::before{ /* 与中轴的连接节点 */
+    content:attr(data-no); position:absolute; top:-23px; width:40px; height:40px; border-radius:50%;
+    background:linear-gradient(135deg,var(--teal),var(--teal-d)); color:#fff; font-weight:800;
+    display:flex; align-items:center; justify-content:center; box-shadow:var(--shadow); font-size:17px;
+  }
+  section.mod:nth-of-type(odd)::before{right:-20px;}
+  section.mod:nth-of-type(even)::before{left:-20px; background:linear-gradient(135deg,var(--blue),#075985);}
+  .mod h2{font-size:21px; color:var(--teal-dd); margin-bottom:2px;}
+  section.mod:nth-of-type(even) h2{color:#075985;}
+  .mod .task{
+    background:linear-gradient(90deg,rgba(20,184,166,.10),rgba(20,184,166,.03));
+    border-left:4px solid var(--teal); border-radius:0 10px 10px 0;
+    padding:8px 14px; margin:10px 0 14px; font-size:14px;
+  }
+  .mod .task b{color:var(--teal-d);}
+  /* 通用小组件 */
+  .btn{
+    display:inline-block; border:none; cursor:pointer; font-family:inherit; font-size:14px;
+    background:var(--teal); color:#fff; padding:8px 18px; border-radius:10px;
+    box-shadow:0 3px 8px rgba(20,184,166,.35); transition:transform .12s, filter .15s;
+  }
+  .btn:hover{filter:brightness(1.08); transform:translateY(-1px);}
+  .btn:active{transform:translateY(1px);}
+  .btn.ghost{background:#fff; color:var(--teal-d); border:2px solid var(--teal); box-shadow:none;}
+  .btn.small{padding:4px 12px; font-size:13px; border-radius:8px;}
+  .btn.warn{background:var(--bad);}
+  .btn:disabled{opacity:.45; cursor:not-allowed; transform:none;}
+  .badge{display:inline-block; padding:2px 10px; border-radius:999px; font-size:12.5px; font-weight:700;}
+  .badge.ok{background:#dcfce7; color:var(--ok);}
+  .badge.bad{background:#fee2e2; color:var(--bad);}
+  .badge.info{background:#e0f2fe; color:var(--blue);}
+  .badge.teal{background:#ccfbf1; color:var(--teal-d);}
+  .fb{border-radius:10px; padding:10px 14px; font-size:13.5px; margin-top:10px; display:none;}
+  .fb.show{display:block; animation:pop .25s;}
+  .fb.good{background:#f0fdf4; border:1.5px solid #86efac; color:#14532d;}
+  .fb.err{background:#fef2f2; border:1.5px solid #fca5a5; color:#7f1d1d;}
+  .fb.hint{background:#fffbeb; border:1.5px solid #fcd34d; color:#78350f;}
+  @keyframes pop{from{transform:scale(.96); opacity:0} to{transform:scale(1); opacity:1}}
+  @keyframes shake{0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)}}
+  .shake{animation:shake .3s;}
+  /* ===== 模块1 金字塔 ===== */
+  .pyr-wrap{display:grid; grid-template-columns:1fr 1.1fr; gap:18px;}
+  @media(max-width:860px){.pyr-wrap{grid-template-columns:1fr;}}
+  .pyr-cards{display:flex; flex-wrap:wrap; gap:8px; align-content:flex-start;}
+  .pcard{
+    border:2px solid #cbd5e1; background:#f8fafc; border-radius:10px; padding:7px 10px;
+    font-size:13px; cursor:pointer; max-width:100%; transition:all .15s; user-select:none;
+  }
+  .pcard:hover{border-color:var(--teal);}
+  .pcard.sel{border-color:var(--teal); background:#ccfbf1; box-shadow:0 0 0 3px rgba(20,184,166,.25);}
+  .pcard.gone{display:none;}
+  .pyramid{display:flex; flex-direction:column; align-items:center; gap:8px;}
+  .p-layer{
+    border:2.5px dashed var(--teal); border-radius:12px; padding:8px 10px; cursor:pointer;
+    background:rgba(20,184,166,.05); transition:background .2s; text-align:center;
+  }
+  .p-layer:hover{background:rgba(20,184,166,.14);}
+  .p-layer h4{font-size:15px; color:var(--teal-dd);}
+  .p-layer .cap{font-size:11.5px; color:var(--gray);}
+  .p-layer .slot{display:flex; flex-wrap:wrap; gap:5px; justify-content:center; min-height:26px; margin-top:5px;}
+  .p-layer .slot .pcard{cursor:default; font-size:12px; background:#fff;}
+  .p-layer.know{width:56%; border-color:#f59e0b; background:rgba(245,158,11,.07);}
+  .p-layer.info{width:76%; border-color:var(--blue); background:rgba(2,132,199,.06);}
+  .p-layer.data{width:96%;}
+  .fill-blank input,.fill-blank select{
+    font-family:inherit; font-size:14px; padding:4px 8px; border:2px solid #cbd5e1; border-radius:8px;
+    width:110px; background:#fff;
+  }
+  .fill-blank input:focus,.fill-blank select:focus{outline:none; border-color:var(--teal);}
+  /* ===== 模块2 传送带 ===== */
+  .belt-zone{background:#134e4a; border-radius:14px; padding:14px; color:#fff;}
+  .belt{
+    position:relative; height:86px; border-radius:10px; overflow:hidden; margin:8px 0;
+    background:repeating-linear-gradient(90deg,#0f3d38 0 34px,#155e56 34px 68px);
+    animation:beltmove 1.2s linear infinite; border:3px solid #0d9488;
+  }
+  .belt.paused{animation-play-state:paused;}
+  @keyframes beltmove{from{background-position-x:0} to{background-position-x:68px}}
+  .belt-item{
+    position:absolute; top:12px; left:-240px; background:#fff; color:var(--ink);
+    border-radius:10px; padding:8px 14px; font-size:14px; box-shadow:0 4px 10px rgba(0,0,0,.35);
+    display:flex; align-items:center; gap:8px; transition:left 1.1s ease-out, top .5s, opacity .5s;
+    max-width:340px;
+  }
+  .belt-item .chip{width:30px; height:30px; border-radius:8px; color:#fff; font-weight:800;
+    display:flex; align-items:center; justify-content:center; flex:none; font-size:14px;}
+  .chutes{display:flex; gap:8px; flex-wrap:wrap; justify-content:center;}
+  .chute{
+    flex:1; min-width:96px; border:none; cursor:pointer; font-family:inherit; border-radius:0 0 12px 12px;
+    background:#fff; padding:10px 4px 8px; text-align:center; border-top:6px solid var(--teal);
+    transition:transform .15s; font-size:14px; font-weight:700; color:var(--teal-dd);
+  }
+  .chute:hover{transform:translateY(-3px);}
+  .chute .cnt{display:block; font-size:11.5px; color:var(--gray); font-weight:400;}
+  .mnist-box{margin-top:16px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:14px;}
+  .mnist-row{display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;}
+  .mnist-cell{text-align:center;}
+  .mnist-cell canvas{border-radius:6px; display:block;}
+  .mnist-cell .lab{font-size:11px; color:var(--gray);}
+  .vs-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;}
+  @media(max-width:700px){.vs-grid{grid-template-columns:1fr;}}
+  .vs-grid > div{border-radius:10px; padding:10px 12px; font-size:13px;}
+  .vs-one{background:#fef9c3; border:1.5px solid #fde047;}
+  .vs-set{background:#ccfbf1; border:1.5px solid #5eead4;}
+  /* ===== 模块3 故事时间轴 ===== */
+  .story-axis{position:relative; margin:18px 0 6px; height:74px;}
+  .story-axis::before{content:""; position:absolute; left:3%; right:3%; top:26px; height:5px;
+    background:linear-gradient(90deg,var(--teal),var(--blue)); border-radius:3px;}
+  .story-axis .snode{
+    position:absolute; top:8px; transform:translateX(-50%); text-align:center; cursor:pointer;
+    border:none; background:none; font-family:inherit;
+  }
+  .snode .yr{display:block; width:74px; padding:6px 0; background:#fff; border:3px solid var(--teal);
+    border-radius:999px; font-weight:800; color:var(--teal-d); font-size:13px; transition:all .2s;}
+  .snode:hover .yr,.snode.open .yr{background:var(--teal); color:#fff;}
+  .snode .who{font-size:11.5px; color:var(--gray); margin-top:3px;}
+  .story-card{display:none; border:2px solid var(--teal-l); border-radius:14px; padding:14px 16px; margin-top:10px;
+    background:#fdfefe;}
+  .story-card.show{display:block; animation:pop .3s;}
+  .story-flex{display:flex; gap:16px; flex-wrap:wrap;}
+  .story-flex svg{flex:none; background:#fff; border:1px solid #e2e8f0; border-radius:10px;}
+  .story-flex .txt{flex:1; min-width:240px; font-size:13.5px;}
+  .quiz-opt{display:block; width:100%; text-align:left; margin:5px 0; padding:7px 12px; font-size:13.5px;
+    border:2px solid #e2e8f0; border-radius:10px; background:#fff; cursor:pointer; font-family:inherit; transition:all .15s;}
+  .quiz-opt:hover{border-color:var(--teal);}
+  .quiz-opt.right{border-color:var(--ok); background:#f0fdf4;}
+  .quiz-opt.wrong{border-color:var(--bad); background:#fef2f2;}
+  /* ===== 模块4 4V ===== */
+  .v4-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media(max-width:860px){.v4-grid{grid-template-columns:1fr;}}
+  .v4{border:1.5px solid #e2e8f0; border-radius:14px; padding:14px; background:#fdfefe;}
+  .v4 h3{font-size:15.5px; color:var(--teal-dd); margin-bottom:6px;}
+  .v4 h3 .en{font-size:11.5px; color:#fff; background:var(--teal); border-radius:6px; padding:1px 8px; margin-left:6px; vertical-align:2px;}
+  input[type=range]{width:100%; accent-color:var(--teal);}
+  .vol-read{font-size:14px; background:#f0fdfa; border-radius:10px; padding:8px 12px; margin-top:6px; min-height:66px;}
+  .vol-read b{color:var(--teal-d); font-size:17px;}
+  .vel-counter{font-size:26px; font-weight:800; color:var(--teal-d); font-variant-numeric:tabular-nums;}
+  .vel-log{height:74px; overflow:hidden; background:#0f172a; color:#5eead4; border-radius:8px;
+    font-size:11.5px; padding:6px 10px; margin-top:6px; font-family:ui-monospace,Consolas,monospace; line-height:1.5;}
+  .var-srcs{display:flex; flex-wrap:wrap; gap:8px;}
+  .var-srcs label{border:2px solid #e2e8f0; border-radius:10px; padding:5px 10px; font-size:13px; cursor:pointer; background:#fff;}
+  .var-srcs label.on{border-color:var(--teal); background:#ccfbf1;}
+  .var-out{margin-top:8px; min-height:34px; display:flex; flex-wrap:wrap; gap:6px;}
+  .val-chart{display:flex; align-items:flex-end; gap:2px; height:110px; background:#f8fafc;
+    border:1px solid #e2e8f0; border-radius:8px; padding:6px; margin-top:8px;}
+  .val-chart .bar{flex:1; background:#cbd5e1; border-radius:3px 3px 0 0; min-height:2px; transition:height .3s, background .3s; position:relative;}
+  .val-chart .bar.hot{background:var(--teal);}
+  .val-chart .bar span{position:absolute; bottom:-16px; left:0; right:0; text-align:center; font-size:8.5px; color:var(--gray);}
+  /* ===== 模块5 地图 ===== */
+  .map-flex{display:flex; gap:16px; flex-wrap:wrap;}
+  .map-flex svg{background:#f0fdfa; border:2px solid var(--teal-l); border-radius:14px; flex:1 1 380px; max-width:560px; height:auto;}
+  .map-ctrl{flex:1 1 240px; font-size:13.5px;}
+  .map-ctrl select{font-family:inherit; font-size:14px; padding:5px 8px; border:2px solid #cbd5e1; border-radius:8px; background:#fff;}
+  .legend i{display:inline-block; width:20px; height:6px; border-radius:3px; margin:0 4px 0 10px; vertical-align:2px;}
+  .rd{stroke-width:7; stroke-linecap:round; cursor:default; transition:stroke .3s;}
+  .rd.lv1{stroke:#22c55e;} .rd.lv2{stroke:#f59e0b;} .rd.lv3{stroke:#ef4444;}
+  .rd.onpath{stroke-width:11; filter:drop-shadow(0 0 4px rgba(13,148,136,.9));}
+  .nd{fill:#fff; stroke:var(--teal-d); stroke-width:3; cursor:pointer;}
+  .nd.pick{fill:var(--teal); }
+  .nd-l{font-size:13px; font-weight:700; fill:var(--teal-dd); pointer-events:none;}
+  .dq-item{border:1.5px solid #e2e8f0; border-radius:12px; padding:10px 14px; margin:8px 0; background:#fff;}
+  .dq-item .stem{font-size:14px; margin-bottom:6px;}
+  /* ===== 模块6 工坊/导出 ===== */
+  .ws-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+  @media(max-width:760px){.ws-grid{grid-template-columns:1fr;}}
+  .ws-grid textarea{
+    width:100%; min-height:84px; border:2px solid #cbd5e1; border-radius:10px; padding:8px 10px;
+    font-family:inherit; font-size:13.5px; resize:vertical; background:#fff;
+  }
+  .ws-grid textarea:focus{outline:none; border-color:var(--teal);}
+  .ws-grid .col h4{font-size:14px; margin-bottom:4px;}
+  .card-list .saved{border-left:4px solid var(--teal); background:#f8fafc; border-radius:8px; padding:8px 12px; margin:6px 0; font-size:13px;}
+  .sum-box{background:#f8fafc; border:1.5px dashed #94a3b8; border-radius:12px; padding:12px 16px;
+    font-size:13px; white-space:pre-wrap; font-family:ui-monospace,Consolas,monospace; max-height:300px; overflow:auto;}
+  .score-strip{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;}
+  footer{padding:20px; text-align:center; color:var(--gray); font-size:12.5px;}
+  .progress-note{font-size:12.5px; color:var(--gray); margin-top:8px;}
+</style>
+</head>
+<body>
+<header class="hero">
+  <span class="unit-tag">第 2 单元 · 数据与数据探究 · 贯通项目：小七孔在线数字气象站</span>
+  <h1>第 1 节　从数据到大数据 · 数据科学画卷</h1>
+  <div class="sub">小清在荔波小七孔发现一天温差极大（如 11~31℃），他想用数据回答：一天中最高气温真的出现在 14 时吗？最低气温真的在日出前后吗？让我们沿着这条“数据画卷”，从一个个数字出发，走到大数据的世界。</div>
+  <div class="goals">
+    <span>① 说清数据、信息、知识的区别与联系，识别常见数据类型与数据集</span>
+    <span>② 通过科学史故事与模拟实验，理解大数据的 4V 特征</span>
+    <span>③ 体验交通大数据应用，能辨析数据价值与隐私风险</span>
+  </div>
+</header>
+
+<!-- 贯穿页面的横向主时间轴（吸顶画卷轴） -->
+<nav class="scroll-axis" aria-label="学习时间轴">
+  <div class="axis-track">
+    <div class="axis-stations" id="axisStations">
+      <button class="station" data-target="mod1"><span class="dot">1</span><span class="lbl">概念金字塔</span></button>
+      <button class="station" data-target="mod2"><span class="dot">2</span><span class="lbl">类型分拣站</span></button>
+      <button class="station" data-target="mod3"><span class="dot">3</span><span class="lbl">数据故事</span></button>
+      <button class="station" data-target="mod4"><span class="dot">4</span><span class="lbl">大数据4V</span></button>
+      <button class="station" data-target="mod5"><span class="dot">5</span><span class="lbl">路网大数据</span></button>
+      <button class="station" data-target="mod6"><span class="dot">6</span><span class="lbl">成果工坊</span></button>
+    </div>
+  </div>
+</nav>
+
+<main class="scroll-paper">
+
+<!-- ============ 模块1 概念金字塔 ============ -->
+<section class="mod" id="mod1" data-no="1">
+  <h2>站点一 · 概念金字塔：数据 → 信息 → 知识</h2>
+  <div class="task"><b>任务：</b>下面 9 张卡片都来自小七孔气象站情境。先<b>点击选中</b>一张卡片，再<b>点击金字塔的某一层</b>把它放进去。放对会讲明道理，放错会给你提示，可重新放置。全部放完后，完成右下方的“数据加工成信息”填空。</div>
+  <div class="pyr-wrap">
+    <div>
+      <div style="font-size:13px;color:var(--gray);margin-bottom:6px;">待归类卡片（剩 <b id="pyrLeft">9</b> 张）：</div>
+      <div class="pyr-cards" id="pyrCards"></div>
+      <div class="fb" id="pyrFb"></div>
+      <div style="margin-top:10px;"><button class="btn ghost small" id="pyrReset">重新开始本任务</button>
+      <span class="badge teal" id="pyrScore">正确 0 / 尝试 0</span></div>
+    </div>
+    <div>
+      <div class="pyramid">
+        <div class="p-layer know" data-layer="know"><h4>知识（塔尖）</h4><div class="cap">对信息归纳提炼出的规律，可指导行动</div><div class="slot"></div></div>
+        <div class="p-layer info" data-layer="info"><h4>信息（塔身）</h4><div class="cap">放进具体场景、有明确含义的数据</div><div class="slot"></div></div>
+        <div class="p-layer data" data-layer="data"><h4>数据（塔基）</h4><div class="cap">用符号对事物属性的原始记录，本身没有意义</div><div class="slot"></div></div>
+      </div>
+    </div>
+  </div>
+  <div style="margin-top:16px; border-top:1.5px dashed #cbd5e1; padding-top:12px;" class="fill-blank">
+    <b style="font-size:14px;">小任务 · 由数据加工出信息：</b>
+    <div style="font-size:13px; color:var(--gray); margin:4px 0;">气象站今天的部分记录：06时 4.1℃ ｜ 10时 18.6℃ ｜ <b>14时 26.5℃</b> ｜ 18时 15.2℃ ｜ 22时 9.8℃</div>
+    <div style="font-size:14px; margin:8px 0;">
+      加工成信息：今天最高气温出现在
+      <select id="fbTime"><option value="">选时刻</option><option>06时</option><option>10时</option><option>14时</option><option>18时</option><option>22时</option></select>
+      ，约为 <input id="fbTemp" type="text" inputmode="decimal" placeholder="填数值"> ℃；
+      再把多天这样的信息归纳提炼，就可能得到一条<b>知识</b>：
+      <select id="fbKnow" style="width:auto;max-width:100%;">
+        <option value="">选一选</option>
+        <option value="a">小七孔一天中最高气温常出现在 14 时前后</option>
+        <option value="b">26.5 是一个很大的数字</option>
+        <option value="c">今天 22 时气温是 9.8℃</option>
+      </select>
+      <button class="btn small" id="fbCheck">检查</button>
+    </div>
+    <div class="fb" id="fbFb"></div>
+  </div>
+</section>
+
+<!-- ============ 模块2 类型分拣站 ============ -->
+<section class="mod" id="mod2" data-no="2">
+  <h2>站点二 · 数据类型分拣站</h2>
+  <div class="task"><b>任务：</b>传送带会送出一件件“数据包裹”。看清它的表现形式，<b>点击下方正确的通道</b>把它分走。分对 +10 分，分错会解释原因并让你重分。分完 10 件后，再看看“单条数据”与“数据集”有什么不同。</div>
+  <div class="belt-zone">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div>包裹 <b id="beltIdx">0</b> / 10　得分 <b id="beltScore">0</b></div>
+      <div><button class="btn small" id="beltStart">启动传送带</button> <button class="btn ghost small" id="beltReset" style="background:#134e4a;color:#99f6e4;border-color:#0d9488;">重置</button></div>
+    </div>
+    <div class="belt paused" id="belt"><div class="belt-item" id="beltItem" style="opacity:0;"></div></div>
+    <div class="chutes" id="chutes">
+      <button class="chute" data-t="num" style="border-top-color:#0d9488;">数值<span class="cnt">用数字直接表示</span></button>
+      <button class="chute" data-t="txt" style="border-top-color:#0284c7;">文本<span class="cnt">文字符号串</span></button>
+      <button class="chute" data-t="img" style="border-top-color:#7c3aed;">图像<span class="cnt">照片、图形</span></button>
+      <button class="chute" data-t="aud" style="border-top-color:#d97706;">音频<span class="cnt">声音记录</span></button>
+      <button class="chute" data-t="vid" style="border-top-color:#dc2626;">视频<span class="cnt">连续画面</span></button>
+    </div>
+    <div class="fb" id="beltFb" style="background:#fff;"></div>
+  </div>
+  <div class="mnist-box">
+    <b style="font-size:14.5px;">单条数据 vs 数据集 · 认识 MNIST</b>
+    <div class="vs-grid">
+      <div class="vs-one"><b>单条数据：</b>“14时 26.5℃”只是一条记录，只能反映一个时刻的情况，承载的信息很有限。</div>
+      <div class="vs-set"><b>数据集：</b>描述某一事物某些属性的<b>一系列</b>数据，数量要足够大，才能反映一般规律。气象站要连续多天采集，才能验证“14 时最热”。</div>
+    </div>
+    <div style="font-size:13px; margin-top:10px;">数据科学与人工智能领域著名的 <b>MNIST 手写数字数据集</b>由 70 000 幅小图像构成，每幅都是 0~9 中某个数字的一种写法，并带有“标签”（它是几）。点击“换一批”可以看到同一个数字有很多不同写法——<b>数据集 = 大量同类样本 + 标签</b>。</div>
+    <div class="mnist-row" id="mnistRow"></div>
+    <button class="btn ghost small" id="mnistRefresh">换一批手写样本</button>
+  </div>
+</section>
+
+<!-- ============ 模块3 数据故事 ============ -->
+<section class="mod" id="mod3" data-no="3">
+  <h2>站点三 · 历史上的数据故事</h2>
+  <div class="task"><b>任务：</b>点击时间轴上的年份节点，展开三个改变历史的数据故事；读完每个故事后，回答“这个故事说明数据的什么价值”，三题全对即通关。</div>
+  <div class="story-axis" id="storyAxis">
+    <button class="snode" style="left:14%;" data-s="0"><span class="yr">1609年</span><span class="who">开普勒</span></button>
+    <button class="snode" style="left:50%;" data-s="1"><span class="yr">1854年</span><span class="who">约翰·斯诺</span></button>
+    <button class="snode" style="left:85%;" data-s="2"><span class="yr">1858年</span><span class="who">南丁格尔</span></button>
+  </div>
+  <div id="storyCards"></div>
+  <div class="progress-note" id="storyProg">故事阅读：0/3 · 答题：0/3</div>
+</section>
+
+<!-- ============ 模块4 大数据4V ============ -->
+<section class="mod" id="mod4" data-no="4">
+  <h2>站点四 · 大数据特征模拟器（4V）</h2>
+  <div class="task"><b>任务：</b>大数据代表着信息量大、变化速度快、种类繁多、需要提炼才能变成价值的信息资产。请把下面 4 个演示<b>都操作一遍</b>（每完成一个点亮一枚徽章），最后在“价值”小游戏里淘出规律。</div>
+  <div class="score-strip" id="v4Badges">
+    <span class="badge info" data-v="vol">□ 巨量性</span><span class="badge info" data-v="vel">□ 高速性</span>
+    <span class="badge info" data-v="var">□ 多样性</span><span class="badge info" data-v="val">□ 价值性</span>
+  </div>
+  <div class="v4-grid">
+    <div class="v4">
+      <h3>巨量性<span class="en">Volume</span></h3>
+      <div style="font-size:13px;color:var(--gray);">拖动滑块，从 KB 一路放大到 PB，看看这些数据量相当于多少部《红楼梦》、多少部电影。</div>
+      <input type="range" id="volSlider" min="0" max="6" step="1" value="0">
+      <div class="vol-read" id="volRead"></div>
+    </div>
+    <div class="v4">
+      <h3>高速性<span class="en">Velocity</span></h3>
+      <div style="font-size:13px;color:var(--gray);">模拟某城市共享单车系统：每秒都有成千上万条骑行记录产生。可运行、暂停、单步、重置。</div>
+      <div style="margin:6px 0;">累计记录：<span class="vel-counter" id="velCount">0</span> 条</div>
+      <div>
+        <button class="btn small" id="velRun">运行</button>
+        <button class="btn ghost small" id="velStep">单步(+1秒)</button>
+        <button class="btn ghost small" id="velReset">重置</button>
+      </div>
+      <div class="vel-log" id="velLog">（等待开始……）</div>
+    </div>
+    <div class="v4">
+      <h3>多样性<span class="en">Variety</span></h3>
+      <div style="font-size:13px;color:var(--gray);">勾选智慧城市中的数据源，看看它们各自产生什么形态的数据（至少勾选 3 个数据源点亮徽章）。</div>
+      <div class="var-srcs" id="varSrcs">
+        <label><input type="checkbox" value="手机"> 手机</label>
+        <label><input type="checkbox" value="监控摄像头"> 监控摄像头</label>
+        <label><input type="checkbox" value="环境传感器"> 环境传感器</label>
+        <label><input type="checkbox" value="社交平台"> 社交平台</label>
+        <label><input type="checkbox" value="气象站"> 在线气象站</label>
+      </div>
+      <div class="var-out" id="varOut"><span style="font-size:12.5px;color:var(--gray);">（勾选后这里会出现各种数据形态）</span></div>
+    </div>
+    <div class="v4">
+      <h3>价值性<span class="en">Value</span></h3>
+      <div style="font-size:13px;color:var(--gray);">价值密度低：海量记录中有用的规律要“淘”。连续点击「淘一批数据」，把 24 小时骑行量攒进图里，规律会浮现。</div>
+      <div style="margin:6px 0;">
+        <button class="btn small" id="valMine">淘一批数据</button>
+        <span class="badge teal" id="valGot">已淘 0 批</span>
+      </div>
+      <div class="val-chart" id="valChart"></div>
+      <div style="font-size:13px;margin-top:22px;" id="valQ" hidden>
+        规律浮现了！骑行的<b>早高峰</b>大约出现在：
+        <button class="btn ghost small valA" data-a="5">5 时</button>
+        <button class="btn ghost small valA" data-a="8">8 时</button>
+        <button class="btn ghost small valA" data-a="13">13 时</button>
+      </div>
+      <div class="fb" id="valFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 模块5 路网大数据 ============ -->
+<section class="mod" id="mod5" data-no="5">
+  <h2>站点五 · 交通大数据：路线是怎么推荐出来的？</h2>
+  <div class="task"><b>任务：</b>①点击“更新路况”，看道路颜色变化（绿=畅通、黄=缓行、红=拥堵，来自海量车辆位置数据的汇聚）；②选择起点和终点，让系统按“路程×拥堵程度”算出推荐路线（至少规划 2 次，试试更新路况后路线会不会变）；③完成下方 8 道“数据的价值与风险”辨析题。</div>
+  <div class="map-flex">
+    <svg id="citySvg" viewBox="0 0 560 360" role="img" aria-label="模拟城市路网"></svg>
+    <div class="map-ctrl">
+      <div style="margin-bottom:8px;">起点：<select id="mapFrom"></select>　终点：<select id="mapTo"></select></div>
+      <div>
+        <button class="btn small" id="mapPlan">规划推荐路线</button>
+        <button class="btn ghost small" id="mapRefresh">更新路况</button>
+      </div>
+      <div class="legend" style="margin-top:8px;font-size:12.5px;">图例：<i style="background:#22c55e"></i>畅通 <i style="background:#f59e0b"></i>缓行 <i style="background:#ef4444"></i>拥堵</div>
+      <div class="fb" id="mapFb"></div>
+      <div style="font-size:12.5px;color:var(--gray);margin-top:10px;">导航软件的“聪明”来自<b>海量匿名位置数据</b>的实时汇聚：无数车辆和手机不断上报位置与速度，平台据此估计每条路的通行时间，再用算法找“总耗时最短”的路——这正是大数据高速性与价值性的体现。</div>
+    </div>
+  </div>
+  <div style="margin-top:16px;border-top:1.5px dashed #cbd5e1;padding-top:10px;">
+    <b style="font-size:14.5px;">数据的价值与风险 · 辨析练习</b>
+    <span class="badge teal" id="dqScore">0 / 8</span>
+    <div id="dqList"></div>
+  </div>
+</section>
+
+<!-- ============ 模块6 成果工坊 ============ -->
+<section class="mod" id="mod6" data-no="6">
+  <h2>站点六 · “数据—信息—知识”卡片工坊 · 学习小结与成果导出</h2>
+  <div class="task"><b>任务：</b>围绕小七孔气象站（或你身边的观测情境），自己写一组卡片：一条原始<b>数据</b> → 加工出的<b>信息</b> → 归纳出的<b>知识</b>。保存后与本页各站点成绩一起生成学习档案，可下载留存。</div>
+  <div class="ws-grid">
+    <div class="col"><h4><span class="badge teal">数据</span> 原始记录</h4><textarea id="wsData" placeholder="例：2025-10-03 14:00, 气温 26.5, 湿度 62"></textarea></div>
+    <div class="col"><h4><span class="badge info">信息</span> 放进场景后的含义</h4><textarea id="wsInfo" placeholder="例：10月3日14时，小七孔景区气温 26.5℃，比较暖和"></textarea></div>
+    <div class="col"><h4><span class="badge ok">知识</span> 归纳出的规律</h4><textarea id="wsKnow" placeholder="例：小七孔晴天时最高气温多出现在 14 时前后，出行宜避开正午"></textarea></div>
+  </div>
+  <div style="margin-top:8px;">
+    <button class="btn small" id="wsSave">保存这组卡片</button>
+    <span class="badge teal" id="wsCount">已保存 0 组</span>
+  </div>
+  <div class="fb" id="wsFb"></div>
+  <div class="card-list" id="wsList"></div>
+
+  <div style="margin-top:18px;border-top:1.5px dashed #cbd5e1;padding-top:12px;">
+    <b style="font-size:15px;">学习小结与成果导出</b>
+    <div style="margin:8px 0;">
+      <button class="btn small" id="sumRefresh">生成学习小结</button>
+      <button class="btn small" id="expTxt">下载小结 (.txt)</button>
+      <button class="btn small" id="expJson">下载档案 (.json)</button>
+      <button class="btn ghost small" id="copySum">复制小结</button>
+      <button class="btn warn small" id="clearAll">清除本机学习数据</button>
+    </div>
+    <div class="sum-box" id="sumBox">（点击“生成学习小结”查看本页学习档案）</div>
+  </div>
+</section>
+
+</main>
+<footer>本页为单文件离线学习工具 · 学习记录仅保存在本机浏览器（localStorage）· 第 2 单元贯通项目：在线数字气象站</footer>
+
+<script>
+(function(){
+"use strict";
+var LS_KEY = "u2l1_state_v1";
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+/* ---------- 状态与存储 ---------- */
+var defState = {
+  pyramid:{correct:0, attempts:0, placed:{}, fill:false},
+  belt:{score:0, idx:0, done:false},
+  stories:{read:[], quiz:{}},
+  v4:{vol:false, vel:false, vari:false, val:false, valTries:0},
+  map:{plans:0, refresh:0},
+  dq:{answers:{}, correct:0},
+  cards:[],
+  log:[]
+};
+var state;
+try{
+  state = JSON.parse(localStorage.getItem(LS_KEY) || "null") || JSON.parse(JSON.stringify(defState));
+}catch(e){ state = JSON.parse(JSON.stringify(defState)); }
+// 补全字段（防旧版本缺字段）
+Object.keys(defState).forEach(function(k){ if(state[k]===undefined) state[k]=JSON.parse(JSON.stringify(defState[k])); });
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+function logAct(text){
+  state.log.push({t:new Date().toLocaleString("zh-CN"), text:text});
+  if(state.log.length>300) state.log.shift();
+  save();
+}
+function showFb(el, cls, html){
+  el.className = "fb show " + cls;
+  el.innerHTML = html;
+}
+
+/* ---------- 吸顶时间轴导航 + 滚动监听 ---------- */
+var stations = Array.prototype.slice.call(document.querySelectorAll(".station"));
+stations.forEach(function(st){
+  st.addEventListener("click", function(){
+    var t = $(st.getAttribute("data-target"));
+    if(t) t.scrollIntoView({behavior:"smooth", block:"start"});
+  });
+});
+var modIds = ["mod1","mod2","mod3","mod4","mod5","mod6"];
+function spy(){
+  var cur = 0;
+  for(var i=0;i<modIds.length;i++){
+    var r = $(modIds[i]).getBoundingClientRect();
+    if(r.top < window.innerHeight*0.45) cur = i;
+  }
+  stations.forEach(function(st,i){ st.classList.toggle("active", i===cur); });
+}
+window.addEventListener("scroll", spy, {passive:true});
+spy();
+function markStationDone(i, on){ stations[i].classList.toggle("done", !!on); }
+
+/* =================== 模块1 概念金字塔 =================== */
+var PYR = [
+  {txt:"「26.5」——传感器传回的一个孤零零的数字", l:"data", why:"没有场景、没有单位，只是对某个属性的原始记录，看不出含义，属于数据。"},
+  {txt:"「78」——湿度探头上传的一个读数", l:"data", why:"单独一个 78，不知道指什么，是原始记录，属于数据。"},
+  {txt:"「2025-10-03,14:00,26.5,62,2」——日志文件里的一行原始记录", l:"data", why:"这是符号化的原始记录，还没有被解释，属于数据（一条记录可含多个属性值）。"},
+  {txt:"“今天 14 时，小七孔气温为 26.5℃”", l:"info", why:"把 26.5 放进了“今天14时、小七孔、气温”这个具体场景，数据有了意义，成为信息。"},
+  {txt:"“今天最低气温 4.1℃，出现在 06 时（日出前后）”", l:"info", why:"数据被解释成特定场景下的具体含义，是信息。"},
+  {txt:"“今天白天多云，湿度 78%，风力 2 级”", l:"info", why:"78 加上湿度场景和 % 单位，就成了描述今天天气状态的信息。"},
+  {txt:"“小七孔一天中最高气温常出现在 14 时前后，出行避开正午暴晒更舒适”", l:"know", why:"对多天信息进行归纳、提炼出规律并能指导行动，这是知识。"},
+  {txt:"“最低气温多出现在日出前后，清晨观测要注意保暖”", l:"know", why:"由许多天的信息归纳出的一般规律，可指导行动，属于知识。"},
+  {txt:"“湿度大、云多的日子，昼夜温差通常较小”", l:"know", why:"这是跨越多天信息、比较归纳后的规律性结论，属于知识。"}
+];
+var pyrSel = -1;
+var layerName = {data:"数据（塔基）", info:"信息（塔身）", know:"知识（塔尖）"};
+function pyrRender(){
+  var box = $("pyrCards"); box.innerHTML = "";
+  var left = 0;
+  PYR.forEach(function(c,i){
+    if(state.pyramid.placed[i]) return;
+    left++;
+    var d = document.createElement("div");
+    d.className = "pcard" + (pyrSel===i ? " sel":"");
+    d.textContent = c.txt;
+    d.addEventListener("click", function(){
+      pyrSel = (pyrSel===i ? -1 : i);
+      pyrRender();
+    });
+    box.appendChild(d);
+  });
+  $("pyrLeft").textContent = left;
+  $("pyrScore").textContent = "正确 " + state.pyramid.correct + " / 尝试 " + state.pyramid.attempts;
+  // 已放置的
+  document.querySelectorAll(".p-layer").forEach(function(lay){
+    var slot = lay.querySelector(".slot"); slot.innerHTML = "";
+    PYR.forEach(function(c,i){
+      if(state.pyramid.placed[i] && c.l === lay.getAttribute("data-layer")){
+        var s = document.createElement("div"); s.className="pcard";
+        s.textContent = c.txt.length>18 ? c.txt.slice(0,18)+"…" : c.txt;
+        s.title = c.txt;
+        slot.appendChild(s);
+      }
+    });
+  });
+  markStationDone(0, Object.keys(state.pyramid.placed).length===PYR.length && state.pyramid.fill);
+}
+document.querySelectorAll(".p-layer").forEach(function(lay){
+  lay.addEventListener("click", function(){
+    if(pyrSel < 0){
+      showFb($("pyrFb"), "hint", "请先在左侧点击选中一张卡片，再点击金字塔的某一层。");
+      return;
+    }
+    var c = PYR[pyrSel];
+    state.pyramid.attempts++;
+    var target = lay.getAttribute("data-layer");
+    if(target === c.l){
+      state.pyramid.correct++;
+      state.pyramid.placed[pyrSel] = true;
+      showFb($("pyrFb"), "good", "放对了！这张卡片属于「" + layerName[c.l] + "」。" + esc(c.why));
+      logAct("金字塔：正确归类「" + c.txt.slice(0,14) + "…」");
+      pyrSel = -1;
+      if(Object.keys(state.pyramid.placed).length === PYR.length){
+        showFb($("pyrFb"), "good", "9 张卡片全部归位！记住这条链：<b>数据</b>是原始记录 → 放进场景成为<b>信息</b> → 归纳提炼沉淀为<b>知识</b>。别忘了完成下方的填空小任务。");
+        logAct("金字塔：9 张卡片全部完成");
+      }
+    }else{
+      lay.classList.add("shake");
+      setTimeout(function(){ lay.classList.remove("shake"); }, 350);
+      var hint = c.l==="data" ? "提示：它有没有被放进具体场景？如果只是符号记录、看不出含义，它还在塔基。"
+               : c.l==="info" ? "提示：它是不是在描述“某个具体时间/地点/事物”的状态？那是被场景解释过的数据——信息。"
+               : "提示：它是不是跨越多条信息归纳出的、能指导行动的规律？那就该放到塔尖。";
+      showFb($("pyrFb"), "err", "放到「" + layerName[target] + "」不合适。" + hint + " 请重试。");
+      logAct("金字塔：归类错误一次");
+    }
+    save(); pyrRender();
+  });
+});
+$("pyrReset").addEventListener("click", function(){
+  state.pyramid = {correct:0, attempts:0, placed:{}, fill:state.pyramid.fill};
+  pyrSel = -1; save(); pyrRender();
+  showFb($("pyrFb"), "hint", "已重置，重新归类 9 张卡片吧。");
+});
+$("fbCheck").addEventListener("click", function(){
+  var t = $("fbTime").value, v = parseFloat($("fbTemp").value), k = $("fbKnow").value;
+  var errs = [];
+  if(t !== "14时") errs.push("最高气温的时刻不对——再看一遍 5 条记录，哪个数值最大？");
+  if(!(Math.abs(v-26.5) < 0.01)) errs.push("温度数值不对——应填 14 时那条记录的数值。");
+  if(k !== "a") errs.push("知识应当是跨越多天归纳出的规律，而不是重复某一天的数字或单条信息。");
+  if(errs.length === 0){
+    state.pyramid.fill = true; save(); pyrRender();
+    showFb($("fbFb"), "good", "完全正确！你完成了一次“数据 → 信息 → 知识”的加工：从原始记录中<b>比较</b>出最大值（26.5℃ 出现在 14 时）得到信息，再把多天信息<b>归纳</b>成规律得到知识。这正是小清气象站项目要做的事。");
+    logAct("金字塔：填空任务通过");
+  }else{
+    showFb($("fbFb"), "err", "还差一点：<br>· " + errs.join("<br>· "));
+    logAct("金字塔：填空任务未通过一次");
+  }
+  save();
+});
+
+/* =================== 模块2 传送带分拣 =================== */
+var BELT = [
+  {txt:"「37.2」——体温计上的读数", t:"num", chip:"数", col:"#0d9488", why:"它以数字形式直接表示体温这个属性的量，属于数值型数据。"},
+  {txt:"“今天白天晴，风力 2~3 级”——一句天气预报", t:"txt", chip:"文", col:"#0284c7", why:"虽然含有数字 2~3，但它们是文字串的组成部分，整体是文本型数据（教材中的例子）。"},
+  {txt:"一张积雨云的照片", t:"img", chip:"图", col:"#7c3aed", why:"照片以像素画面记录事物，属于图像数据。"},
+  {txt:"一段雷声的录音", t:"aud", chip:"音", col:"#d97706", why:"录音以声音波形记录信息，属于音频数据。"},
+  {txt:"一段云朵变化的延时摄影", t:"vid", chip:"视", col:"#dc2626", why:"连续画面构成的记录属于视频数据。"},
+  {txt:"「1013.2」——气压计的读数", t:"num", chip:"数", col:"#0d9488", why:"用数字直接表示气压大小，是数值型数据。"},
+  {txt:"观测日记里写的一段文字：“清晨山谷起雾，正午雾散转晴”", t:"txt", chip:"文", col:"#0284c7", why:"用文字符号描述天气状态，是文本型数据。"},
+  {txt:"气象雷达回波图（一幅彩色图形）", t:"img", chip:"图", col:"#7c3aed", why:"雷达回波以图形/图像方式呈现，是图像数据。"},
+  {txt:"广播里的天气播报录音", t:"aud", chip:"音", col:"#d97706", why:"它是声音记录，属于音频数据。"},
+  {txt:"校园气象角的监控录像片段", t:"vid", chip:"视", col:"#dc2626", why:"监控录像是连续画面，属于视频数据。"}
+];
+var beltTName = {num:"数值", txt:"文本", img:"图像", aud:"音频", vid:"视频"};
+var beltBusy = false;
+function beltShow(){
+  var i = state.belt.idx;
+  $("beltIdx").textContent = Math.min(i+1, BELT.length);
+  $("beltScore").textContent = state.belt.score;
+  if(i >= BELT.length){
+    $("belt").classList.add("paused");
+    $("beltItem").style.opacity = 0;
+    state.belt.done = true; save();
+    showFb($("beltFb"), "good", "10 件包裹分拣完毕，得分 " + state.belt.score + " / 100！无论数据以什么形式呈现（数值、文本、图像、音频、视频），为了让计算机加工处理，它们最终都会表示为<b>二进制数</b>。");
+    markStationDone(1, true);
+    logAct("分拣站：完成全部 10 件，得分 " + state.belt.score);
+    return;
+  }
+  var it = BELT[i];
+  var el = $("beltItem");
+  $("belt").classList.remove("paused");
+  el.style.transition = "none"; el.style.left = "-360px"; el.style.top = "12px"; el.style.opacity = 1;
+  el.innerHTML = '<span class="chip" style="background:' + it.col + '">?</span><span>' + esc(it.txt) + "</span>";
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){
+    el.style.transition = "left 1.1s ease-out, top .5s, opacity .5s";
+    var beltW = $("belt").clientWidth;
+    el.style.left = Math.max(20, (beltW - el.offsetWidth)/2) + "px";
+    beltBusy = false;
+  });});
+}
+$("beltStart").addEventListener("click", function(){
+  if(state.belt.idx >= BELT.length){
+    showFb($("beltFb"), "hint", "本轮已完成，可点“重置”再练一遍。");
+    return;
+  }
+  beltShow();
+  logAct("分拣站：启动传送带");
+});
+$("beltReset").addEventListener("click", function(){
+  state.belt = {score:0, idx:0, done:false}; save();
+  $("beltIdx").textContent = 0; $("beltScore").textContent = 0;
+  $("beltItem").style.opacity = 0; $("belt").classList.add("paused");
+  $("beltFb").className = "fb";
+  markStationDone(1, false);
+});
+Array.prototype.forEach.call(document.querySelectorAll(".chute"), function(ch){
+  ch.addEventListener("click", function(){
+    if(beltBusy) return;
+    var i = state.belt.idx;
+    if(i >= BELT.length || $("beltItem").style.opacity === "0" || $("beltItem").style.opacity === ""){
+      showFb($("beltFb"), "hint", "请先点击「启动传送带」，等包裹到达中间再分拣。");
+      return;
+    }
+    var it = BELT[i], pick = ch.getAttribute("data-t");
+    if(pick === it.t){
+      beltBusy = true;
+      state.belt.score += 10; state.belt.idx++;
+      showFb($("beltFb"), "good", "分对了！它是「" + beltTName[it.t] + "型」。" + esc(it.why));
+      var el = $("beltItem");
+      el.style.top = "120px"; el.style.opacity = 0;
+      save();
+      setTimeout(beltShow, 650);
+    }else{
+      showFb($("beltFb"), "err", "分错通道了：它不是「" + beltTName[pick] + "型」。提示：" + esc(it.why) + " 请重新选择通道。");
+      logAct("分拣站：一次误分拣");
+      save();
+    }
+    $("beltScore").textContent = state.belt.score;
+  });
+});
+
+/* MNIST 风格手写数字（Canvas 自绘，5x7 点阵 + 随机抖动模拟手写差异） */
+var FONT5x7 = {
+  0:["01110","10001","10011","10101","11001","10001","01110"],
+  1:["00100","01100","00100","00100","00100","00100","01110"],
+  2:["01110","10001","00001","00110","01000","10000","11111"],
+  3:["11110","00001","00001","01110","00001","00001","11110"],
+  4:["00010","00110","01010","10010","11111","00010","00010"],
+  5:["11111","10000","11110","00001","00001","10001","01110"],
+  6:["00110","01000","10000","11110","10001","10001","01110"],
+  7:["11111","00001","00010","00100","01000","01000","01000"],
+  8:["01110","10001","10001","01110","10001","10001","01110"],
+  9:["01110","10001","10001","01111","00001","00010","01100"]
+};
+function drawDigit(cv, d){
+  var ctx = cv.getContext("2d");
+  ctx.fillStyle = "#111827"; ctx.fillRect(0,0,56,56);
+  var rows = FONT5x7[d];
+  var jx = (Math.random()-0.5)*6, jy = (Math.random()-0.5)*6;
+  var sx = 0.85 + Math.random()*0.35, rot = (Math.random()-0.5)*0.28;
+  ctx.save();
+  ctx.translate(28+jx, 28+jy); ctx.rotate(rot); ctx.scale(sx, 1);
+  for(var r=0;r<7;r++){
+    for(var c=0;c<5;c++){
+      if(rows[r][c] === "1"){
+        var g = 200 + Math.floor(Math.random()*56);
+        ctx.fillStyle = "rgb(" + g + "," + g + "," + g + ")";
+        var w = 6 + Math.random()*2.4, h = 6 + Math.random()*2.4;
+        ctx.fillRect((c-2.5)*6.4 + (Math.random()-0.5)*1.6 - w/2 + 3,
+                     (r-3.5)*6.4 + (Math.random()-0.5)*1.6 - h/2 + 3, w, h);
+      }
+    }
+  }
+  ctx.restore();
+}
+function mnistRender(){
+  var row = $("mnistRow"); row.innerHTML = "";
+  for(var d=0; d<10; d++){
+    var cell = document.createElement("div"); cell.className = "mnist-cell";
+    var cv = document.createElement("canvas"); cv.width = 56; cv.height = 56;
+    drawDigit(cv, d);
+    var lab = document.createElement("div"); lab.className = "lab"; lab.textContent = "标签:" + d;
+    cell.appendChild(cv); cell.appendChild(lab); row.appendChild(cell);
+  }
+}
+$("mnistRefresh").addEventListener("click", function(){ mnistRender(); logAct("MNIST：换一批样本"); });
+mnistRender();
+
+/* =================== 模块3 数据故事 =================== */
+var STORIES = [
+  {yr:"1609 年前后", who:"开普勒与第谷的观测数据", svg:kepSvg(),
+   body:"17 世纪初，天文学家<b>开普勒</b>分析了他的雇主<b>第谷·布拉赫</b>积累的 20 多年星空观测数据，陆续发现了行星运动三大定律。坚实全面的观测数据为新发现提供了强有力的证据，打破了延续千余年的僵化信条，也为牛顿发现万有引力定律奠定了基础。",
+   q:"这个故事最能说明数据的什么价值？",
+   opts:["长期、坚实的观测数据能为科学新发现提供证据","观测星空只要凭肉眼感觉就行","数据越旧越没有用处"],
+   ans:0, why:"第谷 20 多年的数据积累是开普勒发现规律的基石——没有充分的数据，规律无从谈起。这也提醒小清：气象站要坚持多天采集。",
+   whyWrong:["", "恰恰相反，凭感觉的结论不可靠，正是精确记录的数据打破了旧信条。", "第谷的数据用了几十年后仍然产生了巨大价值，数据的价值不因时间而消失。"]},
+  {yr:"1854 年", who:"约翰·斯诺的霍乱地图", svg:snowSvg(),
+   body:"1854 年伦敦某些区域急性传染病大暴发。<b>约翰·斯诺</b>医生把死亡病例逐一绘制在地图上，分析不同区域病例的分布，发现一条大街的<b>水泵</b>周边病例特别集中，由此得出“传染病通过受污染的水传播”的结论，及时挽救了数以万计居民的生命。",
+   q:"这个故事最能说明数据的什么价值？",
+   opts:["把数据画到地图上就一定好看","把数据放到空间位置中呈现，能帮助发现事物之间的联系、找到问题根源","数据可以代替医生看病"],
+   ans:1, why:"斯诺没有新仪器，只是换了一种<b>呈现方式</b>（点在地图上），就让“病例围着水泵”这一联系显现出来——数据的组织与可视化能揭示隐藏的规律。",
+   whyWrong:["地图不是为了好看，而是为了让位置分布规律显现出来。","","数据帮助医生做判断，但不能代替专业诊断，重点在“发现联系”。"]},
+  {yr:"1858 年前后", who:"南丁格尔的玫瑰图", svg:roseSvg(),
+   body:"现代护理体系创始者<b>弗洛伦斯·南丁格尔</b>是最早使用统计图表的数据科学先驱之一。克里米亚战争期间，她用士兵死亡数据绘制统计图形（后人称“玫瑰图”），证明战地医院糟糕的卫生条件才是伤员高死亡率的主因，促使当局改善医疗状况，挽救了大量士兵的生命。",
+   q:"这个故事最能说明数据的什么价值？",
+   opts:["图表画得越复杂越有说服力","打仗时不需要统计数据","清晰有力的数据图表能说服决策者，推动现实改变"],
+   ans:2, why:"同样的数字写成表格可能无人在意，画成直观图形却能让人一眼看懂问题、推动决策——数据的价值要通过恰当呈现来释放。",
+   whyWrong:["复杂不等于有说服力，南丁格尔的图胜在直观清晰。","正是战地的死亡统计数据揭示了真正的问题所在。",""]}
+];
+function kepSvg(){
+  var s = '<svg width="180" height="140" viewBox="0 0 180 140">';
+  s += '<rect width="180" height="140" fill="#0f172a" rx="8"/>';
+  s += '<ellipse cx="90" cy="70" rx="64" ry="40" fill="none" stroke="#5eead4" stroke-width="2" stroke-dasharray="5 4"/>';
+  s += '<circle cx="112" cy="70" r="9" fill="#fbbf24"/>';
+  s += '<circle cx="30" cy="60" r="5" fill="#93c5fd"/>';
+  for(var i=0;i<26;i++){
+    var x = 8+Math.floor(((i*37)%164)), y = 8+Math.floor(((i*53)%124));
+    s += '<circle cx="'+x+'" cy="'+y+'" r="1.2" fill="#e2e8f0"/>';
+  }
+  s += '<text x="90" y="130" fill="#99f6e4" font-size="10" text-anchor="middle">行星沿椭圆轨道运行（示意）</text></svg>';
+  return s;
+}
+function snowSvg(){
+  var s = '<svg width="180" height="140" viewBox="0 0 180 140">';
+  s += '<rect width="180" height="140" fill="#fefce8" rx="8"/>';
+  s += '<path d="M20 30 H160 M20 70 H160 M20 110 H160 M45 12 V128 M90 12 V128 M135 12 V128" stroke="#d6d3d1" stroke-width="5"/>';
+  s += '<circle cx="90" cy="70" r="7" fill="#0d9488"/><text x="90" y="88" font-size="9" text-anchor="middle" fill="#0f766e">水泵</text>';
+  var pts = [[80,60],[100,63],[95,80],[78,78],[104,74],[86,55],[110,66],[70,68],[97,52],[88,90],[60,64],[118,80],[92,42],[73,88],[108,90],[130,40],[40,100],[150,105],[35,40]];
+  for(var i=0;i<pts.length;i++){ s += '<circle cx="'+pts[i][0]+'" cy="'+pts[i][1]+'" r="2.6" fill="#dc2626"/>'; }
+  s += '<ellipse cx="90" cy="70" rx="42" ry="30" fill="none" stroke="#0284c7" stroke-width="1.6" stroke-dasharray="4 3"/>';
+  s += '<text x="90" y="132" fill="#78350f" font-size="10" text-anchor="middle">病例（红点）围绕水泵集中（示意）</text></svg>';
+  return s;
+}
+function roseSvg(){
+  var s = '<svg width="180" height="140" viewBox="0 0 180 140">';
+  s += '<rect width="180" height="140" fill="#fdf2f8" rx="8"/>';
+  var cx=90, cy=74, vals=[46,58,52,40,30,22,18,14,20,26,34,42];
+  var cols=["#60a5fa","#93c5fd","#f9a8d4","#f472b6","#ec4899","#db2777"];
+  for(var i=0;i<12;i++){
+    var a0=(i*30-90)*Math.PI/180, a1=((i+1)*30-90)*Math.PI/180, r=vals[i];
+    var x0=cx+r*Math.cos(a0), y0=cy+r*Math.sin(a0), x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1);
+    s += '<path d="M'+cx+' '+cy+' L'+x0.toFixed(1)+' '+y0.toFixed(1)+' A'+r+' '+r+' 0 0 1 '+x1.toFixed(1)+' '+y1.toFixed(1)+' Z" fill="'+cols[i%6]+'" fill-opacity="0.85" stroke="#fff"/>';
+  }
+  s += '<text x="90" y="132" fill="#831843" font-size="10" text-anchor="middle">按月份分扇区的死亡人数（示意）</text></svg>';
+  return s;
+}
+function storyRender(){
+  var box = $("storyCards"); box.innerHTML = "";
+  STORIES.forEach(function(st, i){
+    var card = document.createElement("div");
+    card.className = "story-card"; card.id = "story" + i;
+    var optsHtml = st.opts.map(function(o, j){
+      var cls = "quiz-opt";
+      var a = state.stories.quiz[i];
+      if(a !== undefined){
+        if(j === st.ans) cls += " right";
+        else if(j === a && a !== st.ans) cls += " wrong";
+      }
+      return '<button class="' + cls + '" data-s="' + i + '" data-o="' + j + '">' + "ABC"[j] + ". " + esc(o) + "</button>";
+    }).join("");
+    card.innerHTML = '<div class="story-flex">' + st.svg +
+      '<div class="txt"><b style="color:var(--teal-dd)">' + st.yr + " · " + st.who + "</b><p style='margin-top:6px'>" + st.body + "</p></div></div>" +
+      '<div style="margin-top:10px;font-size:14px;"><b>想一想：</b>' + esc(st.q) + "</div>" + optsHtml +
+      '<div class="fb" id="storyFb' + i + '"></div>';
+    box.appendChild(card);
+  });
+  Array.prototype.forEach.call(box.querySelectorAll(".quiz-opt"), function(btn){
+    btn.addEventListener("click", function(){
+      var i = +btn.getAttribute("data-s"), j = +btn.getAttribute("data-o");
+      var st = STORIES[i];
+      var fb = $("storyFb" + i);
+      if(j === st.ans){
+        state.stories.quiz[i] = j; save();
+        showFb(fb, "good", "答对了！" + st.why);
+        logAct("数据故事：第" + (i+1) + "题答对");
+        storyRefreshOpts(i);
+      }else{
+        showFb(fb, "err", "再想想：" + (st.whyWrong[j] || "这个说法没有抓住故事的重点。") + " 提示：故事的关键在“数据（或它的呈现方式）带来了什么改变”。可再选一次。");
+        logAct("数据故事：第" + (i+1) + "题答错一次");
+      }
+      storyProg();
+    });
+  });
+  storyProg();
+}
+function storyRefreshOpts(i){
+  var card = $("story" + i);
+  Array.prototype.forEach.call(card.querySelectorAll(".quiz-opt"), function(b){
+    var j = +b.getAttribute("data-o");
+    b.classList.toggle("right", j === STORIES[i].ans);
+    b.classList.toggle("wrong", false);
+  });
+}
+function storyProg(){
+  var read = state.stories.read.length, ans = Object.keys(state.stories.quiz).length;
+  $("storyProg").textContent = "故事阅读：" + read + "/3 · 答题：" + ans + "/3";
+  markStationDone(2, read === 3 && ans === 3);
+}
+Array.prototype.forEach.call(document.querySelectorAll(".snode"), function(n){
+  n.addEventListener("click", function(){
+    var i = +n.getAttribute("data-s");
+    var card = $("story" + i);
+    var wasOpen = card.classList.contains("show");
+    Array.prototype.forEach.call(document.querySelectorAll(".story-card"), function(c){ c.classList.remove("show"); });
+    Array.prototype.forEach.call(document.querySelectorAll(".snode"), function(m){ m.classList.remove("open"); });
+    if(!wasOpen){
+      card.classList.add("show"); n.classList.add("open");
+      if(state.stories.read.indexOf(i) < 0){ state.stories.read.push(i); save(); }
+      logAct("数据故事：阅读第" + (i+1) + "个故事");
+    }
+    storyProg();
+  });
+});
+storyRender();
+
+/* =================== 模块4 4V =================== */
+function v4Badge(){
+  Array.prototype.forEach.call(document.querySelectorAll("#v4Badges .badge"), function(b){
+    var k = b.getAttribute("data-v");
+    var on = k==="vol"?state.v4.vol : k==="vel"?state.v4.vel : k==="var"?state.v4.vari : state.v4.val;
+    b.className = "badge " + (on ? "ok" : "info");
+    b.textContent = (on ? "✓ " : "□ ") + (k==="vol"?"巨量性":k==="vel"?"高速性":k==="var"?"多样性":"价值性");
+  });
+  markStationDone(3, state.v4.vol && state.v4.vel && state.v4.vari && state.v4.val);
+}
+/* Volume：教材锚点：10TB ≈ 66亿部《红楼梦》（约87万汉字）；高清电影约 2GB/部 */
+var VOLS = [
+  {n:"1 KB", b:1024, note:"大约半页纯文字。"},
+  {n:"1 MB", b:1048576, note:"一张普通照片的量级。"},
+  {n:"1 GB", b:1073741824, note:"1 GB = 1 024 MB。"},
+  {n:"1 TB", b:1099511627776, note:"1 TB = 1 024 GB，家用大硬盘的量级。"},
+  {n:"10 TB", b:10995116277760, note:"教材：通常认为 10~100TB 是“大数据”的门槛；10TB 约等于 66 亿部《红楼梦》（约 87 万汉字/部）。"},
+  {n:"1 PB", b:1125899906842624, note:"1 PB = 1 024 TB。我国一个中等城市 50 年的医疗数据量可达 10PB 级。"},
+  {n:"1 EB", b:1152921504606846976, note:"1 EB = 1 024 PB。“中国天眼”FAST 未来十年数据量预计达 1 亿 GB（约 95EB 量级），TB、PB 已不足以衡量人类产生的数据。"}
+];
+function volShow(){
+  var i = +$("volSlider").value;
+  var v = VOLS[i];
+  var hlm = v.b / 10995116277760 * 6.6e9; // 以教材“10TB≈66亿部”为换算锚点
+  var mov = v.b / (2 * 1073741824);
+  function fmt(x){
+    if(x >= 1e8) return (x/1e8).toFixed(x>=1e9?0:1) + " 亿";
+    if(x >= 1e4) return (x/1e4).toFixed(x>=1e5?0:1) + " 万";
+    if(x >= 1) return x >= 100 ? Math.round(x).toLocaleString("zh-CN") : x.toFixed(1);
+    return x.toFixed(4);
+  }
+  $("volRead").innerHTML = "当前数据量：<b>" + v.n + "</b><br>≈ <b>" + fmt(hlm) + "</b> 部《红楼梦》　≈ <b>" + fmt(mov) + "</b> 部高清电影<br><span style='color:var(--gray)'>" + v.note + "</span>";
+  if(i >= 4 && !state.v4.vol){ state.v4.vol = true; save(); v4Badge(); logAct("4V：体验巨量性（滑到 10TB 以上）"); }
+}
+$("volSlider").addEventListener("input", volShow);
+volShow();
+/* Velocity */
+var velTimer = null, velSec = 0, velTotal = 0;
+function velTick(){
+  velSec++;
+  var n = 3200 + Math.floor(Math.random()*2600);
+  velTotal += n;
+  $("velCount").textContent = velTotal.toLocaleString("zh-CN");
+  var log = $("velLog");
+  var line = "第 " + velSec + " 秒：+" + n.toLocaleString("zh-CN") + " 条骑行记录（开锁/位置/还车…）";
+  log.innerHTML = esc(line) + "<br>" + log.innerHTML;
+  var lines = log.innerHTML.split("<br>"); if(lines.length > 5) log.innerHTML = lines.slice(0,5).join("<br>");
+  if(velSec >= 5 && !state.v4.vel){ state.v4.vel = true; save(); v4Badge(); logAct("4V：体验高速性（模拟 5 秒以上）"); }
+}
+$("velRun").addEventListener("click", function(){
+  if(velTimer){ clearInterval(velTimer); velTimer = null; this.textContent = "运行"; }
+  else{ velTimer = setInterval(velTick, 1000); this.textContent = "暂停"; }
+});
+$("velStep").addEventListener("click", velTick);
+$("velReset").addEventListener("click", function(){
+  if(velTimer){ clearInterval(velTimer); velTimer = null; $("velRun").textContent = "运行"; }
+  velSec = 0; velTotal = 0;
+  $("velCount").textContent = "0"; $("velLog").innerHTML = "（等待开始……）";
+});
+/* Variety */
+var VAR_MAP = {
+  "手机":["位置轨迹(日志)","照片(图像)","语音(音频)","聊天文字(文本)"],
+  "监控摄像头":["监控录像(视频)","抓拍画面(图像)"],
+  "环境传感器":["温度读数(数值)","湿度读数(数值)","气压读数(数值)"],
+  "社交平台":["帖子文字(文本)","短视频(视频)","评论(文本)"],
+  "气象站":["气温序列(数值)","云图(图像)","观测日志(文本)"]
+};
+$("varSrcs").addEventListener("change", function(){
+  var out = $("varOut"); out.innerHTML = "";
+  var cnt = 0;
+  Array.prototype.forEach.call(document.querySelectorAll("#varSrcs input"), function(cb){
+    cb.parentNode.classList.toggle("on", cb.checked);
+    if(cb.checked){
+      cnt++;
+      VAR_MAP[cb.value].forEach(function(f){
+        var b = document.createElement("span"); b.className = "badge teal"; b.textContent = f;
+        out.appendChild(b);
+      });
+    }
+  });
+  if(cnt === 0) out.innerHTML = '<span style="font-size:12.5px;color:var(--gray)">（勾选后这里会出现各种数据形态）</span>';
+  if(cnt >= 3 && !state.v4.vari){ state.v4.vari = true; save(); v4Badge(); logAct("4V：体验多样性（勾选 3 个以上数据源）"); }
+});
+/* Value：淘规律小游戏 */
+var HOUR_BASE = [2,1,1,1,2,5,14,30,42,20,12,10,12,14,11,10,14,26,38,24,14,9,6,3]; // 相对骑行强度
+var valAcc = new Array(24).fill(0), valBatches = 0;
+function valDraw(){
+  var chart = $("valChart");
+  if(!chart.children.length){
+    for(var h=0; h<24; h++){
+      var bar = document.createElement("div"); bar.className = "bar";
+      var sp = document.createElement("span"); sp.textContent = (h%4===0)? h : "";
+      bar.appendChild(sp); chart.appendChild(bar);
+    }
+  }
+  var mx = Math.max.apply(null, valAcc.concat([1]));
+  for(var h2=0; h2<24; h2++){
+    var b = chart.children[h2];
+    b.style.height = Math.max(2, valAcc[h2]/mx*96) + "px";
+    b.classList.toggle("hot", valBatches >= 4 && valAcc[h2] > mx*0.72);
+  }
+}
+$("valMine").addEventListener("click", function(){
+  valBatches++;
+  for(var h=0; h<24; h++){
+    valAcc[h] += HOUR_BASE[h] * (0.6 + Math.random()*0.8);
+  }
+  $("valGot").textContent = "已淘 " + valBatches + " 批（每批约 1 万条记录）";
+  valDraw();
+  if(valBatches >= 4){
+    $("valQ").hidden = false;
+    if(valBatches === 4) showFb($("valFb"), "hint", "看！杂乱的记录攒多了，早晚两个“山峰”浮现出来——价值密度低，但海量之中藏着规律。请回答右边的问题。");
+  }
+});
+Array.prototype.forEach.call(document.querySelectorAll(".valA"), function(b){
+  b.addEventListener("click", function(){
+    state.v4.valTries++;
+    if(b.getAttribute("data-a") === "8"){
+      state.v4.val = true; save(); v4Badge();
+      showFb($("valFb"), "good", "正确！早高峰约在 8 时（上学上班），晚高峰约在 18 时。单看一条骑行记录毫无价值，把海量记录汇聚统计，规律才被“提纯”出来——这就是大数据的价值性。");
+      logAct("4V：价值性小游戏通关");
+    }else{
+      showFb($("valFb"), "err", "再看看柱状图：哪个时段的柱子在上午明显最高？提示：想想大家几点出门上学上班。可再选。");
+      logAct("4V：价值性问题答错一次");
+    }
+    save();
+  });
+});
+valDraw();
+v4Badge();
+
+/* =================== 模块5 路网 =================== */
+var NODES = {
+  A:{x:60, y:60, n:"学校"}, B:{x:230, y:40, n:"体育馆"}, C:{x:420, y:60, n:"火车站"},
+  D:{x:70, y:180, n:"公园"}, E:{x:250, y:170, n:"市中心"}, F:{x:440, y:180, n:"医院"},
+  G:{x:90, y:300, n:"图书馆"}, H:{x:270, y:310, n:"商场"}, I:{x:470, y:300, n:"科技园"}
+};
+var EDGES = [
+  ["A","B"],["B","C"],["A","D"],["B","E"],["C","F"],["D","E"],["E","F"],
+  ["D","G"],["E","H"],["F","I"],["G","H"],["H","I"],["A","E"],["E","I"]
+];
+var edgeLv = {};
+function edgeKey(a,b){ return a<b ? a+b : b+a; }
+function edgeLen(a,b){
+  var dx = NODES[a].x - NODES[b].x, dy = NODES[a].y - NODES[b].y;
+  return Math.sqrt(dx*dx + dy*dy);
+}
+function randomTraffic(){
+  EDGES.forEach(function(e){
+    var r = Math.random();
+    edgeLv[edgeKey(e[0],e[1])] = r < 0.5 ? 1 : (r < 0.82 ? 2 : 3);
+  });
+}
+function mapDraw(pathEdges){
+  var svg = $("citySvg");
+  var html = "";
+  EDGES.forEach(function(e){
+    var k = edgeKey(e[0],e[1]);
+    var on = pathEdges && pathEdges.indexOf(k) >= 0;
+    html += '<line class="rd lv' + edgeLv[k] + (on?" onpath":"") + '" x1="' + NODES[e[0]].x + '" y1="' + NODES[e[0]].y +
+            '" x2="' + NODES[e[1]].x + '" y2="' + NODES[e[1]].y + '"><title>' +
+            NODES[e[0]].n + "—" + NODES[e[1]].n + "</title></line>";
+  });
+  Object.keys(NODES).forEach(function(k){
+    var nd = NODES[k];
+    var pick = (k === $("mapFrom").value || k === $("mapTo").value);
+    html += '<circle class="nd' + (pick?" pick":"") + '" data-n="' + k + '" cx="' + nd.x + '" cy="' + nd.y + '" r="14"></circle>';
+    html += '<text class="nd-l" x="' + nd.x + '" y="' + (nd.y - 20) + '" text-anchor="middle">' + nd.n + "</text>";
+    html += '<text class="nd-l" x="' + nd.x + '" y="' + (nd.y + 5) + '" text-anchor="middle" style="font-size:11px;fill:' + (pick?"#fff":"#0f766e") + '">' + k + "</text>";
+  });
+  svg.innerHTML = html;
+  Array.prototype.forEach.call(svg.querySelectorAll(".nd"), function(c){
+    c.addEventListener("click", function(){
+      var k = c.getAttribute("data-n");
+      if(!$("mapFrom").value || ($("mapFrom").value && $("mapTo").value)){
+        $("mapFrom").value = k; $("mapTo").value = "";
+      }else if(k !== $("mapFrom").value){
+        $("mapTo").value = k;
+      }
+      mapDraw(null);
+    });
+  });
+}
+function dijkstra(src, dst){
+  var dist = {}, prev = {}, un = Object.keys(NODES).slice();
+  un.forEach(function(k){ dist[k] = Infinity; });
+  dist[src] = 0;
+  var adj = {};
+  EDGES.forEach(function(e){
+    var k = edgeKey(e[0],e[1]);
+    var w = edgeLen(e[0],e[1]) * (edgeLv[k]===1 ? 1 : edgeLv[k]===2 ? 1.9 : 3.2);
+    (adj[e[0]] = adj[e[0]]||[]).push([e[1], w]);
+    (adj[e[1]] = adj[e[1]]||[]).push([e[0], w]);
+  });
+  while(un.length){
+    un.sort(function(a,b){ return dist[a]-dist[b]; });
+    var u = un.shift();
+    if(u === dst || dist[u] === Infinity) break;
+    (adj[u]||[]).forEach(function(p){
+      var v = p[0], w = p[1];
+      if(dist[u] + w < dist[v]){ dist[v] = dist[u] + w; prev[v] = u; }
+    });
+  }
+  if(dist[dst] === Infinity) return null;
+  var path = [dst];
+  while(path[0] !== src){ path.unshift(prev[path[0]]); }
+  return {path:path, cost:dist[dst]};
+}
+(function initMapSel(){
+  var fs = $("mapFrom"), ts = $("mapTo");
+  var oh = '<option value="">--</option>';
+  Object.keys(NODES).forEach(function(k){ oh += '<option value="' + k + '">' + k + " " + NODES[k].n + "</option>"; });
+  fs.innerHTML = oh; ts.innerHTML = oh;
+  fs.addEventListener("change", function(){ mapDraw(null); });
+  ts.addEventListener("change", function(){ mapDraw(null); });
+})();
+$("mapRefresh").addEventListener("click", function(){
+  randomTraffic(); mapDraw(null);
+  state.map.refresh++; save();
+  showFb($("mapFb"), "hint", "路况已更新（模拟海量车辆位置数据的实时汇聚）。同一起终点再规划一次，看看推荐路线会不会改变。");
+  logAct("路网：更新路况");
+});
+$("mapPlan").addEventListener("click", function(){
+  var f = $("mapFrom").value, t = $("mapTo").value;
+  if(!f || !t || f === t){
+    showFb($("mapFb"), "hint", "请先选择<b>不同的</b>起点和终点（可直接点击地图上的圆点：第一次点选起点，第二次点选终点）。");
+    return;
+  }
+  var r = dijkstra(f, t);
+  var pe = [];
+  for(var i=0; i<r.path.length-1; i++) pe.push(edgeKey(r.path[i], r.path[i+1]));
+  mapDraw(pe);
+  var names = r.path.map(function(k){ return NODES[k].n; }).join(" → ");
+  var mins = (r.cost/38).toFixed(1);
+  state.map.plans++; save();
+  showFb($("mapFb"), "good", "推荐路线：<b>" + names + "</b>，预计约 " + mins + " 分钟。系统按「路程 × 拥堵系数」计算总耗时最短的路，红色路段会被自动绕开——这正是地图导航基于交通大数据给出“绕路”建议的原理。已规划 " + state.map.plans + " 次。");
+  logAct("路网：规划路线 " + f + "→" + t);
+  markStationDone(4, state.map.plans >= 2 && state.dq.correct >= 8);
+});
+randomTraffic(); mapDraw(null);
+
+/* 辨析题 */
+var DQ = [
+  {s:"为了求助修门锁，把家庭详细住址和门锁密码发到公开网络上。", a:false,
+   why:"住址、密码是敏感个人信息，公开发布可能带来入室盗窃等严重安全风险。求助应通过可信的线下渠道。"},
+  {s:"学校发布“全校学生平均身高 158cm”这类不指向任何个人的统计结果。", a:true,
+   why:"经过汇总、去掉个人身份的统计数据不泄露隐私，可以公开，这也是数据发挥价值的常见方式。"},
+  {s:"导航软件把海量用户的匿名位置数据汇总起来分析道路拥堵。", a:true,
+   why:"匿名化、聚合后的数据不指向具体个人，用于改善公共出行，是大数据的正当应用。"},
+  {s:"某手机应用未经用户同意读取通讯录，并把联系人信息卖给广告商。", a:false,
+   why:"未经同意收集、出售个人信息是违法行为。《中华人民共和国网络安全法》规定不得非法获取、出售个人信息。"},
+  {s:"把自己拍的晚霞照片分享到班级群，和同学交流天气观察。", a:true,
+   why:"自己创作的、不含他人隐私的内容可以自主分享，还能促进学习交流。"},
+  {s:"把带有同学姓名和成绩的体检数据表发到公开网络上。", a:false,
+   why:"体检数据属于他人的敏感个人信息，公开传播侵犯同学隐私，即使“出于好玩”也不可以。"},
+  {s:"气象部门把历史气温数据放到开放数据平台，供大家免费下载研究。", a:true,
+   why:"政府和许多组织公开气象、交通等数据供人们自由使用，这正是小清项目可利用的开放数据资源。"},
+  {s:"陌生网页弹出“填写身份证号即可领大奖”的问卷，如实填写。", a:false,
+   why:"这是典型的信息诈骗手法。身份证号是核心身份信息，绝不能随意提供给来历不明的网页。"}
+];
+function dqRender(){
+  var list = $("dqList"); list.innerHTML = "";
+  DQ.forEach(function(q, i){
+    var d = document.createElement("div"); d.className = "dq-item";
+    var ansd = state.dq.answers[i];
+    d.innerHTML = '<div class="stem">' + (i+1) + ". " + esc(q.s) + "</div>" +
+      '<button class="btn ghost small dqA" data-i="' + i + '" data-v="1">可以 / 合理</button> ' +
+      '<button class="btn ghost small dqA" data-i="' + i + '" data-v="0">不可以 / 有风险</button> ' +
+      (ansd !== undefined ? '<span class="badge ok">已答对</span>' : "") +
+      '<div class="fb' + (ansd !== undefined ? " show good" : "") + '" id="dqFb' + i + '">' +
+      (ansd !== undefined ? "✓ " + esc(q.why) : "") + "</div>";
+    list.appendChild(d);
+  });
+  $("dqScore").textContent = state.dq.correct + " / 8";
+  Array.prototype.forEach.call(list.querySelectorAll(".dqA"), function(b){
+    b.addEventListener("click", function(){
+      var i = +b.getAttribute("data-i"), v = b.getAttribute("data-v") === "1";
+      var q = DQ[i];
+      var fb = $("dqFb" + i);
+      if(state.dq.answers[i] !== undefined){
+        showFb(fb, "good", "这题已答对：" + esc(q.why));
+        return;
+      }
+      if(v === q.a){
+        state.dq.answers[i] = true;
+        state.dq.correct = Object.keys(state.dq.answers).length;
+        save();
+        showFb(fb, "good", "判断正确！" + esc(q.why));
+        logAct("辨析：第" + (i+1) + "题答对");
+        $("dqScore").textContent = state.dq.correct + " / 8";
+        markStationDone(4, state.map.plans >= 2 && state.dq.correct >= 8);
+        if(state.dq.correct === 8) logAct("辨析：8 题全部完成");
+      }else{
+        showFb(fb, "err", "再想想。提示：判断的关键是——①是不是<b>个人敏感信息</b>（住址、密码、证件号、他人健康数据）？②是否<b>经过同意</b>或已<b>匿名化/汇总</b>？想清楚这两点再答一次。");
+        logAct("辨析：第" + (i+1) + "题答错一次");
+      }
+    });
+  });
+}
+dqRender();
+
+/* =================== 模块6 工坊与导出 =================== */
+function wsRender(){
+  $("wsCount").textContent = "已保存 " + state.cards.length + " 组";
+  var list = $("wsList"); list.innerHTML = "";
+  state.cards.forEach(function(c, i){
+    var d = document.createElement("div"); d.className = "saved";
+    d.innerHTML = "<b>第 " + (i+1) + " 组</b>　<span class='badge teal'>数据</span> " + esc(c.d) +
+      "　<span class='badge info'>信息</span> " + esc(c.i) +
+      "　<span class='badge ok'>知识</span> " + esc(c.k) +
+      ' <button class="btn warn small" data-del="' + i + '" style="float:right">删除</button>';
+    list.appendChild(d);
+  });
+  Array.prototype.forEach.call(list.querySelectorAll("[data-del]"), function(b){
+    b.addEventListener("click", function(){
+      state.cards.splice(+b.getAttribute("data-del"), 1);
+      save(); wsRender();
+    });
+  });
+  markStationDone(5, state.cards.length > 0);
+}
+$("wsSave").addEventListener("click", function(){
+  var d = $("wsData").value.trim(), i = $("wsInfo").value.trim(), k = $("wsKnow").value.trim();
+  if(!d || !i || !k){
+    showFb($("wsFb"), "hint", "三栏都要填写：先写一条原始记录（数据），再写它在场景中的含义（信息），最后写归纳出的规律（知识）。");
+    return;
+  }
+  if(k.length < 6){
+    showFb($("wsFb"), "hint", "“知识”一栏太短了——试着写成一条完整的规律，例如“……通常出现在……，因此应当……”。");
+    return;
+  }
+  state.cards.push({d:d, i:i, k:k, t:new Date().toLocaleString("zh-CN")});
+  save();
+  $("wsData").value = ""; $("wsInfo").value = ""; $("wsKnow").value = "";
+  showFb($("wsFb"), "good", "已保存！这组卡片体现了“数据 → 信息 → 知识”的加工链条，做得好。可以再写一组，或到下方导出学习档案。");
+  logAct("工坊：保存一组卡片");
+  wsRender();
+});
+function buildSummary(){
+  var lines = [];
+  lines.push("======= 第2单元 第1节《从数据到大数据》学习档案 =======");
+  lines.push("生成时间：" + new Date().toLocaleString("zh-CN"));
+  lines.push("");
+  lines.push("【站点一 概念金字塔】 归类正确 " + state.pyramid.correct + " 次 / 尝试 " + state.pyramid.attempts + " 次；已归位 " +
+    Object.keys(state.pyramid.placed).length + "/9 张；填空任务：" + (state.pyramid.fill ? "已通过" : "未完成"));
+  lines.push("【站点二 类型分拣站】 得分 " + state.belt.score + "/100，" + (state.belt.done ? "已完成全部 10 件" : "已分拣 " + state.belt.idx + "/10 件"));
+  lines.push("【站点三 数据故事】 已阅读 " + state.stories.read.length + "/3 个故事，答对 " + Object.keys(state.stories.quiz).length + "/3 题");
+  lines.push("【站点四 大数据4V】 巨量性" + (state.v4.vol?"✓":"×") + " 高速性" + (state.v4.vel?"✓":"×") +
+    " 多样性" + (state.v4.vari?"✓":"×") + " 价值性" + (state.v4.val?"✓":"×"));
+  lines.push("【站点五 路网大数据】 规划路线 " + state.map.plans + " 次，更新路况 " + state.map.refresh + " 次；辨析题答对 " + state.dq.correct + "/8");
+  lines.push("【站点六 卡片工坊】 保存 " + state.cards.length + " 组卡片：");
+  state.cards.forEach(function(c, i){
+    lines.push("  " + (i+1) + ") 数据：" + c.d + " ｜ 信息：" + c.i + " ｜ 知识：" + c.k);
+  });
+  lines.push("");
+  lines.push("【核心结论】");
+  lines.push("· 数据是对事物属性的符号记录；放进场景成为信息；归纳提炼沉淀为知识。");
+  lines.push("· 数据集 = 描述某事物某些属性的一系列数据，数量要充分大（如 MNIST 有 70 000 幅带标签图像）。");
+  lines.push("· 大数据 4V：巨量性、高速性、多样性、价值性；需要更强的技术工具才能洞察规律。");
+  lines.push("· 使用数据要守法：不非法获取、出售个人信息；匿名化、汇总后的开放数据可造福社会。");
+  lines.push("· 呼应贯通项目：小清的气象站要连续多天采集，才能验证“14 时最热、日出前后最冷”。");
+  lines.push("");
+  lines.push("【操作日志（最近 20 条）】");
+  state.log.slice(-20).forEach(function(l){ lines.push("  [" + l.t + "] " + l.text); });
+  return lines.join("\n");
+}
+$("sumRefresh").addEventListener("click", function(){
+  $("sumBox").textContent = buildSummary();
+});
+function download(name, content, mime){
+  var blob = new Blob(["\ufeff" + content], {type:mime});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+$("expTxt").addEventListener("click", function(){
+  download("第2单元第1节_学习小结.txt", buildSummary(), "text/plain;charset=utf-8");
+  logAct("导出：下载 txt 小结");
+});
+$("expJson").addEventListener("click", function(){
+  download("第2单元第1节_学习档案.json", JSON.stringify(state, null, 2), "application/json;charset=utf-8");
+  logAct("导出：下载 json 档案");
+});
+$("copySum").addEventListener("click", function(){
+  var txt = buildSummary();
+  $("sumBox").textContent = txt;
+  var ta = document.createElement("textarea");
+  ta.value = txt; document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); }catch(e){}
+  ta.remove();
+  showFb($("wsFb"), "good", "小结已生成并尝试复制到剪贴板（也可直接从下方文本框选择复制）。");
+});
+$("clearAll").addEventListener("click", function(){
+  if(this.getAttribute("data-arm") !== "1"){
+    this.setAttribute("data-arm", "1");
+    this.textContent = "再点一次确认清除";
+    var self = this;
+    setTimeout(function(){ self.setAttribute("data-arm",""); self.textContent = "清除本机学习数据"; }, 4000);
+    return;
+  }
+  try{ localStorage.removeItem(LS_KEY); }catch(e){}
+  state = JSON.parse(JSON.stringify(defState));
+  location.reload();
+});
+
+/* 恢复界面状态 */
+pyrRender(); wsRender();
+if(state.belt.idx > 0 && state.belt.idx < BELT.length){
+  $("beltIdx").textContent = state.belt.idx; $("beltScore").textContent = state.belt.score;
+}
+if(state.belt.done){ markStationDone(1, true); $("beltScore").textContent = state.belt.score; $("beltIdx").textContent = 10; }
+markStationDone(4, state.map.plans >= 2 && state.dq.correct >= 8);
+})();
+</script>
+</body>
+</html>
