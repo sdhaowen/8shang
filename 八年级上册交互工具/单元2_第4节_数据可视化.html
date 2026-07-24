@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第2单元 第4节 数据可视化 · 设计工作室</title>
+<style>
+:root{
+  --pk:#ec4899; --vi:#8b5cf6; --grad:linear-gradient(120deg,#ec4899,#8b5cf6);
+  --bg:#faf7fd; --panel:#ffffff; --stage:#1e1b2e; --ink:#3b0764;
+  --ok:#059669; --err:#dc2626; --warn:#d97706;
+  --mono:"SFMono-Regular",Consolas,"Courier New",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:#27272a;line-height:1.6}
+header.studio-head{background:var(--grad);color:#fff;padding:22px 18px 14px}
+.head-inner{max-width:1160px;margin:0 auto}
+.head-inner .unit{font-size:.82rem;opacity:.92;letter-spacing:2px}
+.head-inner h1{font-size:1.45rem;margin:3px 0 8px}
+.goals{display:flex;flex-wrap:wrap;gap:8px}
+.goals span{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:3px 12px;font-size:.78rem}
+/* 工具标签栏（像设计软件的文档页签） */
+nav.tabbar{position:sticky;top:0;z-index:60;background:#2a2440;padding:0 10px;display:flex;flex-wrap:wrap;gap:2px;box-shadow:0 2px 10px rgba(59,7,100,.3)}
+nav.tabbar .tab{border:none;background:transparent;color:#c4b5fd;font-size:.82rem;padding:10px 14px;cursor:pointer;border-radius:8px 8px 0 0;font-family:inherit}
+nav.tabbar .tab.on{background:var(--bg);color:var(--ink);font-weight:700}
+nav.tabbar .tab:hover:not(.on){background:rgba(255,255,255,.08)}
+main{max-width:1160px;margin:16px auto 50px;padding:0 12px}
+section.module{display:none}
+section.module.on{display:block}
+/* 设计软件双栏布局：左画板 + 右属性面板 */
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:14px;align-items:start}
+.stage{background:var(--stage);border-radius:14px;padding:16px;box-shadow:0 6px 24px rgba(59,7,100,.18);position:sticky;top:52px}
+.stage .stage-title{color:#e9d5ff;font-size:.78rem;letter-spacing:2px;margin-bottom:10px;font-family:var(--mono)}
+.stage canvas{width:100%;height:auto;background:#fff;border-radius:10px;display:block;touch-action:none}
+.panel{background:var(--panel);border:1px solid #f3e8ff;border-radius:14px;padding:16px;box-shadow:0 3px 14px rgba(139,92,246,.10)}
+.panel h2{font-size:1.02rem;color:var(--ink);margin-bottom:6px}
+.panel h2 .tag{font-size:.68rem;background:linear-gradient(120deg,#fce7f3,#ede9fe);color:#9d174d;border-radius:6px;padding:2px 8px;margin-left:6px;vertical-align:middle}
+.task{background:linear-gradient(120deg,#fdf2f8,#f5f3ff);border:1px dashed #e9d5ff;border-radius:9px;padding:8px 11px;font-size:.84rem;color:#52525b;margin:8px 0 12px}
+.task b{color:var(--pk)}
+.prop{margin-bottom:10px}
+.prop label{display:block;font-size:.78rem;color:#6b21a8;margin-bottom:3px;font-weight:600}
+.prop select,.prop input[type=text],.prop input[type=number]{width:100%;padding:6px 9px;border:1px solid #e4e4e7;border-radius:8px;font-size:.84rem;font-family:inherit;background:#fff}
+.prop input[type=range]{width:100%}
+.prop .row{display:flex;gap:8px;flex-wrap:wrap}
+.prop .row label{font-weight:400;color:#3f3f46;font-size:.82rem}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:8px;padding:7px 13px;font-size:.84rem;transition:.15s}
+.btn-grad{background:var(--grad);color:#fff;font-weight:600}
+.btn-grad:hover{filter:brightness(1.08)}
+.btn-ghost{background:#fff;color:#7e22ce;border:1px solid #e9d5ff}
+.btn-ghost:hover{background:#faf5ff}
+.btn-warn{background:#fef2f2;color:var(--err);border:1px solid #fecaca}
+button:disabled{opacity:.45;cursor:not-allowed}
+textarea{width:100%;font-family:inherit;padding:8px 10px;border:1px solid #e4e4e7;border-radius:8px;font-size:.84rem;resize:vertical}
+.badge{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.74rem;font-weight:600}
+.badge.ok{background:#d1fae5;color:var(--ok)} .badge.err{background:#fee2e2;color:var(--err)}
+.badge.info{background:#ede9fe;color:#6d28d9} .badge.warn{background:#fef3c7;color:var(--warn)}
+.fb{border-radius:8px;padding:8px 11px;font-size:.83rem;margin-top:8px;display:none}
+.fb.show{display:block}
+.fb.ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
+.fb.err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.fb.hint{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.opt-col{display:flex;flex-direction:column;gap:8px}
+.opt-col button{text-align:left;background:#fff;border:1px solid #e4e4e7;color:#3f3f46}
+.opt-col button:hover{border-color:var(--vi);color:#6d28d9}
+.opt-col button.sel-ok{background:#d1fae5;border-color:var(--ok);color:#065f46}
+.opt-col button.sel-err{background:#fee2e2;border-color:var(--err);color:#991b1b}
+.opt-row{display:flex;flex-wrap:wrap;gap:8px}
+.opt-row button{background:#fff;border:1px solid #e4e4e7;color:#3f3f46}
+.opt-row button.sel-ok{background:#d1fae5;border-color:var(--ok);color:#065f46}
+.opt-row button.sel-err{background:#fee2e2;border-color:var(--err);color:#991b1b}
+.code-box{background:#1e1b2e;border-radius:10px;padding:12px;font-family:var(--mono);font-size:.8rem;color:#e9d5ff;overflow-x:auto}
+.code-box .ln{color:#6d6a85;user-select:none;display:inline-block;width:24px}
+.code-box .kw{color:#f9a8d4} .code-box .str{color:#86efac} .code-box .fn{color:#93c5fd}
+.code-box input,.code-box select{font-family:var(--mono);font-size:.8rem;background:#3b3654;color:#fff;border:1px solid #8b5cf6;border-radius:4px;padding:1px 5px}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dash-cell{background:#2a2440;border:2px dashed #6d6a85;border-radius:10px;min-height:150px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:.15s}
+.dash-cell.sel{border-color:var(--pk);box-shadow:0 0 0 3px rgba(236,72,153,.35)}
+.dash-cell .hintxt{color:#6d6a85;font-size:.78rem}
+.dash-cell canvas{width:100%;border-radius:8px}
+.tray{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.tray .widget-chip{background:#fff;border:1px solid #e9d5ff;border-radius:8px;padding:6px 12px;font-size:.8rem;cursor:pointer;color:#6d28d9}
+.tray .widget-chip.sel{background:var(--grad);color:#fff;border-color:transparent}
+.tray .widget-chip.used{opacity:.35;pointer-events:none}
+.quiz-block{background:var(--panel);border:1px solid #f3e8ff;border-radius:14px;padding:16px;margin-top:14px;box-shadow:0 3px 14px rgba(139,92,246,.10)}
+.scene{border:1px solid #f1f5f9;border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fff}
+.scene .q{font-size:.86rem;margin-bottom:8px}
+.scene .q .no{font-family:var(--mono);color:var(--pk);font-weight:700;margin-right:6px}
+.mono{font-family:var(--mono)}
+.stat-grid{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
+.stat-box{background:#faf5ff;border:1px solid #e9d5ff;border-radius:8px;padding:6px 14px;text-align:center}
+.stat-box .v{font-family:var(--mono);font-size:1rem;font-weight:700;color:#7e22ce}
+.stat-box .k{font-size:.7rem;color:#71717a}
+footer{max-width:1160px;margin:0 auto 40px;padding:0 12px;text-align:center;font-size:.74rem;color:#a1a1aa}
+@media (max-width:860px){
+  .workspace{grid-template-columns:1fr}
+  .stage{position:static}
+}
+</style>
+</head>
+<body>
+<header class="studio-head">
+  <div class="head-inner">
+    <div class="unit">第2单元 数据与数据探究 · 贯通项目「在线数字气象站」</div>
+    <h1>第4节 数据可视化 —— 可视化设计工作室</h1>
+    <div class="goals">
+      <span>① 知道柱状图、折线图、饼图、散点图各自的适用场景</span>
+      <span>② 会用图表、词云等方法把气象数据变成可读的图形</span>
+      <span>③ 能为气象站设计可读性良好的可视化仪表盘</span>
+    </div>
+  </div>
+</header>
+<nav class="tabbar" id="tabbar">
+  <button class="tab on" data-m="m1">① 选图训练</button>
+  <button class="tab" data-m="m2">② 图表设计器</button>
+  <button class="tab" data-m="m3">③ 图表诊所</button>
+  <button class="tab" data-m="m4">④ 词云工坊</button>
+  <button class="tab" data-m="m5">⑤ 代码联动</button>
+  <button class="tab" data-m="m6">⑥ 气象仪表盘</button>
+  <button class="tab" data-m="m7">⑦ 作品集导出</button>
+</nav>
+<main>
+
+<!-- ===== ① 选图训练 ===== -->
+<section class="module on" id="m1">
+  <div class="workspace">
+    <div class="stage">
+      <div class="stage-title">画板 · 需求预览</div>
+      <canvas id="m1-cv" width="620" height="380"></canvas>
+    </div>
+    <div class="panel">
+      <h2>图表选择训练 <span class="tag">场景 × 图表</span></h2>
+      <div class="task"><b>任务：</b>左侧画板会依次展示 7 个数据表达需求（附示意小图）。为每个需求挑选最合适的图表类型。选错会解释"为什么不合适"，改对为止，首次答对计分。</div>
+      <div id="m1-scene" style="font-size:.88rem;margin-bottom:10px"></div>
+      <div class="opt-col" id="m1-opts"></div>
+      <div class="fb" id="m1-fb"></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:12px">
+        <button class="btn-ghost" id="m1-prev">上一题</button>
+        <button class="btn-ghost" id="m1-next">下一题</button>
+        <button class="btn-ghost" id="m1-retry">重做</button>
+        <span class="badge info" id="m1-score">0 / 7</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ② 图表设计器 ===== -->
+<section class="module" id="m2">
+  <div class="workspace">
+    <div class="stage">
+      <div class="stage-title">画板 · 图表画布（实时渲染）</div>
+      <canvas id="m2-cv" width="720" height="460"></canvas>
+    </div>
+    <div class="panel">
+      <h2>交互图表设计器 <span class="tag">核心工具</span></h2>
+      <div class="task"><b>任务：</b>用小七孔气象站的数据设计一张<b>可读性良好</b>的图表：选类型和数据、写清标题与坐标轴名称、配好颜色，再导出 PNG 存进作品集。所有调整即时重绘。</div>
+      <div class="prop"><label>图表类型</label>
+        <select id="m2-type">
+          <option value="bar">柱状图（比大小）</option>
+          <option value="line" selected>折线图（看趋势）</option>
+          <option value="pie">饼图（看占比）</option>
+          <option value="scatter">散点图（看关系）</option>
+        </select></div>
+      <div class="prop"><label>数据字段</label>
+        <select id="m2-data">
+          <option value="temp24" selected>24小时气温（℃）</option>
+          <option value="hum24">24小时湿度（%）</option>
+          <option value="weather7">一周天气天数统计</option>
+          <option value="temphum">气温—湿度对应关系</option>
+        </select></div>
+      <div class="prop"><label>图表标题</label><input type="text" id="m2-title" value="小七孔气象站一天气温变化" maxlength="30"></div>
+      <div class="prop"><label>横轴名称 / 纵轴名称</label>
+        <div class="row"><input type="text" id="m2-xlab" value="时刻" style="flex:1" maxlength="12"><input type="text" id="m2-ylab" value="气温/℃" style="flex:1" maxlength="12"></div></div>
+      <div class="prop"><label>配色方案</label>
+        <select id="m2-palette">
+          <option value="studio" selected>工作室（粉紫）</option>
+          <option value="warm">暖阳（橙红）</option>
+          <option value="cool">清凉（蓝青）</option>
+          <option value="fresh">草木（绿色）</option>
+        </select></div>
+      <div class="prop"><label>显示选项</label>
+        <div class="row">
+          <label><input type="checkbox" id="m2-grid" checked> 网格线</label>
+          <label><input type="checkbox" id="m2-labels"> 数据标签</label>
+          <label><input type="checkbox" id="m2-legend" checked> 图例</label>
+        </div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-grad" id="m2-save">存入作品集</button>
+        <button class="btn-ghost" id="m2-png">导出 PNG</button>
+      </div>
+      <div class="fb" id="m2-fb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ③ 图表诊所 ===== -->
+<section class="module" id="m3">
+  <div class="workspace">
+    <div class="stage">
+      <div class="stage-title">画板 · 病例观察窗</div>
+      <canvas id="m3-cv" width="620" height="400"></canvas>
+    </div>
+    <div class="panel">
+      <h2>错误图表诊所 <span class="tag">找出病因</span></h2>
+      <div class="task"><b>任务：</b>4 张"生病的图表"依次就诊。仔细观察左侧病例，从选项中诊断病因；确诊后点"开始治疗"，观看"治疗前 → 治疗后"的对比动画。记住：<b>图表最重要的是可读性，不能歪曲数据。</b></div>
+      <div id="m3-case" style="font-size:.86rem;font-weight:600;color:var(--ink);margin-bottom:8px"></div>
+      <div class="opt-col" id="m3-opts"></div>
+      <div class="fb" id="m3-fb"></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">
+        <button class="btn-grad" id="m3-cure" disabled>开始治疗 ▶</button>
+        <button class="btn-ghost" id="m3-prev">上一例</button>
+        <button class="btn-ghost" id="m3-next">下一例</button>
+        <span class="badge info" id="m3-prog">病例 1 / 4</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ④ 词云工坊 ===== -->
+<section class="module" id="m4">
+  <div class="workspace">
+    <div class="stage">
+      <div class="stage-title">画板 · 词云画布</div>
+      <canvas id="m4-cv" width="640" height="420"></canvas>
+    </div>
+    <div class="panel">
+      <h2>词云工坊 <span class="tag">文本可视化</span></h2>
+      <div class="task"><b>任务：</b>词云用<b>文字大小代表词语出现的频率</b>。修改或粘贴一段文字，点"生成词云"，观察哪些词最突出；调整最大词数与配色，导出你满意的作品。</div>
+      <div class="prop"><label>文本内容（可编辑）</label>
+      <textarea id="m4-text" rows="7">今天小组在小七孔开展气象观测。我们用温度传感器和湿度传感器采集数据，气温在14时达到最高，日出前后气温最低。湿度与气温变化相反，光照增强时气温上升，风力也影响气温。我们把采集的数据进行分析，再用图表进行可视化，制作了在线数字气象站的仪表盘。数据可视化让天气数据变得直观，图表让分析结论一目了然。气象观测需要坚持记录数据，数据越多，分析越可靠，预测天气也更有把握。</textarea></div>
+      <div class="prop"><label>最大词数：<span id="m4-maxn-v">20</span></label><input type="range" id="m4-maxn" min="8" max="40" value="20"></div>
+      <div class="prop"><label>配色方案</label>
+        <select id="m4-palette">
+          <option value="studio" selected>工作室（粉紫）</option>
+          <option value="warm">暖阳（橙红）</option>
+          <option value="cool">清凉（蓝青）</option>
+          <option value="fresh">草木（绿色）</option>
+        </select></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-grad" id="m4-gen">生成词云</button>
+        <button class="btn-ghost" id="m4-png">导出 PNG</button>
+      </div>
+      <div class="fb" id="m4-fb"></div>
+      <div id="m4-top" style="font-size:.8rem;color:#52525b;margin-top:8px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ⑤ 代码联动 ===== -->
+<section class="module" id="m5">
+  <div class="workspace">
+    <div class="stage">
+      <div class="stage-title">画板 · 模拟渲染结果</div>
+      <canvas id="m5-cv" width="620" height="400"></canvas>
+    </div>
+    <div class="panel">
+      <h2>代码 → 图表联动 <span class="tag">matplotlib 模拟</span></h2>
+      <div class="task"><b>任务：</b>这是教材中绘制 A 地二氧化碳浓度图的 matplotlib 代码。修改 3 个高亮"填空点"（绘图函数、标题、颜色参数），点"运行代码"，左侧立即模拟出对应图表（页面内模拟渲染，不执行真实 Python）。体会"改一行代码，图就变样"。</div>
+      <div class="code-box" id="m5-code">
+<span class="ln">1</span><span class="kw">import</span> matplotlib.pyplot <span class="kw">as</span> plt<br>
+<span class="ln">2</span><span class="kw">import</span> pandas <span class="kw">as</span> pd<br>
+<span class="ln">3</span>df1 = pd.read_excel(<span class="str">'A地CO2浓度.xls'</span>)<br>
+<span class="ln">4</span>plt.rcParams[<span class="str">'font.sans-serif'</span>] = [<span class="str">'SimSun'</span>]<br>
+<span class="ln">5</span>plt.<select id="m5-fn"><option value="plot" selected>plot</option><option value="bar">bar</option><option value="scatter">scatter</option></select>(df1.年份, df1.CO2浓度, color=<span class="str">'</span><input type="text" id="m5-color" value="purple" size="8" maxlength="12"><span class="str">'</span>)<br>
+<span class="ln">6</span>plt.title(<span class="str">'</span><input type="text" id="m5-title" value="A地CO2浓度变化情况" size="16" maxlength="24"><span class="str">'</span>)<br>
+<span class="ln">7</span>plt.xlabel(<span class="str">'年份'</span>)<br>
+<span class="ln">8</span>plt.ylabel(<span class="str">'CO2浓度(mg/L)'</span>)<br>
+<span class="ln">9</span>plt.show()
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn-grad" id="m5-run">▶ 运行代码</button>
+        <button class="btn-ghost" id="m5-reset">恢复默认</button>
+      </div>
+      <div class="fb" id="m5-fb"></div>
+      <div style="font-size:.78rem;color:#71717a;margin-top:8px">合法颜色参数示例：red、blue、green、orange、purple、pink、gray、black</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ⑥ 气象仪表盘 ===== -->
+<section class="module" id="m6">
+  <div class="workspace">
+    <div class="stage">
+      <div class="stage-title">画板 · 2×2 仪表盘网格（点击两个格子可交换）</div>
+      <div class="dash-grid" id="m6-grid"></div>
+    </div>
+    <div class="panel">
+      <h2>在线数字气象站仪表盘 <span class="tag">拼装台</span></h2>
+      <div class="task"><b>任务：</b>像教材"可视化仪表盘"拓展阅读那样，把 4 个组件安排进 2×2 网格：先点下方组件，再点左侧空格放入；点击两个已放置的格子可交换位置。想一想：<b>最重要的信息应该放在哪个位置？</b>完成后导出整块仪表盘 PNG。</div>
+      <div class="prop"><label>组件托盘（点选后再点网格放置）</label>
+        <div class="tray" id="m6-tray"></div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn-ghost" id="m6-reset">清空重摆</button>
+        <button class="btn-grad" id="m6-png" disabled>导出仪表盘 PNG</button>
+      </div>
+      <div class="fb" id="m6-fb"></div>
+    </div>
+  </div>
+  <div class="quiz-block">
+    <h2 style="font-size:1rem;color:var(--ink)">可视化练习场 <span class="tag">即时反馈</span></h2>
+    <div class="task"><b>任务：</b>6 道题：读图、选图表、评价可读性。不确定先点"提示"；答错可重试，首次答对计分。</div>
+    <div id="m6-quiz"></div>
+    <div style="display:flex;gap:8px;align-items:center"><button class="btn-ghost" id="m6-retry">练习重做</button><span class="badge info" id="m6-score">得分 0 / 6</span></div>
+  </div>
+</section>
+
+<!-- ===== ⑦ 作品集导出 ===== -->
+<section class="module" id="m7">
+  <div class="workspace">
+    <div class="stage">
+      <div class="stage-title">画板 · 报告预览</div>
+      <textarea id="m7-report" rows="20" readonly placeholder="点击「生成报告」后在此预览……" style="background:#fff;border-radius:10px;border:none;font-size:.8rem;font-family:var(--mono)"></textarea>
+    </div>
+    <div class="panel">
+      <h2>学习小结与成果导出 <span class="tag">可视化作品集</span></h2>
+      <div class="task"><b>任务：</b>把你在本工作室完成的图表设计、词云、代码实验、仪表盘布局与练习成绩汇总成《气象站可视化报告》，下载留档（图表与仪表盘可在各自页面另存 PNG）。</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="btn-grad" id="m7-gen">生成报告</button>
+        <button class="btn-ghost" id="m7-txt">下载 .txt</button>
+        <button class="btn-ghost" id="m7-json">下载 .json</button>
+        <button class="btn-ghost" id="m7-copy">复制到剪贴板</button>
+        <button class="btn-warn" id="m7-clear">清除本机学习数据</button>
+      </div>
+      <div class="fb" id="m7-fb"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer>第2单元 第4节《数据可视化》交互学习工具 · 数据均为教学示例 · 学习记录仅保存在本机浏览器</footer>
+
+<script>
+(function(){
+'use strict';
+/* ============ 公共 ============ */
+var PRE='u2l4_';
+function save(k,v){ try{ localStorage.setItem(PRE+k,JSON.stringify(v)); }catch(e){} }
+function load(k,d){ try{ var s=localStorage.getItem(PRE+k); return s===null?d:JSON.parse(s); }catch(e){ return d; } }
+function $(id){ return document.getElementById(id); }
+function fb(el,type,html){ el.className='fb show '+type; el.innerHTML=html; }
+function download(name,text,mime){
+  var blob=new Blob([text],{type:mime||'text/plain;charset=utf-8'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },300);
+}
+function pngExport(cv,name){
+  var a=document.createElement('a'); a.href=cv.toDataURL('image/png'); a.download=name;
+  document.body.appendChild(a); a.click(); setTimeout(function(){ a.remove(); },300);
+}
+var PALETTES={
+  studio:['#ec4899','#8b5cf6','#3b82f6','#10b981','#f59e0b','#ef4444','#14b8a6','#f472b6'],
+  warm:['#f97316','#ef4444','#f59e0b','#fb7185','#eab308','#ea580c','#dc2626','#fbbf24'],
+  cool:['#0ea5e9','#6366f1','#14b8a6','#3b82f6','#8b5cf6','#06b6d4','#0284c7','#818cf8'],
+  fresh:['#059669','#10b981','#84cc16','#22c55e','#166534','#4d7c0f','#65a30d','#34d399']
+};
+/* 小七孔气象示例数据 */
+var TEMPS=[13.5,13.1,12.8,12.4,12.1,11.8,11.5,12.3,14.0,16.2,18.5,20.6,22.4,23.8,24.6,24.2,23.3,21.8,19.9,18.2,16.8,15.6,14.7,14.0];
+var HUMS=[88,89,90,91,92,93,94,90,84,78,72,66,61,57,55,56,59,64,70,75,79,82,84,86];
+var HOURL=[]; for(var _h=0;_h<24;_h++) HOURL.push(_h+'时');
+var WEATHER={cats:['晴','多云','阴','小雨'],vals:[3,2,1,1]};
+
+/* ============ 通用图表绘制引擎 ============ */
+/* cfg:{type,title,xlab,ylab,palette,grid,labels,legend}  data:{cats,vals} 或 {xs,ys} */
+function drawChart(ctx,W,H,cfg,data){
+  var pal=PALETTES[cfg.palette]||PALETTES.studio;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#3b0764'; ctx.font='bold 16px system-ui'; ctx.textAlign='center';
+  ctx.fillText(cfg.title||'',W/2,26); ctx.textAlign='left';
+  var padl=58,padr=(cfg.legend?120:26),padt=44,padb=52;
+  var iw=W-padl-padr, ih=H-padt-padb;
+  function axes(vmin,vmax,fmt){
+    ctx.strokeStyle='#a1a1aa'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(padl,padt); ctx.lineTo(padl,H-padb); ctx.lineTo(W-padr,H-padb); ctx.stroke();
+    ctx.fillStyle='#52525b'; ctx.font='11px system-ui';
+    for(var i=0;i<=5;i++){
+      var v=vmin+(vmax-vmin)*i/5, y=H-padb-ih*i/5;
+      if(cfg.grid && i>0){ ctx.strokeStyle='#f4f4f5'; ctx.beginPath(); ctx.moveTo(padl,y); ctx.lineTo(W-padr,y); ctx.stroke(); }
+      ctx.strokeStyle='#a1a1aa'; ctx.beginPath(); ctx.moveTo(padl-4,y); ctx.lineTo(padl,y); ctx.stroke();
+      ctx.textAlign='right'; ctx.fillText(fmt(v),padl-7,y+4); ctx.textAlign='left';
+    }
+    ctx.fillStyle='#3f3f46';
+    ctx.fillText(cfg.xlab||'',W-padr-((cfg.xlab||'').length*11),H-padb+34);
+    ctx.save(); ctx.translate(14,padt+64); ctx.rotate(-Math.PI/2); ctx.fillText(cfg.ylab||'',0,0); ctx.restore();
+  }
+  function legend(items){
+    if(!cfg.legend) return;
+    var x=W-padr+14,y=padt+6;
+    items.forEach(function(it,i){
+      ctx.fillStyle=it.c; ctx.fillRect(x,y+i*20,12,12);
+      ctx.fillStyle='#3f3f46'; ctx.font='11px system-ui'; ctx.fillText(it.t,x+17,y+10+i*20);
+    });
+  }
+  if(cfg.type==='bar'||cfg.type==='line'){
+    var vals=data.vals, cats=data.cats;
+    var vmax=Math.max.apply(null,vals)*1.15, vmin=0;
+    axes(vmin,vmax,function(v){ return (Math.round(v*10)/10).toString(); });
+    var n=vals.length, step=iw/n;
+    // x 刻度（最多显示 12 个标签避免重叠）
+    var skip=Math.ceil(n/12);
+    ctx.fillStyle='#52525b'; ctx.font='10px system-ui'; ctx.textAlign='center';
+    cats.forEach(function(c,i){ if(i%skip===0) ctx.fillText(c,padl+step*(i+0.5),H-padb+16); });
+    ctx.textAlign='left';
+    if(cfg.type==='bar'){
+      var bw=Math.min(step*0.62,58);
+      vals.forEach(function(v,i){
+        var x=padl+step*i+(step-bw)/2, h=(v-vmin)/(vmax-vmin)*ih;
+        ctx.fillStyle=(n<=8? pal[i%pal.length] : pal[0]);
+        ctx.fillRect(x,H-padb-h,bw,h);
+        if(cfg.labels){ ctx.fillStyle='#3f3f46'; ctx.font='10px system-ui'; ctx.textAlign='center'; ctx.fillText(''+v,x+bw/2,H-padb-h-4); ctx.textAlign='left'; }
+      });
+      legend([{c:pal[0],t:data.name||'数值'}]);
+    }else{
+      ctx.strokeStyle=pal[0]; ctx.lineWidth=2.5; ctx.beginPath();
+      vals.forEach(function(v,i){
+        var x=padl+step*(i+0.5), y=H-padb-(v-vmin)/(vmax-vmin)*ih;
+        if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      });
+      ctx.stroke(); ctx.lineWidth=1;
+      vals.forEach(function(v,i){
+        var x=padl+step*(i+0.5), y=H-padb-(v-vmin)/(vmax-vmin)*ih;
+        ctx.beginPath(); ctx.arc(x,y,3.2,0,Math.PI*2); ctx.fillStyle=pal[1]; ctx.fill();
+        if(cfg.labels && i%Math.ceil(vals.length/12)===0){ ctx.fillStyle='#3f3f46'; ctx.font='10px system-ui'; ctx.textAlign='center'; ctx.fillText(''+v,x,y-8); ctx.textAlign='left'; }
+      });
+      legend([{c:pal[0],t:data.name||'数值'}]);
+    }
+  }else if(cfg.type==='pie'){
+    var vals2=data.vals, cats2=data.cats, total=0;
+    vals2.forEach(function(v){ total+=v; });
+    var cx=padl+iw/2, cy=padt+ih/2+6, r=Math.min(iw,ih)/2-8, ang=-Math.PI/2;
+    vals2.forEach(function(v,i){
+      var a2=ang+v/total*Math.PI*2;
+      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,ang,a2); ctx.closePath();
+      ctx.fillStyle=pal[i%pal.length]; ctx.fill();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke(); ctx.lineWidth=1;
+      if(cfg.labels){
+        var mid=(ang+a2)/2, lx=cx+Math.cos(mid)*r*0.65, ly=cy+Math.sin(mid)*r*0.65;
+        ctx.fillStyle='#fff'; ctx.font='bold 12px system-ui'; ctx.textAlign='center';
+        ctx.fillText(Math.round(v/total*100)+'%',lx,ly); ctx.textAlign='left';
+      }
+      ang=a2;
+    });
+    legend(cats2.map(function(c,i){ return {c:pal[i%pal.length],t:c+'（'+vals2[i]+'）'}; }));
+  }else if(cfg.type==='scatter'){
+    var xs=data.xs,ys=data.ys;
+    var xmin=Math.min.apply(null,xs),xmax=Math.max.apply(null,xs);
+    var ymin=Math.min.apply(null,ys),ymax=Math.max.apply(null,ys);
+    var xr=(xmax-xmin)||1, yr=(ymax-ymin)||1;
+    xmin-=xr*0.06; xmax+=xr*0.06; ymin-=yr*0.1; ymax+=yr*0.1;
+    axes(ymin,ymax,function(v){ return (Math.round(v*10)/10).toString(); });
+    ctx.fillStyle='#52525b'; ctx.font='10px system-ui'; ctx.textAlign='center';
+    for(var i2=0;i2<=6;i2++){
+      var xv=xmin+(xmax-xmin)*i2/6;
+      ctx.fillText((Math.round(xv*10)/10).toString(),padl+iw*i2/6,H-padb+16);
+    }
+    ctx.textAlign='left';
+    xs.forEach(function(x,i){
+      var px=padl+(x-xmin)/(xmax-xmin)*iw, py=H-padb-(ys[i]-ymin)/(ymax-ymin)*ih;
+      ctx.beginPath(); ctx.arc(px,py,4,0,Math.PI*2);
+      ctx.fillStyle=pal[0]+'cc'; ctx.fill(); ctx.strokeStyle='#fff'; ctx.stroke();
+    });
+    legend([{c:pal[0],t:data.name||'数据点'}]);
+  }
+}
+/* 数据字段 → 绘图数据的适配（含教学化提示） */
+function datasetFor(field,type){
+  if(field==='temp24'){
+    if(type==='scatter') return {ok:true,data:{xs:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],ys:TEMPS,name:'时刻—气温'},warn:''};
+    if(type==='pie') return {ok:false,msg:'饼图用于展示"各部分占总体的比例"。24 小时气温是连续变化的数值，不存在"占比"关系，切成 24 块饼没有意义，还会丢失时间顺序。请改用折线图看趋势。'};
+    return {ok:true,data:{cats:HOURL,vals:TEMPS,name:'气温/℃'},warn:(type==='bar'?'提示：24 根柱子能比较大小，但看"一天变化趋势"时折线图更直观。':'')};
+  }
+  if(field==='hum24'){
+    if(type==='scatter') return {ok:true,data:{xs:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],ys:HUMS,name:'时刻—湿度'},warn:''};
+    if(type==='pie') return {ok:false,msg:'饼图不适合 24 小时湿度这类连续数据：湿度各时刻数值不是"整体的组成部分"，无法构成占比。请改用折线图或柱状图。'};
+    return {ok:true,data:{cats:HOURL,vals:HUMS,name:'湿度/%'},warn:''};
+  }
+  if(field==='weather7'){
+    if(type==='scatter') return {ok:false,msg:'散点图用于观察两个数值变量的关系，而"一周天气统计"只有类别和天数一组数据，没有第二个变量。请改用柱状图比多少，或饼图看占比。'};
+    if(type==='line') return {ok:true,data:{cats:WEATHER.cats,vals:WEATHER.vals,name:'天数'},warn:'提示：晴、多云、阴、雨是类别而不是连续时间，用折线连起来会暗示不存在的"变化过程"，柱状图或饼图更合适。'};
+    return {ok:true,data:{cats:WEATHER.cats,vals:WEATHER.vals,name:'天数'},warn:''};
+  }
+  // temphum
+  if(type==='scatter') return {ok:true,data:{xs:TEMPS,ys:HUMS,name:'气温—湿度'},warn:''};
+  return {ok:false,msg:'「气温—湿度对应关系」是成对的两变量数据，适合用散点图观察相关性；柱状图/折线图/饼图都无法同时表达两个变量的对应关系。请把图表类型换成散点图。'};
+}
+
+/* ============ 页签切换 ============ */
+(function(){
+  var tabs=document.querySelectorAll('#tabbar .tab');
+  Array.prototype.forEach.call(tabs,function(t){
+    t.onclick=function(){
+      Array.prototype.forEach.call(tabs,function(x){ x.className='tab'; });
+      t.className='tab on';
+      Array.prototype.forEach.call(document.querySelectorAll('section.module'),function(s){ s.className='module'; });
+      $(t.getAttribute('data-m')).className='module on';
+      window.scrollTo(0,0);
+    };
+  });
+})();
+
+/* ============ ① 选图训练 ============ */
+(function(){
+  var TYPES=['柱状图','折线图','饼图','散点图'];
+  var QS=[
+    {t:'比较小七孔各月降水量的多少差异。',a:0,why:'柱状图在"数据大小对比"上最直观，一眼看出哪个月降水多。',sk:'bar'},
+    {t:'展示一天中气温随时间的变化趋势。',a:1,why:'折线图能反映数据随时间连续变化的趋势，正合适。',sk:'line'},
+    {t:'展示一周中晴、多云、阴、雨各占多少比例。',a:2,why:'饼图最适合表示各部分占总体的百分比。',sk:'pie'},
+    {t:'观察"气温"与"湿度"两个变量之间有什么关系。',a:3,why:'散点图把成对数据画成点，最适合观察两个变量间的关系（如负相关）。',sk:'scatter'},
+    {t:'比较甲、乙两个气象站同一天的最高气温谁更高。',a:0,why:'两个数值比大小，用柱状图并排一比就清楚。',sk:'bar'},
+    {t:'呈现近 20 年二氧化碳浓度逐年上升的走势。',a:1,why:'逐年变化的走势属于"趋势"表达，折线图最擅长。',sk:'line'},
+    {t:'展示气象站经费中设备、维护、耗材各项支出的占比。',a:2,why:'各项支出占总经费的比例关系，用饼图一目了然。',sk:'pie'}
+  ];
+  var WRONGWHY=[
+    '柱状图擅长比大小，但表达"占比"或"两变量关系"时信息会缺失。',
+    '折线图用于连续变化的趋势；把不相连的类别用线连起来，会暗示不存在的变化过程。',
+    '饼图只表达"部分占总体"的比例；用它看趋势会完全丢失时间顺序，用它比较相近数值也不精确。',
+    '散点图需要成对的两个数值变量；这里没有"两个变量的对应关系"要观察。'
+  ];
+  var cur=0, st=load('m1',{done:{},first:{}});
+  var cv=$('m1-cv'), ctx=cv.getContext('2d');
+  function sketch(kind){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#3b0764'; ctx.font='bold 15px system-ui';
+    ctx.fillText('需求 '+(cur+1)+' / '+QS.length,24,32);
+    ctx.font='13px system-ui'; ctx.fillStyle='#52525b';
+    wrapText(QS[cur].t,24,58,570,20);
+    // 四种图表小样（当前正确项在答对后高亮）
+    var kinds=['bar','line','pie','scatter'];
+    kinds.forEach(function(k,i){
+      var x=30+(i%2)*300, y=100+Math.floor(i/2)*140;
+      miniSketch(k,x,y,250,110,(st.done[cur]===true && QS[cur].sk===k));
+    });
+  }
+  function wrapText(text,x,y,maxW,lh){
+    var line='',yy=y;
+    for(var i=0;i<text.length;i++){
+      var test=line+text[i];
+      if(ctx.measureText(test).width>maxW){ ctx.fillText(line,x,yy); line=text[i]; yy+=lh; }
+      else line=test;
+    }
+    ctx.fillText(line,x,yy);
+  }
+  function miniSketch(kind,x,y,w,h,hl){
+    ctx.save();
+    ctx.strokeStyle=hl?'#ec4899':'#e4e4e7'; ctx.lineWidth=hl?3:1;
+    ctx.strokeRect(x,y,w,h); ctx.lineWidth=1;
+    ctx.fillStyle='#71717a'; ctx.font='11px system-ui';
+    var names={bar:'柱状图',line:'折线图',pie:'饼图',scatter:'散点图'};
+    ctx.fillText(names[kind],x+8,y+16);
+    var pal=PALETTES.studio;
+    if(kind==='bar'){ [40,65,30,55].forEach(function(v,i){ ctx.fillStyle=pal[i]; ctx.fillRect(x+30+i*50,y+h-14-v,28,v); }); }
+    else if(kind==='line'){
+      ctx.strokeStyle=pal[1]; ctx.lineWidth=2; ctx.beginPath();
+      [60,40,55,25,45,20].forEach(function(v,i){ var px=x+25+i*40,py=y+25+v; if(i===0)ctx.moveTo(px,py); else ctx.lineTo(px,py); });
+      ctx.stroke(); ctx.lineWidth=1;
+    }
+    else if(kind==='pie'){
+      var cx=x+w/2,cy=y+h/2+6,r=38,a=-Math.PI/2;
+      [0.4,0.3,0.2,0.1].forEach(function(p,i){
+        var a2=a+p*Math.PI*2; ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,a,a2); ctx.closePath();
+        ctx.fillStyle=pal[i]; ctx.fill(); a=a2;
+      });
+    }
+    else{
+      var ptsx=[20,45,70,95,120,150,180,205],ptsy=[70,60,64,48,42,35,30,22];
+      ptsx.forEach(function(px,i){ ctx.beginPath(); ctx.arc(x+25+px*0.9,y+18+ptsy[i],3.5,0,Math.PI*2); ctx.fillStyle=pal[3]; ctx.fill(); });
+    }
+    ctx.restore();
+  }
+  function render(){
+    $('m1-scene').innerHTML='<b>需求 '+(cur+1)+'：</b>'+QS[cur].t;
+    var box=$('m1-opts'); box.innerHTML='';
+    $('m1-fb').className='fb';
+    TYPES.forEach(function(ty,i){
+      var b=document.createElement('button'); b.textContent=ty;
+      if(st.done[cur]===true && i===QS[cur].a) b.className='sel-ok';
+      b.onclick=function(){
+        if(st.done[cur]===true) return;
+        if(st.first[cur]===undefined) st.first[cur]=(i===QS[cur].a);
+        if(i===QS[cur].a){
+          st.done[cur]=true; b.className='sel-ok';
+          fb($('m1-fb'),'ok','✔ 正确！'+QS[cur].why+(st.first[cur]?'（首次答对 +1 分）':''));
+        }else{
+          b.className='sel-err';
+          fb($('m1-fb'),'err','✘ 不合适。'+WRONGWHY[i]+' 再选一次。');
+        }
+        save('m1',st); sketch(); refresh();
+      };
+      box.appendChild(b);
+    });
+    sketch(); refresh();
+  }
+  function refresh(){
+    var sc=0,i;
+    for(i=0;i<QS.length;i++){ if(st.done[i]===true && st.first[i]) sc++; }
+    $('m1-score').textContent=sc+' / '+QS.length; save('m1_score',sc);
+  }
+  $('m1-prev').onclick=function(){ cur=(cur+QS.length-1)%QS.length; render(); };
+  $('m1-next').onclick=function(){ cur=(cur+1)%QS.length; render(); };
+  $('m1-retry').onclick=function(){ st={done:{},first:{}}; save('m1',st); cur=0; render(); };
+  render();
+})();
+
+/* ============ ② 图表设计器 ============ */
+(function(){
+  var cv=$('m2-cv'), ctx=cv.getContext('2d');
+  var DEFAULTS={temp24:{title:'小七孔气象站一天气温变化',x:'时刻',y:'气温/℃'},
+    hum24:{title:'小七孔气象站一天湿度变化',x:'时刻',y:'湿度/%'},
+    weather7:{title:'小七孔一周天气统计',x:'天气类型',y:'天数'},
+    temphum:{title:'气温与湿度的关系',x:'气温/℃',y:'湿度/%'}};
+  function cfg(){
+    return {type:$('m2-type').value,title:$('m2-title').value,xlab:$('m2-xlab').value,ylab:$('m2-ylab').value,
+      palette:$('m2-palette').value,grid:$('m2-grid').checked,labels:$('m2-labels').checked,legend:$('m2-legend').checked,
+      field:$('m2-data').value};
+  }
+  function redraw(){
+    var c=cfg(), r=datasetFor(c.field,c.type);
+    if(!r.ok){
+      ctx.clearRect(0,0,cv.width,cv.height);
+      ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+      ctx.fillStyle='#dc2626'; ctx.font='bold 16px system-ui'; ctx.fillText('⚠ 这个组合画不出好图表',40,60);
+      ctx.fillStyle='#52525b'; ctx.font='13px system-ui';
+      wrapT(ctx,r.msg,40,95,630,22);
+      fb($('m2-fb'),'err',r.msg);
+      return;
+    }
+    drawChart(ctx,cv.width,cv.height,c,r.data);
+    if(r.warn) fb($('m2-fb'),'hint',r.warn);
+    else $('m2-fb').className='fb';
+    save('m2_cfg',c);
+  }
+  function wrapT(cx,text,x,y,maxW,lh){
+    var line='',yy=y;
+    for(var i=0;i<text.length;i++){
+      var t=line+text[i];
+      if(cx.measureText(t).width>maxW){ cx.fillText(line,x,yy); line=text[i]; yy+=lh; }
+      else line=t;
+    }
+    cx.fillText(line,x,yy);
+  }
+  ['m2-type','m2-data','m2-palette'].forEach(function(id){ $(id).onchange=function(){
+    if(id==='m2-data'){
+      var d=DEFAULTS[$('m2-data').value];
+      $('m2-title').value=d.title; $('m2-xlab').value=d.x; $('m2-ylab').value=d.y;
+    }
+    redraw();
+  }; });
+  ['m2-title','m2-xlab','m2-ylab'].forEach(function(id){ $(id).oninput=redraw; });
+  ['m2-grid','m2-labels','m2-legend'].forEach(function(id){ $(id).onchange=redraw; });
+  $('m2-png').onclick=function(){
+    pngExport(cv,'气象图表_'+cfg().type+'.png');
+    fb($('m2-fb'),'ok','PNG 已导出到下载文件夹。');
+  };
+  $('m2-save').onclick=function(){
+    var c=cfg(), r=datasetFor(c.field,c.type);
+    if(!r.ok){ fb($('m2-fb'),'err','当前组合无法成图，请先按提示调整类型或数据字段，再存入作品集。'); return; }
+    var works=load('m2_works',[]);
+    var names={bar:'柱状图',line:'折线图',pie:'饼图',scatter:'散点图'};
+    works.push({type:names[c.type],field:$('m2-data').options[$('m2-data').selectedIndex].text,title:c.title,palette:c.palette,time:new Date().toLocaleTimeString('zh-CN')});
+    save('m2_works',works);
+    fb($('m2-fb'),'ok','已存入作品集（第 '+works.length+' 件）。它会出现在「⑦ 作品集导出」的报告里。');
+  };
+  // 恢复配置
+  var sc=load('m2_cfg',null);
+  if(sc){
+    $('m2-type').value=sc.type||'line'; $('m2-data').value=sc.field||'temp24';
+    $('m2-title').value=sc.title; $('m2-xlab').value=sc.xlab; $('m2-ylab').value=sc.ylab;
+    $('m2-palette').value=sc.palette||'studio'; $('m2-grid').checked=!!sc.grid;
+    $('m2-labels').checked=!!sc.labels; $('m2-legend').checked=!!sc.legend;
+  }
+  redraw();
+})();
+
+/* ============ ③ 图表诊所 ============ */
+(function(){
+  var cv=$('m3-cv'), ctx=cv.getContext('2d');
+  var cur=0, anim=null, prog=0;
+  var st=load('m3',{cured:{}});
+  var CASES=[
+    {name:'病例一：两站气温柱状图',
+     opts:['颜色不够鲜艳','纵轴不从 0 开始，夸大了微小差异','柱子太宽了','缺少动画效果'],a:1,
+     why:'纵轴从 23.0 开始截断，让 24.6 与 23.8 看起来相差一倍多；治疗方法：柱状图纵轴从 0 开始，差异回到真实比例。'},
+    {name:'病例二：天气占比饼图',
+     opts:['各扇区加起来超过了 100%','扇区颜色太多','没有标题','应该改成折线图'],a:0,
+     why:'标注 55%+40%+35% = 130%，超过 100%！占比数据必须合计恰好 100%；治疗方法：按真实天数计算比例（50%、30%、20%）。'},
+    {name:'病例三：一天气温折线图',
+     opts:['线太粗了','缺少图例','横轴时间顺序被打乱，趋势失真','数据点太少'],a:2,
+     why:'横轴是 8时、20时、11时、23时、14时……乱序连线后完全看不出"先升后降"的规律；治疗方法：按时间从小到大排序后再连线。'},
+    {name:'病例四：立体柱状图',
+     opts:['立体透视效果扭曲了柱子的真实比例','柱子应该横着放','背景不好看','应该用饼图'],a:0,
+     why:'三维透视让后排柱子"显小"、顶面又让柱子"显高"，读数容易出错；治疗方法：改用普通平面柱状图，比例真实、读数方便。'}
+  ];
+  var pal=PALETTES.studio;
+  function axesBox(x,y,w,h){ ctx.strokeStyle='#a1a1aa'; ctx.beginPath(); ctx.moveTo(x,y); ctx.lineTo(x,y+h); ctx.lineTo(x+w,y+h); ctx.stroke(); }
+  function lerp(a,b,t){ return a+(b-a)*t; }
+  function drawCase(idx,t){ // t: 0=病态 1=健康
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#3b0764'; ctx.font='bold 14px system-ui';
+    ctx.fillText(CASES[idx].name+(t>=1?'（治疗后 ✔）':(t>0?'（治疗中…）':'（治疗前）')),24,28);
+    ctx.font='11px system-ui';
+    if(idx===0){
+      // 截断纵轴：基线从 23.0 过渡到 0
+      var base=lerp(23,0,t), vals=[24.6,23.8], names=['甲站','乙站'];
+      var x0=90,y0=60,w=440,h=280;
+      axesBox(x0,y0,w,h);
+      ctx.fillStyle='#52525b';
+      for(var i=0;i<=5;i++){
+        var v=base+(25-base)*i/5, y=y0+h-(v-base)/(25-base)*h;
+        ctx.fillText(v.toFixed(1),x0-34,y+4);
+        ctx.strokeStyle='#f4f4f5'; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x0+w,y); ctx.stroke();
+      }
+      vals.forEach(function(v,i){
+        var bh=(v-base)/(25-base)*h, x=x0+90+i*180;
+        ctx.fillStyle=pal[i]; ctx.fillRect(x,y0+h-bh,90,bh);
+        ctx.fillStyle='#3f3f46'; ctx.fillText(names[i]+' '+v+'℃',x+16,y0+h+18);
+      });
+      ctx.fillStyle=t>=1?'#059669':'#dc2626';
+      ctx.fillText(t>=1?'纵轴从 0 开始：两站气温其实只差 0.8℃':'纵轴从 23.0 开始：看起来差了一大截？',x0,y0+h+40);
+    }else if(idx===1){
+      // 饼图超100%：角度和从 130% 过渡到 100%
+      var sick=[55,40,35], healthy=[50,30,20], labels=['晴','多云','雨'];
+      var cx=250,cy=210,r=120,a=-Math.PI/2;
+      var totalDeg=lerp(1.3,1.0,t); // 占整圆的倍数
+      for(var j=0;j<3;j++){
+        var p=lerp(sick[j],healthy[j],t)/100*Math.PI*2;
+        if(a-(-Math.PI/2)+p>Math.PI*2*Math.min(totalDeg,1)+0.001 && t<1){ /* 病态时允许溢出重叠 */ }
+        var a2=a+p;
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,a,a2); ctx.closePath();
+        ctx.fillStyle=pal[j]+(t<1?'bb':'ff'); ctx.fill();
+        ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke(); ctx.lineWidth=1;
+        var mid=(a+a2)/2;
+        ctx.fillStyle='#3f3f46';
+        ctx.fillText(labels[j]+' '+Math.round(lerp(sick[j],healthy[j],t))+'%',cx+Math.cos(mid)*(r+26)-14,cy+Math.sin(mid)*(r+26));
+        a=a2;
+      }
+      var sum=Math.round(lerp(130,100,t));
+      ctx.fillStyle=sum>100?'#dc2626':'#059669';
+      ctx.font='bold 13px system-ui';
+      ctx.fillText('合计：'+sum+'%'+(sum>100?' ← 超过 100%，扇区都重叠了！':' ✔ 恰好 100%'),420,120);
+    }else if(idx===2){
+      // 乱序折线
+      var hoursSick=[8,20,11,23,14,2,17,5], x0=70,y0=60,w=480,h=280;
+      var tempOf={2:12.8,5:11.8,8:14.0,11:20.6,14:24.6,17:21.8,20:16.8,23:14.0};
+      var order=hoursSick.slice();
+      if(t>=1) order.sort(function(a,b){return a-b;});
+      axesBox(x0,y0,w,h);
+      ctx.fillStyle='#52525b';
+      for(var k2=0;k2<=4;k2++){ var v2=10+k2*4, yy=y0+h-(v2-10)/16*h; ctx.fillText(v2+'℃',x0-34,yy+4); }
+      ctx.strokeStyle=t>=1?'#059669':'#dc2626'; ctx.lineWidth=2; ctx.beginPath();
+      order.forEach(function(hh,i){
+        var px=x0+30+i*(w-60)/(order.length-1), py=y0+h-(tempOf[hh]-10)/16*h;
+        if(i===0)ctx.moveTo(px,py); else ctx.lineTo(px,py);
+      });
+      ctx.stroke(); ctx.lineWidth=1;
+      order.forEach(function(hh,i){
+        var px=x0+30+i*(w-60)/(order.length-1), py=y0+h-(tempOf[hh]-10)/16*h;
+        ctx.beginPath(); ctx.arc(px,py,4,0,Math.PI*2); ctx.fillStyle=pal[1]; ctx.fill();
+        ctx.fillStyle='#3f3f46'; ctx.fillText(hh+'时',px-8,y0+h+16);
+      });
+      ctx.fillStyle=t>=1?'#059669':'#dc2626';
+      ctx.fillText(t>=1?'按时间排序后：清晨低、午后高的规律清清楚楚':'时间顺序乱了：折线上蹿下跳，趋势完全失真',x0,y0+h+40);
+    }else{
+      // 3D 柱状 vs 平面柱状
+      var vals3=[18,21,24,20], names3=['春','夏','秋','冬'], x0=90,y0=70,w=440,h=270;
+      axesBox(x0,y0,w,h);
+      ctx.fillStyle='#52525b';
+      for(var k3=0;k3<=5;k3++){ var v3=k3*5, y3=y0+h-v3/26*h; ctx.fillText(v3+'',x0-24,y3+4); }
+      vals3.forEach(function(v,i){
+        var bw=70, x=x0+40+i*105, bh=v/26*h, y=y0+h-bh;
+        var sk=lerp(18,0,t), sq=lerp(0.82,1,t); // 透视偏移与压缩
+        var drawH=bh*sq;
+        ctx.fillStyle=pal[i];
+        ctx.beginPath();
+        ctx.moveTo(x,y0+h); ctx.lineTo(x,y0+h-drawH);
+        ctx.lineTo(x+bw,y0+h-drawH); ctx.lineTo(x+bw,y0+h); ctx.closePath(); ctx.fill();
+        if(t<1){
+          ctx.fillStyle='rgba(0,0,0,.22)';
+          ctx.beginPath();
+          ctx.moveTo(x,y0+h-drawH); ctx.lineTo(x+sk,y0+h-drawH-sk);
+          ctx.lineTo(x+bw+sk,y0+h-drawH-sk); ctx.lineTo(x+bw,y0+h-drawH); ctx.closePath(); ctx.fill();
+          ctx.beginPath();
+          ctx.moveTo(x+bw,y0+h); ctx.lineTo(x+bw+sk,y0+h-sk);
+          ctx.lineTo(x+bw+sk,y0+h-drawH-sk); ctx.lineTo(x+bw,y0+h-drawH); ctx.closePath();
+          ctx.fillStyle='rgba(0,0,0,.32)'; ctx.fill();
+        }
+        ctx.fillStyle='#3f3f46'; ctx.fillText(names3[i]+' '+v+'℃',x+14,y0+h+18);
+      });
+      ctx.fillStyle=t>=1?'#059669':'#dc2626';
+      ctx.fillText(t>=1?'平面柱状图：柱高与数值严格成比例，读数可靠':'立体透视：顶面与侧面让柱子高度难以准确判断',x0,y0+h+40);
+    }
+  }
+  function render(){
+    $('m3-case').textContent=CASES[cur].name;
+    $('m3-prog').textContent='病例 '+(cur+1)+' / 4'+(st.cured[cur]?'（已治愈）':'');
+    var box=$('m3-opts'); box.innerHTML='';
+    $('m3-fb').className='fb';
+    $('m3-cure').disabled=!st.cured||!st.cured['diag'+cur];
+    CASES[cur].opts.forEach(function(o,i){
+      var b=document.createElement('button'); b.textContent=String.fromCharCode(65+i)+'. '+o;
+      if(st.cured['diag'+cur] && i===CASES[cur].a) b.className='sel-ok';
+      b.onclick=function(){
+        if(i===CASES[cur].a){
+          b.className='sel-ok'; st.cured['diag'+cur]=true; save('m3',st);
+          fb($('m3-fb'),'ok','✔ 确诊！'+CASES[cur].why+' 点击「开始治疗」看对比动画。');
+          $('m3-cure').disabled=false;
+        }else{
+          b.className='sel-err';
+          fb($('m3-fb'),'err','✘ 这不是主要病因。提示：想想这张图有没有<b>歪曲数据的真实比例或顺序</b>？再观察一下左侧图形。');
+        }
+      };
+      box.appendChild(b);
+    });
+    prog=st.cured[cur]?1:0;
+    drawCase(cur,prog);
+  }
+  $('m3-cure').onclick=function(){
+    if(anim) cancelAnimationFrame(anim);
+    var t0=null;
+    function stepA(ts){
+      if(t0===null) t0=ts;
+      prog=Math.min(1,(ts-t0)/1400);
+      drawCase(cur,prog);
+      if(prog<1){ anim=requestAnimationFrame(stepA); }
+      else{
+        st.cured[cur]=true; save('m3',st);
+        $('m3-prog').textContent='病例 '+(cur+1)+' / 4（已治愈）';
+        fb($('m3-fb'),'ok','✔ 治疗完成！对比"治疗前→治疗后"：'+CASES[cur].why);
+      }
+    }
+    anim=requestAnimationFrame(stepA);
+  };
+  $('m3-prev').onclick=function(){ cur=(cur+3)%4; render(); };
+  $('m3-next').onclick=function(){ cur=(cur+1)%4; render(); };
+  render();
+})();
+
+/* ============ ④ 词云工坊 ============ */
+(function(){
+  var cv=$('m4-cv'), ctx=cv.getContext('2d');
+  var DICT=['数据可视化','气象观测','气象站','小七孔','传感器','温度传感器','湿度传感器','数据','气温','湿度','光照','风力','天气','图表','仪表盘','可视化','分析','采集','观测','预测','趋势','记录','最高','最低','日出','变化','结论','小组','在线','数字','直观','可靠'];
+  var STOP=['我们','他们','进行','通过','需要','可以','没有','一个','这个','那个','以及','并且','但是','因为','所以','如果','就是','还是','已经','非常','也','的','了','在','和','与','把','让','更','再','很','都','是','用','对','有','也更','一目了然'];
+  function tokenize(text){
+    var counts={};
+    // 1. 词表最长匹配
+    var rest=text;
+    DICT.slice().sort(function(a,b){ return b.length-a.length; }).forEach(function(w){
+      var n=0, idx=rest.indexOf(w);
+      while(idx>=0){ n++; rest=rest.slice(0,idx)+'\u0001'.repeat(w.length)+rest.slice(idx+w.length); idx=rest.indexOf(w); }
+      if(n>0) counts[w]=(counts[w]||0)+n;
+    });
+    // 2. 剩余文本按标点/停用词切分，取 2~4 字片段
+    var chunks=rest.split(/[\u0001\s，。！？、；：""''（）,.!?;:()\d]+/);
+    chunks.forEach(function(c){
+      STOP.forEach(function(sw){ c=c.split(sw).join('\u0002'); });
+      c.split('\u0002').forEach(function(p){
+        if(p.length>=2&&p.length<=4){ counts[p]=(counts[p]||0)+1; }
+      });
+    });
+    var arr=Object.keys(counts).map(function(w){ return {w:w,n:counts[w]}; });
+    arr.sort(function(a,b){ return b.n-a.n||b.w.length-a.w.length; });
+    return arr;
+  }
+  var lastWords=[];
+  function generate(){
+    var text=$('m4-text').value;
+    if(!text.trim()){ fb($('m4-fb'),'err','请先输入一段文字再生成词云。'); return; }
+    var maxN=parseInt($('m4-maxn').value,10);
+    var words=tokenize(text).slice(0,maxN);
+    if(!words.length){ fb($('m4-fb'),'err','没有提取到有效词语，请输入更长的中文文本。'); return; }
+    lastWords=words;
+    var pal=PALETTES[$('m4-palette').value]||PALETTES.studio;
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+    var placed=[], maxF=words[0].n;
+    var cx=cv.width/2, cy=cv.height/2;
+    // 简单伪随机（确定性），避免每次布局完全一样又不引入外部库
+    var seed=maxN*7+words.length;
+    function rnd(){ seed=(seed*9301+49297)%233280; return seed/233280; }
+    words.forEach(function(item,i){
+      var size=Math.round(16+(item.n/maxF)*36+(i===0?6:0));
+      ctx.font='bold '+size+'px system-ui';
+      var w=ctx.measureText(item.w).width, h=size*1.1;
+      // 阿基米德螺旋试探
+      var angle0=rnd()*Math.PI*2, placedOk=false, x=0,y=0;
+      for(var t2=0;t2<600;t2+=4){
+        var rr=t2*0.55, aa=angle0+t2*0.12;
+        x=cx+Math.cos(aa)*rr-w/2; y=cy+Math.sin(aa)*rr*0.72;
+        if(x<6||y<h||x+w>cv.width-6||y>cv.height-8) continue;
+        var rect={x:x-3,y:y-h,w:w+6,h:h+4}, hit=false;
+        for(var p2=0;p2<placed.length;p2++){
+          var r2=placed[p2];
+          if(!(rect.x+rect.w<r2.x||r2.x+r2.w<rect.x||rect.y+rect.h<r2.y||r2.y+r2.h<rect.y)){ hit=true; break; }
+        }
+        if(!hit){ placedOk=true; break; }
+      }
+      if(placedOk){
+        placed.push({x:x-3,y:y-h,w:w+6,h:h+4});
+        ctx.fillStyle=pal[i%pal.length];
+        ctx.fillText(item.w,x,y);
+      }
+    });
+    $('m4-top').innerHTML='<b>词频前5：</b>'+words.slice(0,5).map(function(w){ return w.w+'×'+w.n; }).join('、');
+    fb($('m4-fb'),'ok','词云已生成：一共提取 '+words.length+' 个词，出现次数越多的词字号越大。换一段文字或调整参数再试试。');
+    save('m4_cloud',{top:words.slice(0,8),maxN:maxN,palette:$('m4-palette').value});
+  }
+  $('m4-maxn').oninput=function(){ $('m4-maxn-v').textContent=$('m4-maxn').value; };
+  $('m4-gen').onclick=generate;
+  $('m4-png').onclick=function(){
+    if(!lastWords.length){ fb($('m4-fb'),'hint','请先点击「生成词云」，再导出 PNG。'); return; }
+    pngExport(cv,'气象词云.png');
+    fb($('m4-fb'),'ok','词云 PNG 已导出。');
+  };
+  // 初始占位
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#a1a1aa'; ctx.font='15px system-ui';
+  ctx.fillText('← 在右侧输入文字，点击「生成词云」',170,210);
+})();
+
+/* ============ ⑤ 代码联动 ============ */
+(function(){
+  var cv=$('m5-cv'), ctx=cv.getContext('2d');
+  var YEARS=[2000,2005,2010,2015], CO2=[325,331,338,345]; // 教材表 2.3.1
+  var COLORS={red:'#dc2626',blue:'#2563eb',green:'#059669',orange:'#ea580c',purple:'#7e22ce',pink:'#ec4899',gray:'#6b7280',grey:'#6b7280',black:'#18181b',cyan:'#0891b2',magenta:'#c026d3',yellow:'#ca8a04'};
+  function run(){
+    var fn=$('m5-fn').value, colorName=$('m5-color').value.trim().toLowerCase(), title=$('m5-title').value;
+    if(!COLORS[colorName]){
+      ctx.clearRect(0,0,cv.width,cv.height);
+      ctx.fillStyle='#1e1b2e'; ctx.fillRect(0,0,cv.width,cv.height);
+      ctx.fillStyle='#f9a8d4'; ctx.font='bold 14px '+'Consolas,monospace';
+      ctx.fillText('Traceback (most recent call last):',24,60);
+      ctx.fillStyle='#fda4af'; ctx.font='13px Consolas,monospace';
+      ctx.fillText('ValueError: \''+colorName+'\' 不是 matplotlib 认识的颜色参数',24,92);
+      ctx.fillStyle='#e9d5ff'; ctx.font='13px system-ui';
+      ctx.fillText('教学提示：颜色参数要用英文颜色名（如 red、blue、purple），',24,132);
+      ctx.fillText('拼写错误或中文都会让程序报错。改好第 5 行后再运行一次。',24,154);
+      fb($('m5-fb'),'err','运行失败：颜色参数 <span class="mono">\''+colorName+'\'</span> 非法。请改成合法颜色名，如 red、blue、purple。');
+      return;
+    }
+    if(!title.trim()){
+      fb($('m5-fb'),'hint','标题为空也能运行，但一张没有标题的图表可读性差——建议在第 6 行填上标题。');
+    }
+    var c=COLORS[colorName];
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#fff'; ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.fillStyle='#18181b'; ctx.font='bold 15px system-ui'; ctx.textAlign='center';
+    ctx.fillText(title,cv.width/2,30); ctx.textAlign='left';
+    var x0=80,y0=56,w=470,h=270;
+    ctx.strokeStyle='#a1a1aa'; ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x0,y0+h); ctx.lineTo(x0+w,y0+h); ctx.stroke();
+    ctx.fillStyle='#52525b'; ctx.font='11px system-ui';
+    for(var i=0;i<=5;i++){ var v=320+i*6, y=y0+h-(v-320)/30*h; ctx.fillText(v+'',x0-32,y+4);
+      ctx.strokeStyle='#f4f4f5'; ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x0+w,y); ctx.stroke(); }
+    var px=function(i){ return x0+50+i*120; }, py=function(v){ return y0+h-(v-320)/30*h; };
+    YEARS.forEach(function(yr,i){ ctx.fillStyle='#52525b'; ctx.fillText(yr+'',px(i)-14,y0+h+18); });
+    if(fn==='plot'){
+      ctx.strokeStyle=c; ctx.lineWidth=2.5; ctx.beginPath();
+      CO2.forEach(function(v,i){ if(i===0)ctx.moveTo(px(i),py(v)); else ctx.lineTo(px(i),py(v)); });
+      ctx.stroke(); ctx.lineWidth=1;
+      CO2.forEach(function(v,i){ ctx.beginPath(); ctx.arc(px(i),py(v),4,0,Math.PI*2); ctx.fillStyle=c; ctx.fill(); });
+    }else if(fn==='bar'){
+      CO2.forEach(function(v,i){ ctx.fillStyle=c; ctx.fillRect(px(i)-28,py(v),56,y0+h-py(v)); });
+    }else{
+      CO2.forEach(function(v,i){ ctx.beginPath(); ctx.arc(px(i),py(v),6,0,Math.PI*2); ctx.fillStyle=c; ctx.fill(); });
+    }
+    ctx.fillStyle='#52525b'; ctx.fillText('年份',x0+w-20,y0+h+34);
+    ctx.save(); ctx.translate(20,y0+110); ctx.rotate(-Math.PI/2); ctx.fillText('CO2浓度(mg/L)',0,0); ctx.restore();
+    var fnames={plot:'plt.plot() → 折线图',bar:'plt.bar() → 柱状图',scatter:'plt.scatter() → 散点图'};
+    fb($('m5-fb'),'ok','✔ 运行成功！'+fnames[fn]+'，颜色 '+colorName+'。对应关系：<b>换绘图函数=换图表类型，plt.title()=改标题，color=改颜色</b>。');
+    save('m5_run',{fn:fn,color:colorName,title:title});
+  }
+  $('m5-run').onclick=run;
+  $('m5-reset').onclick=function(){
+    $('m5-fn').value='plot'; $('m5-color').value='purple'; $('m5-title').value='A地CO2浓度变化情况';
+    run();
+  };
+  run();
+})();
+
+/* ============ ⑥ 气象仪表盘 ============ */
+(function(){
+  var WIDGETS=[
+    {id:'wline',name:'温度折线图',draw:function(c,W,H){
+      drawChart(c,W,H,{type:'line',title:'24小时气温/℃',xlab:'',ylab:'',palette:'studio',grid:true,labels:false,legend:false},{cats:HOURL,vals:TEMPS,name:'气温'});
+    }},
+    {id:'wpie',name:'天气占比饼图',draw:function(c,W,H){
+      drawChart(c,W,H,{type:'pie',title:'一周天气占比',xlab:'',ylab:'',palette:'studio',grid:false,labels:true,legend:false},{cats:WEATHER.cats,vals:WEATHER.vals});
+    }},
+    {id:'wbar',name:'湿度柱状图',draw:function(c,W,H){
+      var cats=['0时','4时','8时','12时','16时','20时'], vals=[88,92,84,61,59,79];
+      drawChart(c,W,H,{type:'bar',title:'湿度抽样/%',xlab:'',ylab:'',palette:'cool',grid:true,labels:true,legend:false},{cats:cats,vals:vals,name:'湿度'});
+    }},
+    {id:'wnum',name:'当前温度数字卡',draw:function(c,W,H){
+      c.clearRect(0,0,W,H);
+      var g=c.createLinearGradient(0,0,W,H); g.addColorStop(0,'#ec4899'); g.addColorStop(1,'#8b5cf6');
+      c.fillStyle=g; c.fillRect(0,0,W,H);
+      c.fillStyle='rgba(255,255,255,.9)'; c.font='13px system-ui'; c.textAlign='center';
+      c.fillText('当前温度（14时采样）',W/2,34);
+      c.font='bold 58px system-ui'; c.fillText('24.6℃',W/2,H/2+18);
+      c.font='12px system-ui'; c.fillText('湿度 55% · 风力 3.1m/s · 小七孔站',W/2,H-24);
+      c.textAlign='left';
+    }}
+  ];
+  var grid=load('m6_grid',[null,null,null,null]); // 每格放 widget id
+  var traySel=null, cellSel=-1;
+  var gridEl=$('m6-grid'), trayEl=$('m6-tray');
+  function widgetById(id){ for(var i=0;i<WIDGETS.length;i++){ if(WIDGETS[i].id===id) return WIDGETS[i]; } return null; }
+  function render(){
+    // 托盘
+    trayEl.innerHTML='';
+    WIDGETS.forEach(function(w){
+      var used=grid.indexOf(w.id)>=0;
+      var chip=document.createElement('div');
+      chip.className='widget-chip'+(used?' used':'')+(traySel===w.id?' sel':'');
+      chip.textContent=w.name;
+      chip.onclick=function(){ traySel=(traySel===w.id?null:w.id); cellSel=-1; render(); };
+      trayEl.appendChild(chip);
+    });
+    // 网格
+    gridEl.innerHTML='';
+    grid.forEach(function(wid,i){
+      var cell=document.createElement('div'); cell.className='dash-cell'+(cellSel===i?' sel':'');
+      if(wid){
+        var cvw=document.createElement('canvas'); cvw.width=380; cvw.height=240;
+        widgetById(wid).draw(cvw.getContext('2d'),380,240);
+        cell.appendChild(cvw);
+      }else{
+        var sp=document.createElement('span'); sp.className='hintxt'; sp.textContent='空格子 '+(i+1)+'（点我放入组件）';
+        cell.appendChild(sp);
+      }
+      cell.onclick=function(){
+        if(traySel){ // 放置
+          var old=grid.indexOf(traySel); if(old>=0) grid[old]=null;
+          grid[i]=traySel; traySel=null;
+          afterChange('已放入组件。');
+        }else if(cellSel===-1){
+          if(grid[i]){ cellSel=i; render(); return; }
+        }else{
+          var t=grid[cellSel]; grid[cellSel]=grid[i]; grid[i]=t; cellSel=-1;
+          afterChange('两个格子的组件已交换。');
+        }
+      };
+      gridEl.appendChild(cell);
+    });
+    var full=grid.every(function(g){ return g; });
+    $('m6-png').disabled=!full;
+    if(full){
+      fb($('m6-fb'),'ok','✔ 仪表盘拼装完成！思考：一般把<b>最重要的实时数值（如当前温度卡）放在左上角</b>，因为人的视线习惯从左上开始。你可以继续交换位置，再导出 PNG。');
+      save('m6_done',true);
+    }
+  }
+  function afterChange(msg){
+    save('m6_grid',grid); render();
+    if(!grid.every(function(g){ return g; })) fb($('m6-fb'),'hint',msg+' 还有 '+grid.filter(function(g){return !g;}).length+' 个空格子。');
+  }
+  $('m6-reset').onclick=function(){ grid=[null,null,null,null]; traySel=null; cellSel=-1; save('m6_grid',grid); $('m6-fb').className='fb'; render(); };
+  $('m6-png').onclick=function(){
+    var big=document.createElement('canvas'); big.width=820; big.height=540;
+    var bc=big.getContext('2d');
+    bc.fillStyle='#1e1b2e'; bc.fillRect(0,0,820,540);
+    bc.fillStyle='#e9d5ff'; bc.font='bold 16px system-ui';
+    bc.fillText('在线数字气象站 · 小七孔站仪表盘',20,30);
+    grid.forEach(function(wid,i){
+      var tmp=document.createElement('canvas'); tmp.width=380; tmp.height=230;
+      widgetById(wid).draw(tmp.getContext('2d'),380,230);
+      bc.drawImage(tmp,20+(i%2)*400,50+Math.floor(i/2)*245);
+    });
+    pngExport(big,'气象站仪表盘.png');
+    fb($('m6-fb'),'ok','仪表盘 PNG 已导出。');
+  };
+  render();
+
+  /* —— 练习场 —— */
+  var QUIZ=[
+    {q:'看「温度折线图」组件：曲线在 14 时附近达到顶点，这说明什么？',opts:['14时气温最高','14时湿度最大','14时风最大','图画错了'],a:0,hint:'折线的最高点对应的纵轴值就是最大值。',why:'折线图的顶点就是一天中的最高气温（24.6℃，14时）——这也验证了教材项目里"最高气温通常出现在14时"的说法。'},
+    {q:'想展示"一周内晴天占了将近一半"，选哪种图最合适？',opts:['折线图','散点图','饼图','词云'],a:2,hint:'"占了将近一半"说的是比例。',why:'表达占比用饼图：晴 3 天占约 43%，扇形大小让比例一目了然。'},
+    {q:'一张图表颜色特别炫、动画特别多，但同学都看不懂它想说什么。教材认为这张图——',opts:['很成功，够美观','是失败的，可读性最重要','需要更多特效','应该加背景音乐'],a:1,hint:'回忆教材：过于追求美观而无法有效传达信息会怎样？',why:'教材明确指出：如果过于追求美观导致图表无法有效传达信息，这张图表的创建就是失败的。可读性第一。'},
+    {q:'词云中"数据"两个字比其他词都大，说明——',opts:['它是随机放大的','它在文本中出现次数最多','它笔画最少','它最不重要'],a:1,hint:'词云用什么表示词语的重要性？',why:'词云以文字大小代表词频/重要性，字越大表示该词出现次数越多。'},
+    {q:'SIoT 平台自带的温度图数据密集、看不出变化规律。更好的做法是——',opts:['直接截图交差','先清洗抽样数据，再用合适图表重新绘制','把屏幕调亮','多盯一会儿'],a:1,hint:'教材实践活动里怎样处理"数据密集不直观"的问题？',why:'教材建议：平台默认图表只有基础功能；应先整理/抽样数据，再用电子表格或代码绘制更直观的图表。'},
+    {q:'要在图表上标出每根柱子的具体数值，应该开启图表的哪个元素？',opts:['网格线','图例','数据标签','坐标轴'],a:2,hint:'在设计器里勾选过这个选项吗？它会把数字标在图形上。',why:'数据标签直接把数值标注在图形旁边；图例说明系列含义，网格线辅助估读。'}
+  ];
+  var qstate=load('m6_quiz',{done:{},first:{}});
+  var qbox=$('m6-quiz');
+  function renderQuiz(){
+    qbox.innerHTML='';
+    QUIZ.forEach(function(q,i){
+      var div=document.createElement('div'); div.className='scene';
+      div.innerHTML='<div class="q"><span class="no">'+(i+1)+'.</span>'+q.q+'</div>';
+      var row=document.createElement('div'); row.className='opt-row';
+      var f=document.createElement('div'); f.className='fb';
+      q.opts.forEach(function(o,oi){
+        var b=document.createElement('button'); b.textContent=o;
+        if(qstate.done[i]===true && oi===q.a) b.className='sel-ok';
+        b.onclick=function(){
+          if(qstate.done[i]===true) return;
+          if(qstate.first[i]===undefined) qstate.first[i]=(oi===q.a);
+          if(oi===q.a){ qstate.done[i]=true; b.className='sel-ok'; fb(f,'ok','✔ 正确！'+q.why+(qstate.first[i]?'（首次答对 +1 分）':'')); }
+          else{ b.className='sel-err'; fb(f,'err','✘ 不对。提示：'+q.hint+' 换一个选项再试。'); }
+          save('m6_quiz',qstate); refreshScore();
+        };
+        row.appendChild(b);
+      });
+      var hb=document.createElement('button'); hb.className='btn-ghost'; hb.textContent='提示';
+      hb.onclick=function(){ fb(f,'hint','提示：'+q.hint); };
+      row.appendChild(hb);
+      div.appendChild(row); div.appendChild(f); qbox.appendChild(div);
+    });
+    refreshScore();
+  }
+  function refreshScore(){
+    var sc=0,i;
+    for(i=0;i<QUIZ.length;i++){ if(qstate.done[i]===true&&qstate.first[i]) sc++; }
+    $('m6-score').textContent='得分 '+sc+' / '+QUIZ.length; save('m6_score',sc);
+  }
+  $('m6-retry').onclick=function(){ qstate={done:{},first:{}}; save('m6_quiz',qstate); renderQuiz(); };
+  renderQuiz();
+})();
+
+/* ============ ⑦ 作品集导出 ============ */
+(function(){
+  function collect(){
+    var m3st=load('m3',{cured:{}});
+    var cured=0; for(var i=0;i<4;i++){ if(m3st.cured[i]) cured++; }
+    var cloud=load('m4_cloud',null);
+    var run=load('m5_run',null);
+    var gridArr=load('m6_grid',[null,null,null,null]);
+    var names={wline:'温度折线图',wpie:'天气占比饼图',wbar:'湿度柱状图',wnum:'当前温度数字卡'};
+    return {
+      标题:'小七孔在线数字气象站 · 可视化作品集报告',
+      生成时间:new Date().toLocaleString('zh-CN'),
+      图表选择训练:{首次答对:load('m1_score',0)+' / 7'},
+      图表设计作品:load('m2_works',[]),
+      当前设计器配置:load('m2_cfg',null),
+      图表诊所:{治愈病例数:cured+' / 4',体会:'图表最重要的是可读性，不能歪曲数据的比例、占比与顺序'},
+      词云:cloud? {高频词:cloud.top.map(function(w){ return w.w+'×'+w.n; }).join('、'),最大词数:cloud.maxN,配色:cloud.palette} : '未生成',
+      代码联动实验:run? {绘图函数:'plt.'+run.fn+'()',颜色:run.color,标题:run.title} : '未运行',
+      仪表盘:{完成:load('m6_done',false)?'已拼装 2×2 仪表盘':'未完成',布局:gridArr.map(function(g,i){ return '格'+(i+1)+'：'+(g?names[g]:'空'); }).join('；')},
+      可视化练习得分:load('m6_score',0)+' / 6'
+    };
+  }
+  function toText(o){
+    var L=[];
+    L.push('====== '+o.标题+' ======');
+    L.push('生成时间：'+o.生成时间);
+    L.push('');
+    L.push('【一、图表选择训练】首次答对 '+o.图表选择训练.首次答对);
+    L.push('');
+    L.push('【二、图表设计作品】共 '+o.图表设计作品.length+' 件：');
+    if(o.图表设计作品.length===0) L.push('    （尚未存入作品，可回到「图表设计器」点「存入作品集」）');
+    o.图表设计作品.forEach(function(w,i){ L.push('    '+(i+1)+'. '+w.type+'《'+w.title+'》 数据：'+w.field+'（配色 '+w.palette+'，'+w.time+'）'); });
+    L.push('');
+    L.push('【三、错误图表诊所】治愈 '+o.图表诊所.治愈病例数+'。体会：'+o.图表诊所.体会);
+    L.push('');
+    if(typeof o.词云==='object') L.push('【四、词云】高频词：'+o.词云.高频词+'（最大词数 '+o.词云.最大词数+'，配色 '+o.词云.配色+'）');
+    else L.push('【四、词云】未生成');
+    L.push('');
+    if(typeof o.代码联动实验==='object') L.push('【五、代码联动】'+o.代码联动实验.绘图函数+'，color=\''+o.代码联动实验.颜色+'\'，标题《'+o.代码联动实验.标题+'》——体会：改一行代码，图就变样。');
+    else L.push('【五、代码联动】未运行');
+    L.push('');
+    L.push('【六、气象仪表盘】'+o.仪表盘.完成+'。'+o.仪表盘.布局);
+    L.push('');
+    L.push('【七、可视化练习】得分 '+o.可视化练习得分);
+    L.push('');
+    L.push('（本报告由《数据可视化》设计工作室自动汇总；图表与仪表盘 PNG 请在对应页面导出）');
+    return L.join('\n');
+  }
+  $('m7-gen').onclick=function(){
+    $('m7-report').value=toText(collect());
+    fb($('m7-fb'),'ok','报告已生成。若某部分显示"未完成"，回到对应工具页补做即可。');
+  };
+  $('m7-txt').onclick=function(){ download('气象站可视化报告_第4节.txt',toText(collect())); };
+  $('m7-json').onclick=function(){ download('气象站可视化报告_第4节.json',JSON.stringify(collect(),null,2),'application/json;charset=utf-8'); };
+  $('m7-copy').onclick=function(){
+    var t=$('m7-report'); if(!t.value) t.value=toText(collect());
+    t.select(); t.setSelectionRange(0,999999);
+    var ok=false;
+    try{ ok=document.execCommand('copy'); }catch(e){}
+    fb($('m7-fb'), ok?'ok':'hint', ok?'已复制到剪贴板。':'请手动全选文本框内容进行复制。');
+  };
+  $('m7-clear').onclick=function(){
+    var i,keys=[];
+    for(i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.indexOf(PRE)===0) keys.push(k); }
+    keys.forEach(function(k){ localStorage.removeItem(k); });
+    $('m7-report').value='';
+    fb($('m7-fb'),'ok','已清除本机全部学习数据（共 '+keys.length+' 项）。刷新页面后从头开始。');
+  };
+})();
+})();
+</script>
+</body>
+</html>

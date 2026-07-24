@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>单元1 第3节 物联网的感知 · 感知实验室</title>
+<style>
+:root{
+  --amber:#f59e0b; --amber-deep:#d97706; --amber-dark:#b45309;
+  --amber-soft:#fef3c7; --amber-mist:#fffbeb; --cream:#fdf8ef;
+  --ink:#44403c; --ink-light:#78716c;
+  --ok:#16a34a; --ok-bg:#dcfce7; --bad:#dc2626; --bad-bg:#fee2e2;
+  --info:#0369a1; --info-bg:#e0f2fe;
+  --card-shadow:0 4px 16px rgba(180,83,9,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--cream); color:var(--ink); min-height:100vh;
+}
+code,.mono{font-family:ui-monospace,Consolas,"Courier New",monospace}
+/* ===== 左侧竖排图标导航（实验室版式） ===== */
+#labnav{
+  position:fixed; left:0; top:0; bottom:0; width:84px; z-index:50;
+  background:linear-gradient(180deg,#b45309,#d97706 55%,#f59e0b);
+  display:flex; flex-direction:column; align-items:center; padding:10px 0; gap:4px;
+  box-shadow:2px 0 12px rgba(180,83,9,.25);
+}
+#labnav .logo{color:#fff;font-weight:700;font-size:12px;text-align:center;line-height:1.3;
+  padding:6px 4px 10px;border-bottom:1px solid rgba(255,255,255,.3);margin-bottom:6px;letter-spacing:1px}
+.navbtn{
+  width:68px;padding:8px 2px;border:none;border-radius:14px;background:transparent;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:3px;color:#fff7ed;transition:.2s;
+}
+.navbtn svg{width:26px;height:26px;stroke:#fff7ed;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.navbtn span{font-size:11px;letter-spacing:1px;writing-mode:vertical-rl;line-height:1.1;max-height:70px}
+.navbtn:hover{background:rgba(255,255,255,.18)}
+.navbtn.active{background:#fff;color:var(--amber-dark);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.navbtn.active svg{stroke:var(--amber-dark)}
+/* ===== 内容区 ===== */
+#main{margin-left:84px;padding:18px 22px 60px;max-width:1080px}
+header.page{
+  background:linear-gradient(120deg,#fffbeb,#fef3c7 60%,#fde68a);
+  border:1px solid #fcd34d;border-radius:18px;padding:18px 22px;box-shadow:var(--card-shadow);margin-bottom:16px;
+}
+header.page .unit{color:var(--amber-dark);font-size:13px;font-weight:600;letter-spacing:2px}
+header.page h1{font-size:24px;color:#7c2d12;margin:4px 0 8px}
+header.page ul{list-style:none;display:flex;flex-wrap:wrap;gap:8px}
+header.page li{background:#fff;border:1px solid #fcd34d;color:var(--amber-dark);
+  font-size:13px;padding:4px 12px;border-radius:999px}
+section.lab{display:none;animation:fadein .25s ease}
+section.lab.show{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:#fff;border:1px solid #f3e8d2;border-radius:16px;box-shadow:var(--card-shadow);
+  padding:16px 18px;margin-bottom:16px}
+.card h2{font-size:19px;color:var(--amber-dark);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.card h2 .no{background:var(--amber);color:#fff;font-size:13px;width:24px;height:24px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;flex:none}
+.task{background:var(--amber-mist);border-left:4px solid var(--amber);border-radius:0 10px 10px 0;
+  padding:8px 12px;font-size:14px;margin:8px 0 12px;color:#78350f}
+.btn{border:none;border-radius:10px;padding:8px 16px;font-size:14px;cursor:pointer;transition:.15s;
+  background:var(--amber);color:#fff;font-family:inherit}
+.btn:hover{background:var(--amber-deep)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.ghost{background:#fff;color:var(--amber-dark);border:1.5px solid var(--amber)}
+.btn.ghost:hover{background:var(--amber-soft)}
+.btn.gray{background:#e7e5e4;color:var(--ink)}
+.btn.gray:hover{background:#d6d3d1}
+.btn.danger{background:var(--bad)}
+.btn.small{padding:5px 10px;font-size:13px;border-radius:8px}
+.badge{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12.5px;font-weight:600}
+.badge.ok{background:var(--ok-bg);color:var(--ok)}
+.badge.bad{background:var(--bad-bg);color:var(--bad)}
+.badge.info{background:var(--info-bg);color:var(--info)}
+.badge.amber{background:var(--amber-soft);color:var(--amber-dark)}
+.feedback{border-radius:10px;padding:9px 12px;font-size:14px;margin-top:8px;line-height:1.6;display:none}
+.feedback.show{display:block}
+.feedback.good{background:var(--ok-bg);color:#14532d;border:1px solid #86efac}
+.feedback.err{background:var(--bad-bg);color:#7f1d1d;border:1px solid #fca5a5}
+.feedback.hint{background:var(--info-bg);color:#0c4a6e;border:1px solid #7dd3fc}
+.row{display:flex;flex-wrap:wrap;gap:14px}
+.col{flex:1;min-width:260px}
+canvas{display:block;max-width:100%}
+input[type=range]{width:100%;accent-color:var(--amber)}
+select,input[type=text]{font-family:inherit;font-size:14px;padding:6px 9px;border:1.5px solid #e7d8bc;
+  border-radius:8px;background:#fff;color:var(--ink)}
+select:focus,input[type=text]:focus{outline:2px solid #fcd34d}
+table.plain{border-collapse:collapse;width:100%;font-size:13.5px;margin-top:8px}
+table.plain th,table.plain td{border:1px solid #f0e4cc;padding:6px 9px;text-align:left}
+table.plain th{background:var(--amber-mist);color:var(--amber-dark)}
+.pill-opts{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}
+.pill-opts button{border:1.5px solid #e7d8bc;background:#fff;border-radius:999px;padding:6px 14px;
+  cursor:pointer;font-size:13.5px;font-family:inherit;transition:.15s;color:var(--ink)}
+.pill-opts button:hover{border-color:var(--amber)}
+.pill-opts button.sel{background:var(--amber);border-color:var(--amber);color:#fff}
+.pill-opts button.right{background:var(--ok);border-color:var(--ok);color:#fff}
+.pill-opts button.wrong{background:var(--bad);border-color:var(--bad);color:#fff}
+.logbox{background:#292524;color:#fde68a;border-radius:10px;padding:10px 12px;font-size:12.5px;
+  max-height:170px;overflow:auto;line-height:1.7;font-family:ui-monospace,Consolas,monospace}
+.small-note{font-size:12.5px;color:var(--ink-light);margin-top:6px;line-height:1.6}
+/* 配对 */
+.match-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.match-item{border:2px solid #eadfc8;border-radius:12px;padding:9px 12px;cursor:pointer;background:#fffdf7;
+  font-size:14px;transition:.15s;position:relative}
+.match-item:hover{border-color:var(--amber)}
+.match-item.sel{border-color:var(--amber);background:var(--amber-soft);box-shadow:0 0 0 3px #fde68a}
+.match-item.done{border-color:var(--ok);background:var(--ok-bg);cursor:default}
+.match-item.shake{animation:shake .3s}
+@keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.match-item .tag{font-size:11px;color:var(--ink-light)}
+/* 练习 */
+.quiz-q{border:1px solid #f0e4cc;border-radius:12px;padding:12px 14px;margin-bottom:12px;background:#fffdf7}
+.quiz-q .qt{font-size:14.5px;font-weight:600;margin-bottom:6px}
+.progress-wrap{background:#f5f0e4;border-radius:999px;height:12px;overflow:hidden;margin:6px 0}
+.progress-bar{height:100%;background:linear-gradient(90deg,var(--amber),#fbbf24);width:0;transition:width .4s;border-radius:999px}
+.sensor-check{display:flex;align-items:center;gap:8px;background:#fffdf7;border:1.5px solid #eadfc8;
+  border-radius:10px;padding:8px 10px;font-size:14px}
+.sensor-check input[type=checkbox]{width:17px;height:17px;accent-color:var(--amber)}
+@media(max-width:760px){
+  #labnav{width:64px}
+  #main{margin-left:64px;padding:12px 10px 50px}
+  .navbtn{width:54px}
+  .match-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<!-- ===== 左侧实验室导航 ===== -->
+<nav id="labnav">
+  <div class="logo">感知<br>实验室</div>
+  <button class="navbtn active" data-sec="sec-principle" title="传感器原理">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M5 12a7 7 0 0 1 7-7M19 12a7 7 0 0 1-7 7"/><path d="M2 12a10 10 0 0 1 10-10M22 12a10 10 0 0 1-10 10"/></svg>
+    <span>原理室</span></button>
+  <button class="navbtn" data-sec="sec-signal" title="信号实验">
+    <svg viewBox="0 0 24 24"><path d="M2 12h4l3-8 4 16 3-8h6"/></svg>
+    <span>信号台</span></button>
+  <button class="navbtn" data-sec="sec-match" title="应用配对">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/><path d="M10 6.5h7v7"/></svg>
+    <span>配对区</span></button>
+  <button class="navbtn" data-sec="sec-qr" title="二维码工坊">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="6" height="6"/><rect x="15" y="3" width="6" height="6"/><rect x="3" y="15" width="6" height="6"/><path d="M15 15h2v2h-2zM19 15h2M15 19h2M19 19h2v2h-2z"/></svg>
+    <span>码工坊</span></button>
+  <button class="navbtn" data-sec="sec-farm" title="方案与练习">
+    <svg viewBox="0 0 24 24"><path d="M12 22V10M12 10c0-4 3-7 7-7 0 4-3 7-7 7zM12 14c0-3-2.5-5-5.5-5 0 3 2.5 5 5.5 5z"/></svg>
+    <span>方案室</span></button>
+  <button class="navbtn" data-sec="sec-report" title="成果档案">
+    <svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h7M9 17h7"/></svg>
+    <span>档案柜</span></button>
+</nav>
+
+<div id="main">
+<header class="page">
+  <div class="unit">第1单元 物联网入门 · 第3节</div>
+  <h1>物联网的感知 —— 感知实验室</h1>
+  <ul>
+    <li>① 理解传感器"敏感元件→转换电路→电信号"的工作原理</li>
+    <li>② 区分开关量、模拟量、数字量三种信号</li>
+    <li>③ 会为真实场景选择感知技术（传感器 / 条码 / RFID / 定位）</li>
+  </ul>
+</header>
+
+<!-- ============ 实验室1：传感器原理可视化 ============ -->
+<section class="lab show" id="sec-principle">
+  <div class="card">
+    <h2><span class="no">1</span>原理室 · 传感器是怎样工作的</h2>
+    <div class="task">任务：切换三种传感器，点击"播放"观察"被测环境量 → 敏感元件 → 转换电路 → 电信号输出"的全过程；再拖动环境滑块，亲手改变环境量，看输出电压如何变化。三种传感器都要探究一遍！</div>
+    <div class="pill-opts" id="pTypeBtns">
+      <button data-t="temp" class="sel">温度传感器（热敏电阻）</button>
+      <button data-t="light">光线传感器（光敏电阻）</button>
+      <button data-t="humi">湿度传感器（湿敏元件）</button>
+    </div>
+    <svg id="pSvg" viewBox="0 0 760 250" style="width:100%;background:#fffdf5;border:1px solid #f0e4cc;border-radius:12px">
+      <defs>
+        <marker id="arrw" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#d97706"/>
+        </marker>
+      </defs>
+      <!-- 环境 -->
+      <g>
+        <rect x="20" y="60" width="140" height="110" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+        <text x="90" y="50" text-anchor="middle" font-size="14" fill="#b45309" font-weight="bold">被测环境量</text>
+        <text id="pEnvIcon" x="90" y="112" text-anchor="middle" font-size="34">🌡️</text>
+        <text id="pEnvLabel" x="90" y="150" text-anchor="middle" font-size="14" fill="#78350f">温度 25.0℃</text>
+      </g>
+      <line x1="164" y1="115" x2="216" y2="115" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrw)"/>
+      <!-- 敏感元件 -->
+      <g>
+        <rect x="220" y="60" width="150" height="110" rx="14" fill="#fff" stroke="#f59e0b" stroke-width="2"/>
+        <text x="295" y="50" text-anchor="middle" font-size="14" fill="#b45309" font-weight="bold">敏感元件</text>
+        <text id="pSenName" x="295" y="90" text-anchor="middle" font-size="15" fill="#7c2d12" font-weight="bold">热敏电阻</text>
+        <path d="M245 125 h14 l6-10 12 20 12-20 12 20 12-20 6 10 h14" stroke="#b45309" stroke-width="2.5" fill="none"/>
+        <text id="pResVal" x="295" y="160" text-anchor="middle" font-size="13" fill="#0369a1">电阻 R = 10.0 kΩ</text>
+      </g>
+      <line x1="374" y1="115" x2="426" y2="115" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrw)"/>
+      <!-- 转换电路 -->
+      <g>
+        <rect x="430" y="60" width="140" height="110" rx="14" fill="#fff" stroke="#f59e0b" stroke-width="2"/>
+        <text x="500" y="50" text-anchor="middle" font-size="14" fill="#b45309" font-weight="bold">转换电路</text>
+        <circle cx="500" cy="105" r="24" fill="none" stroke="#78716c" stroke-width="2"/>
+        <path d="M488 105 h8 m8 0 h8 M500 93 v8 m0 8 v8" stroke="#78716c" stroke-width="2"/>
+        <text x="500" y="155" text-anchor="middle" font-size="12.5" fill="#78716c">电阻变化 → 电压变化</text>
+      </g>
+      <line x1="574" y1="115" x2="626" y2="115" stroke="#d97706" stroke-width="2.5" marker-end="url(#arrw)"/>
+      <!-- 输出 -->
+      <g>
+        <rect x="630" y="60" width="110" height="110" rx="14" fill="#fef3c7" stroke="#f59e0b" stroke-width="2"/>
+        <text x="685" y="50" text-anchor="middle" font-size="14" fill="#b45309" font-weight="bold">电信号输出</text>
+        <text id="pVolt" x="685" y="112" text-anchor="middle" font-size="20" fill="#b91c1c" font-weight="bold">1.65 V</text>
+        <text x="685" y="146" text-anchor="middle" font-size="12" fill="#78716c">送给智能终端</text>
+      </g>
+      <!-- 流动的信号小球 -->
+      <circle id="pDot" cx="164" cy="115" r="6" fill="#f59e0b" opacity="0"/>
+      <!-- 输出电压小曲线 -->
+      <g>
+        <rect x="220" y="190" width="520" height="50" rx="8" fill="#fff" stroke="#f0e4cc"/>
+        <text x="228" y="207" font-size="11" fill="#a8a29e">输出电压随时间变化：</text>
+        <polyline id="pCurve" points="" fill="none" stroke="#dc2626" stroke-width="2"/>
+      </g>
+    </svg>
+    <div class="row" style="margin-top:10px;align-items:center">
+      <div class="col">
+        <label style="font-size:14px">环境量手动调节（<span id="pEnvName">温度</span>）：<b id="pEnvVal" style="color:var(--amber-dark)">25.0</b></label>
+        <input type="range" id="pSlider" min="0" max="100" value="50" step="1">
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn" id="pPlay">▶ 播放</button>
+        <button class="btn ghost" id="pReset">重置</button>
+      </div>
+    </div>
+    <div class="small-note" id="pExplain">热敏电阻：温度升高 → 电阻变小 → 分压电路输出电压升高。传感器就是这样把"温度"翻译成"电压"的。</div>
+    <div style="margin-top:8px">已探究：<span id="pExplored" class="badge amber">0 / 3 种</span></div>
+    <div class="quiz-q" style="margin-top:12px">
+      <div class="qt">小检测：光线传感器中，负责"感受光线强弱"的敏感元件是？</div>
+      <div class="pill-opts" id="pQuizOpts">
+        <button data-i="0">热敏电阻</button><button data-i="1">光敏电阻</button>
+        <button data-i="2">扬声器</button><button data-i="3">电池</button>
+      </div>
+      <div class="feedback" id="pQuizFb"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 实验室2：三种信号对比实验台 ============ -->
+<section class="lab" id="sec-signal">
+  <div class="card">
+    <h2><span class="no">2</span>信号台 · 开关量 / 模拟量 / 数字量对比实验</h2>
+    <div class="task">任务：三个通道各操作一次——①点门磁按钮制造 0/1 方波；②拖光照滑块画出连续曲线；③调整采样间隔，观察模拟曲线如何被"采样-量化"成一串数字。然后完成每个通道的小问题。</div>
+    <div class="row">
+      <!-- 开关量 -->
+      <div class="col" style="min-width:230px">
+        <h3 style="font-size:15px;color:var(--amber-dark)">通道A：开关量（门磁）</h3>
+        <div style="margin:8px 0;display:flex;gap:8px;align-items:center">
+          <button class="btn" id="sgDoorBtn">🚪 开门</button>
+          <span id="sgDoorState" class="badge bad">当前：关（输出 0）</span>
+        </div>
+        <canvas id="sgCanvasD" width="320" height="110" style="border:1px solid #f0e4cc;border-radius:8px;background:#1c1917;width:100%"></canvas>
+        <div class="small-note">输出只有 0 和 1 两种状态，像"开关"一样跳变。</div>
+        <div class="quiz-q"><div class="qt">A题：门磁传感器输出的信号属于？</div>
+          <div class="pill-opts" id="sgQ1Opts"><button data-i="0">开关量</button><button data-i="1">模拟量</button><button data-i="2">数字量</button></div>
+          <div class="feedback" id="sgQ1Fb"></div>
+        </div>
+      </div>
+      <!-- 模拟量 -->
+      <div class="col" style="min-width:230px">
+        <h3 style="font-size:15px;color:var(--amber-dark)">通道B：模拟量（光照）</h3>
+        <div style="margin:8px 0">
+          <label style="font-size:13.5px">光照强度旋钮：<b id="sgLightVal" style="color:var(--amber-dark)">50</b></label>
+          <input type="range" id="sgLight" min="0" max="100" value="50">
+        </div>
+        <canvas id="sgCanvasA" width="320" height="110" style="border:1px solid #f0e4cc;border-radius:8px;background:#1c1917;width:100%"></canvas>
+        <div class="small-note">输出电压随光照<b>连续</b>变化，曲线是平滑的。</div>
+        <div class="quiz-q"><div class="qt">B题：旋钮/光线传感器输出连续变化的电压，属于？</div>
+          <div class="pill-opts" id="sgQ2Opts"><button data-i="0">开关量</button><button data-i="1">模拟量</button><button data-i="2">数字量</button></div>
+          <div class="feedback" id="sgQ2Fb"></div>
+        </div>
+      </div>
+      <!-- 数字量 -->
+      <div class="col" style="min-width:230px">
+        <h3 style="font-size:15px;color:var(--amber-dark)">通道C：数字量（采样-量化）</h3>
+        <div style="margin:8px 0">
+          <label style="font-size:13.5px">采样间隔：<b id="sgIntVal" style="color:var(--amber-dark)">0.6</b> 秒</label>
+          <input type="range" id="sgInterval" min="0.2" max="2" value="0.6" step="0.1">
+        </div>
+        <canvas id="sgCanvasN" width="320" height="110" style="border:1px solid #f0e4cc;border-radius:8px;background:#1c1917;width:100%"></canvas>
+        <div class="mono" id="sgDigits" style="font-size:12px;background:#292524;color:#a5f3fc;border-radius:8px;padding:6px 8px;margin-top:6px;min-height:30px;word-break:break-all">采样序列：--</div>
+        <div class="small-note">通道B的连续曲线每隔一段时间被"取一个点"并变成整数（黄点+台阶线）。间隔越大，台阶越粗糙。</div>
+        <div class="quiz-q"><div class="qt">C题：把采样间隔调大后，台阶曲线与原曲线相比会？</div>
+          <div class="pill-opts" id="sgQ3Opts"><button data-i="0">更贴近原曲线</button><button data-i="1">偏差更大、更粗糙</button><button data-i="2">完全没变化</button></div>
+          <div class="feedback" id="sgQ3Fb"></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:8px">实验记录：<span class="badge amber" id="sgOps">操作 0 次</span> <span class="badge info" id="sgQuizDone">小题完成 0/3</span></div>
+  </div>
+</section>
+
+<!-- ============ 实验室3：感知技术应用配对 ============ -->
+<section class="lab" id="sec-match">
+  <div class="card">
+    <h2><span class="no">3</span>配对区 · 感知技术找应用</h2>
+    <div class="task">任务：先点左侧一项感知技术（变橙色），再点右侧你认为对应的生活场景。配对正确会锁定并说明原因；配错会说明"为什么不对"，可继续重试。全部配对完成看你的首次命中率！</div>
+    <div class="row">
+      <div class="col">
+        <div style="font-weight:600;color:var(--amber-dark);margin-bottom:6px">感知技术</div>
+        <div id="mTechList" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+      <div class="col">
+        <div style="font-weight:600;color:var(--amber-dark);margin-bottom:6px">生活场景</div>
+        <div id="mSceneList" style="display:flex;flex-direction:column;gap:8px"></div>
+      </div>
+    </div>
+    <div class="feedback" id="mFb"></div>
+    <div style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span class="badge amber" id="mScore">已配对 0/6 · 首次命中 0</span>
+      <button class="btn ghost" id="mRestart">🔄 重新开始（重新洗牌）</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 实验室4：二维码工坊 ============ -->
+<section class="lab" id="sec-qr">
+  <div class="card">
+    <h2><span class="no">4</span>码工坊 · 二维码是怎样被"读"出来的</h2>
+    <div class="task">任务：先用"自动演示"或"单步"看懂扫码的 5 个步骤；再在下方输入一段文字，生成属于你的"教学示意码"，体会"文字 → 二进制 → 黑白格子"的编码思想。</div>
+    <div class="row">
+      <div class="col" style="min-width:300px">
+        <canvas id="qrCanvas" width="320" height="320" style="border:1px solid #f0e4cc;border-radius:12px;background:#fff;width:100%;max-width:340px"></canvas>
+        <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn" id="qrAuto">▶ 自动演示</button>
+          <button class="btn ghost" id="qrStep">⏭ 单步</button>
+          <button class="btn gray" id="qrReset">重置</button>
+        </div>
+      </div>
+      <div class="col">
+        <div style="font-weight:600;margin-bottom:6px">识别流程（当前：<span id="qrStepName" class="badge amber">待开始</span>）</div>
+        <ol id="qrSteps" style="padding-left:20px;font-size:14px;line-height:2">
+          <li>摄像头取图 —— 拍下二维码画面</li>
+          <li>定位三个角 —— 找到三个"回"字定位块，确定方向</li>
+          <li>读取黑白格 —— 黑=1、白=0，逐格读成二进制</li>
+          <li>纠错 —— 用纠错码修复被遮挡/污损的格子</li>
+          <li>解码出文字 —— 二进制还原成信息</li>
+        </ol>
+        <div class="feedback" id="qrFb"></div>
+      </div>
+    </div>
+    <hr style="border:none;border-top:1px dashed #eadfc8;margin:16px 0">
+    <div style="font-weight:600;color:var(--amber-dark)">我来"生成"一个示意码</div>
+    <div class="small-note">说明：这是教学示意（把每个字符的编码变成二进制填进格子），并不是真正的 QR 标准码，真实二维码还包含版本、掩码、纠错码等。教材中用 Python 的 qrcode 库可生成真码。</div>
+    <div style="display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;align-items:center">
+      <input type="text" id="qrText" maxlength="10" placeholder="输入1~10个字符，如：智能农植园" style="flex:1;min-width:180px">
+      <button class="btn" id="qrGen">生成示意码</button>
+    </div>
+    <div class="row">
+      <canvas id="qrGenCanvas" width="290" height="290" style="border:1px solid #f0e4cc;border-radius:12px;background:#fff;width:290px"></canvas>
+      <div class="col">
+        <div class="mono" id="qrBits" style="font-size:12px;background:#292524;color:#fde68a;border-radius:8px;padding:8px;min-height:80px;word-break:break-all">这里将显示你的文字对应的二进制串…</div>
+        <div class="feedback" id="qrGenFb"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 实验室5：方案设计 + 练习 ============ -->
+<section class="lab" id="sec-farm">
+  <div class="card">
+    <h2><span class="no">5</span>方案室 · 智能农植园感知方案设计器</h2>
+    <div class="task">任务：农植园有三个需求——<b>①环境监测（温度与空气湿度）②缺水提醒 ③光照不足提醒</b>。请勾选需要的传感器并为它们选择安装位置，然后点"生成方案并点评"。缺了关键传感器或装错位置，系统会告诉你为什么不行。</div>
+    <div class="row" id="farmSensors"></div>
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn" id="farmGen">📋 生成方案并点评</button>
+      <button class="btn gray" id="farmClear">清空选择</button>
+    </div>
+    <div id="farmResult" style="display:none;margin-top:12px">
+      <table class="plain" id="farmTable"><thead><tr><th>传感器</th><th>类型</th><th>安装位置</th><th>服务的需求</th></tr></thead><tbody></tbody></table>
+      <div class="feedback show hint" id="farmReview" style="margin-top:10px"></div>
+    </div>
+  </div>
+  <div class="card">
+    <h2><span class="no">✎</span>随堂练习（8题）</h2>
+    <div class="task">任务：逐题作答。答错会解释原因并给提示，可换答案重试；全部答完看得分。</div>
+    <div class="progress-wrap"><div class="progress-bar" id="quizBar"></div></div>
+    <div id="quizArea"></div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span class="badge amber" id="quizScore">得分 0 / 8</span>
+      <button class="btn ghost" id="quizRetry">🔄 重做全部练习</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 实验室6：成果档案 ============ -->
+<section class="lab" id="sec-report">
+  <div class="card">
+    <h2><span class="no">6</span>档案柜 · 学习小结与成果导出</h2>
+    <div class="task">任务：点"生成学习小结"，自动汇总你在各实验室的操作记录与成绩；确认无误后下载保存，可交给老师。</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+      <button class="btn" id="repGen">📝 生成学习小结</button>
+      <button class="btn ghost" id="repTxt">⬇ 下载 .txt</button>
+      <button class="btn ghost" id="repJson">⬇ 下载 .json</button>
+      <button class="btn danger" id="repClear">🗑 清除本机学习数据</button>
+    </div>
+    <pre id="repView" class="mono" style="background:#fffdf5;border:1px solid #f0e4cc;border-radius:12px;padding:14px;font-size:13px;line-height:1.8;white-space:pre-wrap;min-height:140px">点击"生成学习小结"查看汇总…</pre>
+    <div class="feedback" id="repFb"></div>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+'use strict';
+/* ================= 通用：状态存取 ================= */
+var LS_KEY='u1l3_state_v1';
+function defState(){return{
+  principle:{explored:[],quiz:null},
+  signal:{ops:0,quiz:[null,null,null]},
+  match:{done:0,firstHit:0,attempts:0,finishedOnce:false},
+  qr:{demoRuns:0,lastText:'',genCount:0},
+  farm:{plan:null,review:''},
+  quiz:{answers:{},score:0}
+};}
+var state;
+try{state=JSON.parse(localStorage.getItem(LS_KEY))||defState();}catch(e){state=defState();}
+if(!state.principle)state=defState();
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(state));}catch(e){}}
+function $(id){return document.getElementById(id);}
+function setFb(el,cls,html){el.className='feedback show '+cls;el.innerHTML=html;}
+function download(name,text,mime){
+  var blob=new Blob([text],{type:mime||'text/plain;charset=utf-8'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},300);
+}
+/* ================= 导航 ================= */
+var navBtns=document.querySelectorAll('.navbtn');
+navBtns.forEach(function(b){
+  b.addEventListener('click',function(){
+    navBtns.forEach(function(x){x.classList.remove('active');});
+    b.classList.add('active');
+    document.querySelectorAll('section.lab').forEach(function(s){s.classList.remove('show');});
+    $(b.dataset.sec).classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* ================= 实验室1：传感器原理 ================= */
+var P={
+  temp:{icon:'🌡️',env:'温度',unit:'℃',sen:'热敏电阻',min:0,max:50,
+    explain:'热敏电阻：温度升高 → 电阻变小 → 分压电路输出电压升高。传感器把"温度"翻译成"电压"。',
+    res:function(v){return (20-15*v).toFixed(1)+' kΩ';},
+    fmt:function(v){return (v*50).toFixed(1)+'℃';}},
+  light:{icon:'☀️',env:'光照',unit:'lx',sen:'光敏电阻',
+    explain:'光敏电阻：光线越强 → 电阻越小 → 输出电压越高。教材图1.3.1正是这个结构。',
+    res:function(v){return (50-45*v).toFixed(1)+' kΩ';},
+    fmt:function(v){return Math.round(v*1000)+' lx';}},
+  humi:{icon:'💧',env:'湿度',unit:'%RH',sen:'湿敏元件',
+    explain:'湿敏元件：空气越潮湿 → 元件电学特性改变 → 输出电压随湿度变化。',
+    res:function(v){return (30-22*v).toFixed(1)+' kΩ';},
+    fmt:function(v){return Math.round(v*100)+' %RH';}}
+};
+var pType='temp',pPlaying=false,pPhase=0,pCurveData=[],pDotT=0;
+var pSlider=$('pSlider');
+function pMarkExplored(t){
+  if(state.principle.explored.indexOf(t)<0){state.principle.explored.push(t);save();}
+  $('pExplored').textContent='已探究 '+state.principle.explored.length+' / 3 种';
+  if(state.principle.explored.length===3)$('pExplored').className='badge ok';
+}
+function pRender(){
+  var cfg=P[pType],v=pSlider.value/100;
+  $('pEnvIcon').textContent=cfg.icon;
+  $('pEnvName').textContent=cfg.env;
+  $('pEnvLabel').textContent=cfg.env+' '+cfg.fmt(v);
+  $('pEnvVal').textContent=cfg.fmt(v);
+  $('pSenName').textContent=cfg.sen;
+  $('pResVal').textContent='电阻 R = '+cfg.res(v);
+  var volt=(0.3+v*3.0);
+  $('pVolt').textContent=volt.toFixed(2)+' V';
+  $('pExplain').textContent=cfg.explain;
+  pCurveData.push(volt);
+  if(pCurveData.length>120)pCurveData.shift();
+  var pts=[];
+  for(var i=0;i<pCurveData.length;i++){
+    var x=228+i*(500/119);
+    var y=235-(pCurveData[i]/3.5)*38;
+    pts.push(x.toFixed(1)+','+y.toFixed(1));
+  }
+  $('pCurve').setAttribute('points',pts.join(' '));
+}
+var pDot=$('pDot');
+function pTick(){
+  if(pPlaying){
+    pDotT+=0.012;
+    var envV=50+45*Math.sin(pDotT*2.2);
+    pSlider.value=Math.round(envV);
+    var seg=(pDotT*0.8)%1;
+    var x;
+    if(seg<0.33)x=164+(216-164)*(seg/0.33);
+    else if(seg<0.66)x=374+(426-374)*((seg-0.33)/0.33);
+    else x=574+(626-574)*((seg-0.66)/0.34);
+    pDot.setAttribute('cx',x);pDot.setAttribute('opacity','1');
+  }else{pDot.setAttribute('opacity','0');}
+  pRender();
+  requestAnimationFrame(pTick);
+}
+document.querySelectorAll('#pTypeBtns button').forEach(function(b){
+  b.addEventListener('click',function(){
+    document.querySelectorAll('#pTypeBtns button').forEach(function(x){x.classList.remove('sel');});
+    b.classList.add('sel');pType=b.dataset.t;pCurveData=[];
+    pMarkExplored(pType);pRender();
+  });
+});
+$('pPlay').addEventListener('click',function(){
+  pPlaying=!pPlaying;
+  this.textContent=pPlaying?'⏸ 暂停':'▶ 播放';
+  if(pPlaying)pMarkExplored(pType);
+});
+$('pReset').addEventListener('click',function(){
+  pPlaying=false;$('pPlay').textContent='▶ 播放';pSlider.value=50;pCurveData=[];pDotT=0;pRender();
+});
+pSlider.addEventListener('input',function(){pMarkExplored(pType);});
+/* 原理小检测 */
+(function(){
+  var opts=document.querySelectorAll('#pQuizOpts button'),fb=$('pQuizFb');
+  opts.forEach(function(b){b.addEventListener('click',function(){
+    opts.forEach(function(x){x.classList.remove('right','wrong');});
+    if(b.dataset.i==='1'){
+      b.classList.add('right');
+      setFb(fb,'good','✔ 正确！光线传感器用<b>光敏电阻</b>感受光线：光强变化 → 电阻变化 → 输出电压变化。');
+      state.principle.quiz=true;
+    }else{
+      b.classList.add('wrong');
+      setFb(fb,'err','✘ 不对。提示：切换到"光线传感器"再看一遍敏感元件方框里写的是什么，再试一次。');
+      state.principle.quiz=false;
+    }
+    save();
+  });});
+})();
+pMarkExplored('temp');pRender();requestAnimationFrame(pTick);
+
+/* ================= 实验室2：信号实验台 ================= */
+var sg={door:0,light:50,interval:0.6,histD:[],histA:[],samples:[],lastSample:0};
+function sgOp(){state.signal.ops++;$('sgOps').textContent='操作 '+state.signal.ops+' 次';save();}
+$('sgDoorBtn').addEventListener('click',function(){
+  sg.door=sg.door?0:1;
+  this.textContent=sg.door?'🚪 关门':'🚪 开门';
+  var st=$('sgDoorState');
+  st.textContent=sg.door?'当前：开（输出 1）':'当前：关（输出 0）';
+  st.className='badge '+(sg.door?'ok':'bad');
+  sgOp();
+});
+$('sgLight').addEventListener('input',function(){
+  sg.light=+this.value;$('sgLightVal').textContent=this.value;
+});
+$('sgLight').addEventListener('change',sgOp);
+$('sgInterval').addEventListener('input',function(){
+  sg.interval=+this.value;$('sgIntVal').textContent=(+this.value).toFixed(1);
+});
+$('sgInterval').addEventListener('change',sgOp);
+function sgDrawWave(cv,data,color,maxV,stair){
+  var c=cv.getContext('2d'),W=cv.width,H=cv.height;
+  c.clearRect(0,0,W,H);
+  c.strokeStyle='#3f3f46';c.lineWidth=1;
+  for(var gy=1;gy<4;gy++){c.beginPath();c.moveTo(0,H*gy/4);c.lineTo(W,H*gy/4);c.stroke();}
+  if(!data.length)return;
+  c.strokeStyle=color;c.lineWidth=2;c.beginPath();
+  for(var i=0;i<data.length;i++){
+    var x=i*(W/(data.length-1||1));
+    var y=H-8-(data[i]/maxV)*(H-16);
+    if(i===0)c.moveTo(x,y);
+    else if(stair){c.lineTo(x,c._py===undefined?y:c._py);c.lineTo(x,y);}
+    else c.lineTo(x,y);
+    c._py=y;
+  }
+  c.stroke();c._py=undefined;
+}
+var sgLastPush=0;
+function sgTick(ts){
+  if(ts-sgLastPush>60){
+    sgLastPush=ts;
+    sg.histD.push(sg.door);if(sg.histD.length>110)sg.histD.shift();
+    var noisy=sg.light+ (Math.random()*4-2) + 6*Math.sin(ts/900);
+    noisy=Math.max(0,Math.min(100,noisy));
+    sg.histA.push(noisy);if(sg.histA.length>110)sg.histA.shift();
+  }
+  if(ts-sg.lastSample>sg.interval*1000){
+    sg.lastSample=ts;
+    var cur=sg.histA.length?sg.histA[sg.histA.length-1]:50;
+    var q=Math.round(cur/10)*10;
+    sg.samples.push(q);if(sg.samples.length>16)sg.samples.shift();
+    $('sgDigits').textContent='采样序列：'+sg.samples.join(' , ');
+  }
+  sgDrawWave($('sgCanvasD'),sg.histD,'#4ade80',1,true);
+  sgDrawWave($('sgCanvasA'),sg.histA,'#fbbf24',100,false);
+  /* 数字通道：底层淡曲线+台阶 */
+  var cv=$('sgCanvasN'),c=cv.getContext('2d');
+  sgDrawWave(cv,sg.histA,'rgba(251,191,36,.28)',100,false);
+  if(sg.samples.length>1){
+    c.strokeStyle='#22d3ee';c.lineWidth=2;c.beginPath();
+    var n=sg.samples.length;
+    for(var i=0;i<n;i++){
+      var x=i*(cv.width/(n-1)),y=cv.height-8-(sg.samples[i]/100)*(cv.height-16);
+      if(i===0)c.moveTo(x,y);else{c.lineTo(x,py);c.lineTo(x,y);}
+      var py=y;
+      c.fillStyle='#facc15';c.fillRect(x-2.5,y-2.5,5,5);
+    }
+    c.stroke();
+  }
+  requestAnimationFrame(sgTick);
+}
+requestAnimationFrame(sgTick);
+/* 信号台三道小题 */
+var SGQ=[
+  {opts:'sgQ1Opts',fb:'sgQ1Fb',ans:0,
+   good:'✔ 正确！只有 0/1（通/断）两种状态的是<b>开关量</b>。教材中"D"标识的传感器就属于这类，用 read_digital 读取。',
+   bad:'✘ 再想想。提示：看看通道A的波形，它只在两个高度之间"跳"，没有中间值。'},
+  {opts:'sgQ2Opts',fb:'sgQ2Fb',ans:1,
+   good:'✔ 正确！输出<b>连续变化</b>的是模拟量，"A"标识、用 read_analog 读取，如旋钮、光线传感器。',
+   bad:'✘ 再想想。提示：通道B的曲线是平滑连续的，任何中间值都可能出现。'},
+  {opts:'sgQ3Opts',fb:'sgQ3Fb',ans:1,
+   good:'✔ 正确！采样间隔越大，取的点越少，台阶越粗糙、丢失细节越多。所以数字化时要选择合适的采样频率。',
+   bad:'✘ 亲手试试：把采样间隔从 0.2 拖到 2.0 秒，盯着通道C的青色台阶线对比原曲线，再回答。'}
+];
+SGQ.forEach(function(q,qi){
+  var btns=document.querySelectorAll('#'+q.opts+' button'),fb=$(q.fb);
+  btns.forEach(function(b){b.addEventListener('click',function(){
+    btns.forEach(function(x){x.classList.remove('right','wrong');});
+    var ok=+b.dataset.i===q.ans;
+    b.classList.add(ok?'right':'wrong');
+    setFb(fb,ok?'good':'err',ok?q.good:q.bad);
+    state.signal.quiz[qi]=ok;
+    var done=state.signal.quiz.filter(function(x){return x===true;}).length;
+    $('sgQuizDone').textContent='小题完成 '+done+'/3';
+    save();
+  });});
+});
+$('sgOps').textContent='操作 '+state.signal.ops+' 次';
+$('sgQuizDone').textContent='小题完成 '+state.signal.quiz.filter(function(x){return x===true;}).length+'/3';
+
+/* ================= 实验室3：配对 ================= */
+var MPAIRS=[
+  {t:'二维码',s:'共享单车扫码开锁',why:'二维码信息量大、印制成本低，手机摄像头一扫即可建立"人—车"联系（教材图1.3.5）。'},
+  {t:'RFID 电子标签',s:'公交卡 / 校园智慧卡"滴"卡',why:'RFID 用无线电识别电子标签，不用对准、不怕污渍，卡片轻轻一靠即可识别。'},
+  {t:'条形码',s:'超市收银台扫描商品',why:'条形码用宽窄不等的黑白条表示商品信息，成本极低，商品流通领域应用最广。'},
+  {t:'GPS / 北斗定位',s:'外卖骑手位置实时追踪',why:'定位技术能感知"位置"信息，骑手App持续上报坐标，你才能看到他到哪了。'},
+  {t:'温度传感器',s:'空调自动恒温控制',why:'温度传感器把室温变成电信号，空调据此决定制冷还是停机。'},
+  {t:'加速度传感器',s:'手机计步',why:'走路时手机随身体晃动，加速度传感器捕捉这种变化并计数（教材中它采用 I2C 协议）。'}
+];
+var mSelTech=null;
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function mBuild(){
+  mSelTech=null;
+  state.match.done=0;state.match.firstHit=0;state.match.attempts=0;
+  var techIdx=shuffle(MPAIRS.map(function(_,i){return i;}));
+  var sceneIdx=shuffle(MPAIRS.map(function(_,i){return i;}));
+  var tl=$('mTechList'),sl=$('mSceneList');
+  tl.innerHTML='';sl.innerHTML='';
+  techIdx.forEach(function(i){
+    var d=document.createElement('div');
+    d.className='match-item';d.dataset.pair=i;d.dataset.tried='0';
+    d.innerHTML='<b>'+MPAIRS[i].t+'</b><div class="tag">感知技术</div>';
+    d.addEventListener('click',function(){
+      if(d.classList.contains('done'))return;
+      document.querySelectorAll('#mTechList .match-item').forEach(function(x){x.classList.remove('sel');});
+      d.classList.add('sel');mSelTech=d;
+    });
+    tl.appendChild(d);
+  });
+  sceneIdx.forEach(function(i){
+    var d=document.createElement('div');
+    d.className='match-item';d.dataset.pair=i;
+    d.innerHTML=MPAIRS[i].s+'<div class="tag">生活场景</div>';
+    d.addEventListener('click',function(){
+      if(d.classList.contains('done'))return;
+      if(!mSelTech){setFb($('mFb'),'hint','请先在左侧点选一项感知技术，再点场景。');return;}
+      state.match.attempts++;
+      var pi=+mSelTech.dataset.pair;
+      if(+d.dataset.pair===pi){
+        if(mSelTech.dataset.tried==='0')state.match.firstHit++;
+        mSelTech.classList.remove('sel');mSelTech.classList.add('done');
+        d.classList.add('done');
+        state.match.done++;
+        setFb($('mFb'),'good','✔ 配对成功：<b>'+MPAIRS[pi].t+'</b> ↔ '+MPAIRS[pi].s+'。<br>'+MPAIRS[pi].why);
+        mSelTech=null;
+        if(state.match.done===6){
+          state.match.finishedOnce=true;
+          setFb($('mFb'),'good','🎉 全部配对完成！首次命中 '+state.match.firstHit+'/6。'+(state.match.firstHit===6?'满分，太棒了！':'可点"重新开始"再挑战一次满分。'));
+        }
+      }else{
+        mSelTech.dataset.tried='1';
+        d.classList.add('shake');setTimeout(function(){d.classList.remove('shake');},350);
+        var wrongWhy={'二维码':'二维码需要摄像头"看"图案','RFID 电子标签':'RFID 是无线电"隔空"识别标签','条形码':'条形码是黑白条纹供扫描枪识别','GPS / 北斗定位':'定位技术感知的是"在哪里"','温度传感器':'温度传感器感知的是"冷热"','加速度传感器':'加速度传感器感知的是"运动/晃动"'};
+        setFb($('mFb'),'err','✘ 不匹配：'+wrongWhy[MPAIRS[pi].t]+'，而"'+MPAIRS[+d.dataset.pair].s+'"需要的不是这种感知方式。想想这个场景里被感知的是什么信息，再试一次。');
+      }
+      mUpdateScore();save();
+    });
+    sl.appendChild(d);
+  });
+  mUpdateScore();
+}
+function mUpdateScore(){$('mScore').textContent='已配对 '+state.match.done+'/6 · 首次命中 '+state.match.firstHit;}
+$('mRestart').addEventListener('click',function(){mBuild();setFb($('mFb'),'hint','已重新洗牌，开始新一轮配对！');save();});
+mBuild();
+
+/* ================= 实验室4：二维码工坊 ================= */
+var qrN=21,qrCell,qrGrid=[],qrDamaged=[],qrStepIdx=0,qrTimer=null;
+var QR_STEPS=['待开始','① 摄像头取图','② 定位三个角','③ 读取黑白格','④ 纠错','⑤ 解码出文字'];
+function qrMakeGrid(){
+  qrGrid=[];qrDamaged=[];
+  var i,j;
+  for(i=0;i<qrN;i++){qrGrid.push([]);for(j=0;j<qrN;j++)qrGrid[i].push(Math.random()<0.45?1:0);}
+  function finder(r,c){
+    for(i=0;i<7;i++)for(j=0;j<7;j++){
+      var ring=Math.max(Math.abs(i-3),Math.abs(j-3));
+      qrGrid[r+i][c+j]=(ring===3||ring<=1)?1:0;
+    }
+  }
+  finder(0,0);finder(0,qrN-7);finder(qrN-7,0);
+  for(i=8;i<qrN-8;i++){qrGrid[6][i]=i%2===0?1:0;qrGrid[i][6]=i%2===0?1:0;}
+  qrDamaged=[[10,15],[14,10],[16,16]];
+}
+function qrInFinder(r,c){
+  return (r<7&&c<7)||(r<7&&c>=qrN-7)||(r>=qrN-7&&c<7);
+}
+function qrDraw(){
+  var cv=$('qrCanvas'),c=cv.getContext('2d');
+  qrCell=Math.floor(cv.width/(qrN+4));
+  var off=qrCell*2;
+  c.fillStyle='#fff';c.fillRect(0,0,cv.width,cv.height);
+  for(var i=0;i<qrN;i++)for(var j=0;j<qrN;j++){
+    var dam=qrDamaged.some(function(d){return d[0]===i&&d[1]===j;});
+    if(qrStepIdx<4&&dam){c.fillStyle='#f59e0b';}
+    else c.fillStyle=qrGrid[i][j]?'#1c1917':'#fff';
+    c.fillRect(off+j*qrCell,off+i*qrCell,qrCell-1,qrCell-1);
+  }
+  if(qrStepIdx===1){
+    c.strokeStyle='#0ea5e9';c.lineWidth=3;
+    var m=6,L=26;
+    [[m,m],[cv.width-m,m],[m,cv.height-m],[cv.width-m,cv.height-m]].forEach(function(p,k){
+      c.beginPath();
+      var dx=k%2===0?1:-1,dy=k<2?1:-1;
+      c.moveTo(p[0]+dx*L,p[1]);c.lineTo(p[0],p[1]);c.lineTo(p[0],p[1]+dy*L);c.stroke();
+    });
+  }
+  if(qrStepIdx===2){
+    c.strokeStyle='#dc2626';c.lineWidth=3;
+    [[0,0],[0,qrN-7],[qrN-7,0]].forEach(function(p){
+      c.strokeRect(off+p[1]*qrCell-2,off+p[0]*qrCell-2,7*qrCell+3,7*qrCell+3);
+    });
+  }
+  if(qrStepIdx===3){
+    var row=Math.floor((Date.now()/120)%qrN);
+    c.fillStyle='rgba(14,165,233,.30)';
+    c.fillRect(off,off+row*qrCell,qrN*qrCell,qrCell);
+  }
+  if(qrStepIdx>=4){
+    c.strokeStyle='#16a34a';c.lineWidth=2;
+    qrDamaged.forEach(function(d){
+      c.strokeRect(off+d[1]*qrCell-1,off+d[0]*qrCell-1,qrCell+1,qrCell+1);
+    });
+  }
+  if(qrStepIdx===5){
+    c.fillStyle='rgba(255,251,235,.92)';
+    c.fillRect(off,cv.height/2-26,qrN*qrCell,52);
+    c.fillStyle='#b45309';c.font='bold 20px system-ui';c.textAlign='center';
+    c.fillText('"欢迎学习物联网"',cv.width/2,cv.height/2+7);
+  }
+}
+var QR_FB=[
+  '点"自动演示"或"单步"开始。橙色格子表示被污损的部分，看看它们后来怎样被修复。',
+  '📷 摄像头取图：设备拍下整幅画面，此时它还只是一张普通图片。',
+  '🎯 定位三个角：图中三个红框就是"回"字形定位块。为什么是3个不是4个？——3个角就能唯一确定方向与正反！',
+  '📖 读取黑白格：蓝色扫描带正逐行把 黑=1、白=0 读成二进制串。',
+  '🩹 纠错：绿框处的污损格子被纠错码推算修复了——这就是二维码缺个角也能扫的原因。',
+  '✅ 解码完成：二进制串按编码规则还原成文字"欢迎学习物联网"。整个"图形→信息"过程结束！'
+];
+function qrSetStep(n){
+  qrStepIdx=n;
+  $('qrStepName').textContent=QR_STEPS[n];
+  setFb($('qrFb'),n===0?'hint':(n===5?'good':'hint'),QR_FB[n]);
+  qrDraw();
+}
+function qrStopAuto(){if(qrTimer){clearInterval(qrTimer);qrTimer=null;$('qrAuto').textContent='▶ 自动演示';}}
+$('qrAuto').addEventListener('click',function(){
+  if(qrTimer){qrStopAuto();return;}
+  if(qrStepIdx>=5)qrSetStep(0);
+  $('qrAuto').textContent='⏸ 暂停';
+  qrTimer=setInterval(function(){
+    if(qrStepIdx>=5){qrStopAuto();state.qr.demoRuns++;save();return;}
+    qrSetStep(qrStepIdx+1);
+  },1800);
+});
+$('qrStep').addEventListener('click',function(){
+  qrStopAuto();
+  if(qrStepIdx>=5){qrSetStep(0);return;}
+  qrSetStep(qrStepIdx+1);
+  if(qrStepIdx===5){state.qr.demoRuns++;save();}
+});
+$('qrReset').addEventListener('click',function(){qrStopAuto();qrMakeGrid();qrSetStep(0);});
+qrMakeGrid();qrSetStep(0);
+setInterval(function(){if(qrStepIdx===3)qrDraw();},120);
+/* 生成示意码 */
+$('qrGen').addEventListener('click',function(){
+  var txt=$('qrText').value.trim();
+  var fb=$('qrGenFb');
+  if(!txt){setFb(fb,'err','请先输入 1~10 个字符再生成。');return;}
+  var bits='';
+  for(var k=0;k<txt.length;k++){
+    bits+=txt.charCodeAt(k).toString(2).padStart(16,'0');
+  }
+  $('qrBits').textContent='「'+txt+'」共 '+txt.length+' 个字符 → '+bits.length+' 位二进制：\n'+bits;
+  var n=21,cv=$('qrGenCanvas'),c=cv.getContext('2d');
+  var cell=Math.floor(cv.width/(n+2)),off=cell;
+  c.fillStyle='#fff';c.fillRect(0,0,cv.width,cv.height);
+  var bi=0;
+  for(var i=0;i<n;i++)for(var j=0;j<n;j++){
+    var inF=(i<7&&j<7)||(i<7&&j>=n-7)||(i>=n-7&&j<7);
+    var v;
+    if(inF){
+      var r=i<7?i:i-(n-7),cc=j<7?j:j-(n-7);
+      var ring=Math.max(Math.abs(r-3),Math.abs(cc-3));
+      v=(ring===3||ring<=1)?1:0;
+    }else{
+      v=bi<bits.length?+bits[bi++]:((i+j)%3===0?1:0);
+    }
+    c.fillStyle=v?'#1c1917':'#fff';
+    c.fillRect(off+j*cell,off+i*cell,cell-1,cell-1);
+  }
+  setFb(fb,'good','✔ 生成成功！你的文字先变成二进制（右侧黑框），再按"黑=1、白=0"填进格子。三个"回"字角是留给扫码设备定位用的。<br><b>想一想：</b>字越多，需要的格子就越多，所以真实二维码有不同"版本"（尺寸）。');
+  state.qr.lastText=txt;state.qr.genCount++;save();
+});
+
+/* ================= 实验室5：农植园方案 ================= */
+var FSENS=[
+  {id:'temp',name:'温度传感器',type:'模拟量/数字量',need:'环境监测',pos:['大棚内空中','土壤中','棚顶室外']},
+  {id:'ahumi',name:'空气湿度传感器',type:'数字量(如DH11)',need:'环境监测',pos:['大棚内空中','土壤中','棚顶室外']},
+  {id:'light',name:'光线传感器',type:'模拟量',need:'光照不足提醒',pos:['大棚内空中','土壤中','棚顶室外']},
+  {id:'soil',name:'土壤湿度传感器',type:'模拟量',need:'缺水提醒',pos:['土壤中','大棚内空中','棚顶室外']},
+  {id:'sound',name:'声音传感器',type:'模拟量',need:'（拓展）',pos:['大棚内空中','入口处']},
+  {id:'pir',name:'人体红外传感器',type:'开关量',need:'（拓展）',pos:['入口处','大棚内空中']}
+];
+(function(){
+  var wrap=$('farmSensors');
+  FSENS.forEach(function(s){
+    var d=document.createElement('div');
+    d.className='sensor-check';d.style.minWidth='300px';
+    d.innerHTML='<input type="checkbox" id="fs_'+s.id+'"><label for="fs_'+s.id+'" style="flex:1"><b>'+s.name+'</b>'
+      +' <span class="badge amber" style="font-size:11px">'+s.type+'</span></label>'
+      +'<select id="fp_'+s.id+'">'+s.pos.map(function(p){return '<option>'+p+'</option>';}).join('')+'</select>';
+    wrap.appendChild(d);
+  });
+})();
+$('farmClear').addEventListener('click',function(){
+  FSENS.forEach(function(s){$('fs_'+s.id).checked=false;$('fp_'+s.id).selectedIndex=0;});
+  $('farmResult').style.display='none';
+});
+$('farmGen').addEventListener('click',function(){
+  var chosen=FSENS.filter(function(s){return $('fs_'+s.id).checked;});
+  var tb=$('farmTable').querySelector('tbody');
+  tb.innerHTML='';
+  var plan=[];
+  chosen.forEach(function(s){
+    var pos=$('fp_'+s.id).value;
+    plan.push({name:s.name,type:s.type,pos:pos});
+    tb.innerHTML+='<tr><td>'+s.name+'</td><td>'+s.type+'</td><td>'+pos+'</td><td>'+s.need+'</td></tr>';
+  });
+  var msgs=[],good=0;
+  function has(id){return chosen.some(function(s){return s.id===id;});}
+  function posOf(id){return $('fp_'+id).value;}
+  if(!chosen.length){msgs.push('❌ 还没有选择任何传感器，三个需求都无法实现。');}
+  else{
+    if(has('temp')&&has('ahumi')){
+      good++;msgs.push('✅ 需求①环境监测：温度 + 空气湿度传感器齐全'+((posOf('temp')==='土壤中'||posOf('ahumi')==='土壤中')?'，但注意：测"环境空气"的传感器埋进土壤会测不准，建议装在大棚内空中。':'，位置合理。'));
+    }else{
+      msgs.push('❌ 需求①环境监测：缺少'+(!has('temp')?'温度传感器':'')+((!has('temp')&&!has('ahumi'))?'和':'')+(!has('ahumi')?'空气湿度传感器':'')+'，无法同时掌握冷热与干湿。');
+    }
+    if(has('soil')){
+      if(posOf('soil')==='土壤中'){good++;msgs.push('✅ 需求②缺水提醒：土壤湿度传感器插在土壤中，教材指出"土壤缺水时输出值将减少"，据此就能触发缺水提醒。');}
+      else msgs.push('⚠️ 需求②缺水提醒：选了土壤湿度传感器，但它装在"'+posOf('soil')+'"测不到土壤水分——它必须插进土壤里！');
+    }else{
+      msgs.push('❌ 需求②缺水提醒：没有土壤湿度传感器，系统无法判断土壤是否缺水。空气湿度不能代替土壤湿度哦。');
+    }
+    if(has('light')){
+      if(posOf('light')==='土壤中')msgs.push('⚠️ 需求③光照提醒：光线传感器埋在土里永远是"黑的"，请装到大棚内空中或棚顶。');
+      else{good++;msgs.push('✅ 需求③光照提醒：光线传感器位置合理，光照弱于阈值即可提醒补光。');}
+    }else{
+      msgs.push('❌ 需求③光照提醒：缺少光线传感器，无法感知光照强弱。');
+    }
+    if(has('sound')||has('pir'))msgs.push('💡 你还选了'+(has('sound')?'声音传感器 ':'')+(has('pir')?'人体红外传感器 ':'')+'——与三个基本需求关系不大，但可拓展做"入侵提醒"等功能，属于加分创意。');
+  }
+  var verdict=good===3?'🎉 三个需求全部满足，方案通过！':'当前满足 '+good+'/3 个需求，请按上面的提示调整后重新生成。';
+  $('farmReview').innerHTML='<b>'+verdict+'</b><br>'+msgs.join('<br>');
+  $('farmResult').style.display='block';
+  state.farm.plan=plan;state.farm.review=verdict;
+  save();
+});
+
+/* ================= 练习 ================= */
+var QUIZ=[
+  {q:'按钮/门磁传感器的输出只有"通"和"断"两种状态，它属于哪类信号？',
+   o:['开关量','模拟量','数字量','视频信号'],a:0,
+   e:'开关量只有 0/1 两种取值，教材中模块上标"D"，用 read_digital 读取。',
+   h:'回想信号台通道A的方波，只在两个高度之间跳变。'},
+  {q:'光线传感器中感受光照强弱的敏感元件是？',
+   o:['热敏电阻','光敏电阻','湿敏元件','压电陶瓷'],a:1,
+   e:'光敏电阻的阻值随光照强弱变化，从而使输出电压变化（教材图1.3.1）。',
+   h:'"光"敏电阻——名字里就藏着答案。'},
+  {q:'旋钮传感器缓缓旋转时输出的数值连续变化，读取它应采用哪种方式？',
+   o:['read_digital 数字输入','read_analog 模拟输入','I2C 协议','串口打印'],a:1,
+   e:'旋钮是模拟量传感器（标"A"），要把引脚设为 Pin.ANALOG 并用 read_analog 读取。',
+   h:'连续变化的信号叫模拟量，读它的函数名里有 analog。'},
+  {q:'公交卡、校园智慧卡靠近读卡器"滴"一下就完成识别，用的是什么技术？',
+   o:['条形码','二维码','射频识别 RFID','GPS 定位'],a:2,
+   e:'RFID 通过无线电读写电子标签，不需要"看见"图案，也不怕污渍。二代身份证也内置 RFID 芯片。',
+   h:'这种卡不需要摄像头拍照，是"隔空"感应的。'},
+  {q:'要判断农植园土壤是否缺水，最应该选择的传感器是？',
+   o:['空气湿度传感器','土壤湿度传感器','温度传感器','声音传感器'],a:1,
+   e:'教材指出土壤湿度传感器"土壤缺水时输出值将减少"。空气湿度反映的是空气而非土壤。',
+   h:'注意"土壤"两个字——空气湿度≠土壤湿度。'},
+  {q:'与一维条形码相比，二维码最突出的优势是？',
+   o:['印刷更便宜','信息存储量更大','不需要设备识别','永不磨损'],a:1,
+   e:'二维码在两个方向分布黑白格，可把文字、图像等大量信息"编码"进一个图形。',
+   h:'想想码工坊里：格子越多，能装的二进制位就越多。'},
+  {q:'NFC 的工作距离小于 10cm，这个"缺点"反而带来了什么好处？',
+   o:['传输速度更快','安全性高','功耗更大','能远程控制'],a:1,
+   e:'距离近意味着难以被远处设备窃读，所以"碰一碰支付"等金融应用敢用 NFC。',
+   h:'想想为什么支付宁愿"碰一碰"也不隔着十米刷？'},
+  {q:'掌控板上的加速度传感器采用 I2C 协议，I2C 的突出优点是？',
+   o:['一条总线可挂多个从设备，省引脚','只能连一个设备','必须用无线连接','只能传图片'],a:0,
+   e:'I2C 用 SCL 和 SDA 两条线，支持多从机、不同地址，接口线少、控制简单。',
+   h:'教材拓展阅读说它"可以在一个引脚上连接多个设备，能够节省很多资源"。'}
+];
+function quizBuild(){
+  var area=$('quizArea');area.innerHTML='';
+  QUIZ.forEach(function(item,qi){
+    var d=document.createElement('div');d.className='quiz-q';
+    var oh=item.o.map(function(o,oi){return '<button data-i="'+oi+'">'+o+'</button>';}).join('');
+    d.innerHTML='<div class="qt">'+(qi+1)+'. '+item.q+'</div><div class="pill-opts">'+oh+'</div>'
+      +'<div style="display:flex;gap:8px"><button class="btn small gray qhint">💡 提示</button></div><div class="feedback"></div>';
+    var fb=d.querySelector('.feedback');
+    var btns=d.querySelectorAll('.pill-opts button');
+    btns.forEach(function(b){b.addEventListener('click',function(){
+      if(state.quiz.answers[qi]===true)return;
+      btns.forEach(function(x){x.classList.remove('right','wrong');});
+      var ok=+b.dataset.i===item.a;
+      b.classList.add(ok?'right':'wrong');
+      if(ok){
+        setFb(fb,'good','✔ 正确！'+item.e);
+        state.quiz.answers[qi]=true;
+      }else{
+        setFb(fb,'err','✘ 不对。'+item.e.split('。')[0]+'？先点"💡 提示"，想好再换个答案试试。');
+        if(state.quiz.answers[qi]!==true)state.quiz.answers[qi]=false;
+      }
+      quizScore();save();
+    });});
+    d.querySelector('.qhint').addEventListener('click',function(){
+      setFb(fb,'hint','💡 提示：'+item.h);
+    });
+    area.appendChild(d);
+  });
+  quizScore();
+}
+function quizScore(){
+  var s=0,done=0;
+  QUIZ.forEach(function(_,qi){
+    if(state.quiz.answers[qi]===true)s++;
+    if(state.quiz.answers[qi]!==undefined&&state.quiz.answers[qi]!==null)done++;
+  });
+  state.quiz.score=s;
+  $('quizScore').textContent='得分 '+s+' / '+QUIZ.length;
+  $('quizBar').style.width=(done/QUIZ.length*100)+'%';
+}
+$('quizRetry').addEventListener('click',function(){
+  state.quiz.answers={};state.quiz.score=0;save();quizBuild();
+});
+quizBuild();
+
+/* ================= 成果档案 ================= */
+function buildReport(){
+  var d=new Date();
+  var lines=[];
+  lines.push('====== 第1单元 第3节《物联网的感知》学习小结 ======');
+  lines.push('生成时间：'+d.toLocaleString('zh-CN'));
+  lines.push('');
+  lines.push('【1 原理室】已探究传感器：'+(state.principle.explored.length?state.principle.explored.map(function(t){return {temp:'温度(热敏电阻)',light:'光照(光敏电阻)',humi:'湿度(湿敏元件)'}[t];}).join('、'):'尚未探究')+'（'+state.principle.explored.length+'/3）');
+  lines.push('        小检测（光敏电阻）：'+(state.principle.quiz===true?'答对':(state.principle.quiz===false?'答错待重试':'未作答')));
+  lines.push('【2 信号台】实验操作 '+state.signal.ops+' 次；三道小题答对 '+state.signal.quiz.filter(function(x){return x===true;}).length+'/3');
+  lines.push('【3 配对区】完成配对 '+state.match.done+'/6，首次命中 '+state.match.firstHit+' 个'+(state.match.finishedOnce?'（已完整通关）':''));
+  lines.push('【4 码工坊】识别流程完整观看 '+state.qr.demoRuns+' 次；生成示意码 '+state.qr.genCount+' 次'+(state.qr.lastText?('，最近编码文字："'+state.qr.lastText+'"'):''));
+  if(state.farm.plan&&state.farm.plan.length){
+    lines.push('【5 方案室】农植园感知方案（'+state.farm.review+'）：');
+    state.farm.plan.forEach(function(p){lines.push('        · '+p.name+'（'+p.type+'）→ 安装于'+p.pos);});
+  }else lines.push('【5 方案室】尚未生成感知方案');
+  lines.push('【练习】随堂练习得分 '+state.quiz.score+'/'+QUIZ.length);
+  lines.push('');
+  lines.push('我学到了：感知技术把外界状态变成数字信号；传感器=敏感元件+转换电路；');
+  lines.push('信号分开关量/模拟量/数字量；条码、二维码、RFID、NFC、定位各有适用场景。');
+  return lines.join('\n');
+}
+$('repGen').addEventListener('click',function(){
+  $('repView').textContent=buildReport();
+  setFb($('repFb'),'good','小结已生成，可下载保存。');
+});
+$('repTxt').addEventListener('click',function(){
+  download('第3节_物联网的感知_学习小结.txt',buildReport());
+  setFb($('repFb'),'good','.txt 已开始下载。');
+});
+$('repJson').addEventListener('click',function(){
+  download('第3节_物联网的感知_学习数据.json',JSON.stringify({lesson:'第1单元第3节 物联网的感知',time:new Date().toISOString(),data:state},null,2),'application/json');
+  setFb($('repFb'),'good','.json 已开始下载。');
+});
+$('repClear').addEventListener('click',function(){
+  if(!confirm('确定清除本页在本机保存的全部学习数据吗？此操作不可恢复。'))return;
+  localStorage.removeItem(LS_KEY);
+  state=defState();
+  $('repView').textContent='数据已清除。重新学习后可再次生成小结。';
+  setFb($('repFb'),'hint','本机学习数据已全部清除。');
+  quizBuild();mBuild();
+  $('sgOps').textContent='操作 0 次';$('sgQuizDone').textContent='小题完成 0/3';
+  $('pExplored').className='badge amber';$('pExplored').textContent='已探究 0 / 3 种';
+});
+})();
+</script>
+</body>
+</html>

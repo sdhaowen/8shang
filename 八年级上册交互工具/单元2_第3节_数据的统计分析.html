@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第2单元 第3节 数据的统计分析 · 分析笔记本</title>
+<style>
+:root{
+  --ink:#312e81; --main:#6366f1; --main-dark:#4f46e5; --main-light:#e0e7ff;
+  --bg:#f4f5fb; --card:#ffffff; --ok:#059669; --err:#dc2626; --warn:#d97706;
+  --line:#c7d2fe; --mono:"SFMono-Regular",Consolas,"Courier New",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:#1e293b;line-height:1.65}
+header.nb-head{background:linear-gradient(120deg,#4338ca,#6366f1 55%,#818cf8);color:#fff;padding:26px 20px 18px;box-shadow:0 3px 12px rgba(79,70,229,.35)}
+.head-inner{max-width:980px;margin:0 auto}
+.head-inner .unit{font-size:.85rem;opacity:.9;letter-spacing:2px}
+.head-inner h1{font-size:1.5rem;margin:4px 0 8px}
+.head-inner h1 .file{font-family:var(--mono);font-size:.85rem;background:rgba(255,255,255,.18);padding:2px 10px;border-radius:6px;margin-left:10px;vertical-align:middle}
+.goals{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.goals span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.35);border-radius:999px;padding:3px 12px;font-size:.8rem}
+nav.nb-nav{position:sticky;top:0;z-index:50;background:rgba(244,245,251,.95);backdrop-filter:blur(4px);border-bottom:1px solid var(--line);padding:8px 12px}
+nav.nb-nav .nav-inner{max-width:980px;margin:0 auto;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+nav.nb-nav a{font-family:var(--mono);font-size:.8rem;color:var(--main-dark);text-decoration:none;background:#fff;border:1px solid var(--line);border-radius:6px;padding:3px 10px;transition:.15s}
+nav.nb-nav a:hover{background:var(--main);color:#fff}
+main{max-width:980px;margin:22px auto 60px;padding:0 14px}
+/* —— 笔记本单元格版式 —— */
+.cell{display:flex;margin-bottom:30px}
+.cell-no{width:64px;flex:none;text-align:right;padding-right:12px;font-family:var(--mono);color:var(--main-dark);font-weight:700;font-size:.95rem;padding-top:18px;user-select:none}
+.cell-no small{display:block;color:#94a3b8;font-weight:400;font-size:.68rem}
+.cell-main{flex:1;min-width:0;border-left:4px solid var(--line);padding-left:16px}
+.cell:target .cell-main{border-left-color:var(--main)}
+.cell-card{background:var(--card);border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 2px 10px rgba(99,102,241,.08);padding:18px}
+.cell-card h2{font-size:1.08rem;color:var(--ink);margin-bottom:6px}
+.cell-card h2 .tag{font-size:.7rem;background:var(--main-light);color:var(--main-dark);border-radius:6px;padding:2px 8px;margin-left:8px;vertical-align:middle;font-weight:600}
+.task{background:#f8faff;border:1px dashed var(--line);border-radius:8px;padding:8px 12px;font-size:.88rem;color:#475569;margin:8px 0 12px}
+.task b{color:var(--main-dark)}
+.cell-output{margin-top:12px;background:#eef2ff;border-left:4px solid var(--main);border-radius:0 10px 10px 0;padding:10px 14px;font-size:.88rem}
+.cell-output .out-label{font-family:var(--mono);font-size:.72rem;color:var(--main-dark);letter-spacing:1px;margin-bottom:4px}
+button{font-family:inherit;cursor:pointer;border:none;border-radius:8px;padding:7px 14px;font-size:.85rem;transition:.15s}
+.btn-main{background:var(--main);color:#fff}
+.btn-main:hover{background:var(--main-dark)}
+.btn-ghost{background:#fff;color:var(--main-dark);border:1px solid var(--line)}
+.btn-ghost:hover{background:var(--main-light)}
+.btn-warn{background:#fef2f2;color:var(--err);border:1px solid #fecaca}
+button:disabled{opacity:.45;cursor:not-allowed}
+select,input[type=number],input[type=text]{font-family:inherit;padding:6px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:.85rem;background:#fff}
+textarea{width:100%;font-family:inherit;padding:8px 10px;border:1px solid #cbd5e1;border-radius:8px;font-size:.86rem;resize:vertical}
+canvas{max-width:100%;display:block;background:#fff;border:1px solid #e2e8f0;border-radius:10px;touch-action:none}
+.badge{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.75rem;font-weight:600}
+.badge.ok{background:#d1fae5;color:var(--ok)} .badge.err{background:#fee2e2;color:var(--err)}
+.badge.info{background:var(--main-light);color:var(--main-dark)} .badge.warn{background:#fef3c7;color:var(--warn)}
+.fb{border-radius:8px;padding:8px 12px;font-size:.85rem;margin-top:8px;display:none}
+.fb.show{display:block}
+.fb.ok{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46}
+.fb.err{background:#fef2f2;border:1px solid #fecaca;color:#991b1b}
+.fb.hint{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+/* 方法卡 */
+.mcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:14px}
+.mcard{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:linear-gradient(160deg,#fff,#f5f6ff)}
+.mcard h4{color:var(--main-dark);font-size:.9rem;margin-bottom:4px}
+.mcard p{font-size:.78rem;color:#64748b}
+.scene{border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:10px;background:#fff}
+.scene .q{font-size:.88rem;margin-bottom:8px}
+.scene .q .no{font-family:var(--mono);color:var(--main-dark);font-weight:700;margin-right:6px}
+.opt-row{display:flex;flex-wrap:wrap;gap:8px}
+.opt-row button{background:#fff;border:1px solid #cbd5e1;color:#334155}
+.opt-row button:hover{border-color:var(--main);color:var(--main-dark)}
+.opt-row button.sel-ok{background:#d1fae5;border-color:var(--ok);color:#065f46}
+.opt-row button.sel-err{background:#fee2e2;border-color:var(--err);color:#991b1b}
+.ctrl-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+.ctrl-row label{font-size:.82rem;color:#475569}
+.chips{display:flex;gap:6px}
+.chip{width:26px;height:26px;border-radius:50%;border:3px solid transparent;cursor:pointer}
+.chip.on{border-color:#1e293b}
+table.data-tb{border-collapse:collapse;font-size:.78rem;width:100%}
+table.data-tb th,table.data-tb td{border:1px solid #e2e8f0;padding:3px 8px;text-align:center}
+table.data-tb th{background:var(--main-light);color:var(--ink)}
+.tb-wrap{max-height:220px;overflow:auto;border:1px solid #e2e8f0;border-radius:8px;margin:8px 0}
+.mono{font-family:var(--mono)}
+.stat-grid{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
+.stat-box{background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 14px;text-align:center}
+.stat-box .v{font-family:var(--mono);font-size:1.05rem;font-weight:700;color:var(--main-dark)}
+.stat-box .k{font-size:.72rem;color:#64748b}
+footer{max-width:980px;margin:0 auto 40px;padding:0 14px;text-align:center;font-size:.75rem;color:#94a3b8}
+@media (max-width:640px){ .cell-no{width:40px;font-size:.8rem} .cell-main{padding-left:10px} }
+</style>
+</head>
+<body>
+<header class="nb-head">
+  <div class="head-inner">
+    <div class="unit">第2单元 数据与数据探究 · 贯通项目「在线数字气象站」</div>
+    <h1>第3节 数据的统计分析<span class="file">分析笔记本.ipynb</span></h1>
+    <div class="goals">
+      <span>① 认识聚类、对比、平均、回归四种常见数据分析方法</span>
+      <span>② 会用统计量和趋势线从数据中提取结论</span>
+      <span>③ 能为小七孔气象数据选择合适的分析方法并形成报告</span>
+    </div>
+  </div>
+</header>
+<nav class="nb-nav"><div class="nav-inner">
+  <a href="#cell1">[1] 方法选择器</a><a href="#cell2">[2] 聚类实验</a><a href="#cell3">[3] 平均数实验室</a>
+  <a href="#cell4">[4] 趋势与预测</a><a href="#cell5">[5] 气象站分析</a><a href="#cell6">[6] 报告导出</a>
+</div></nav>
+<main>
+
+<!-- ======== 单元格 1 方法选择器 ======== -->
+<section class="cell" id="cell1">
+  <div class="cell-no">[1]<small>输入</small></div>
+  <div class="cell-main">
+    <div class="cell-card">
+      <h2>方法选择器 <span class="tag">场景匹配</span></h2>
+      <div class="task"><b>任务：</b>先读懂四种数据分析方法的"说明书"，再给下面 8 个真实场景各选一种最合适的方法。选错会告诉你原因，改对为止；首次就答对才计分。</div>
+      <div class="mcards">
+        <div class="mcard"><h4>聚类分析法</h4><p>按数据内在性质自动分组：同一类尽量相似，不同类差别尽量大。"物以类聚"。</p></div>
+        <div class="mcard"><h4>对比分析法</h4><p>把多个数据放在一起比较，直观看出数值差异，常配柱状图。</p></div>
+        <div class="mcard"><h4>平均分析法</h4><p>求平均值，反映整体的平均水平；但要小心极端值的干扰。</p></div>
+        <div class="mcard"><h4>回归分析法</h4><p>研究自变量与因变量的数量关系，用函数关系去预测未来数值。</p></div>
+      </div>
+      <div id="m1-list"></div>
+      <div class="ctrl-row">
+        <button class="btn-ghost" id="m1-retry">全部重做</button>
+        <span id="m1-score" class="badge info">得分 0 / 8</span>
+      </div>
+    </div>
+    <div class="cell-output"><div class="out-label">输出 [1]</div><div id="m1-out">还没有作答。完成 8 个场景后，这里会给出你的方法辨析小结。</div></div>
+  </div>
+</section>
+
+<!-- ======== 单元格 2 聚类实验 ======== -->
+<section class="cell" id="cell2">
+  <div class="cell-no">[2]<small>输入</small></div>
+  <div class="cell-main">
+    <div class="cell-card">
+      <h2>聚类互动：散点分组实验 <span class="tag">k-means 模拟</span></h2>
+      <div class="task"><b>任务：</b>下图是 30 名同学的「身高-体重」散点。第一步：选一种颜色，点击散点手动分组（你认为像一类的涂同色）。第二步：选择 k 值，点击"自动聚类"，观察 ✕ 形质心如何一步步移动，把点自动分成 k 类。最后切换视图，比比"你分的"和"机器分的"像不像。</div>
+      <div class="ctrl-row">
+        <label>手动涂色：</label>
+        <div class="chips" id="m2-chips"></div>
+        <button class="btn-ghost" id="m2-clear-manual">清除手动分组</button>
+      </div>
+      <div class="ctrl-row">
+        <label>k =</label>
+        <select id="m2-k"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option></select>
+        <button class="btn-main" id="m2-run">自动聚类 ▶ 运行</button>
+        <button class="btn-ghost" id="m2-step">单步</button>
+        <button class="btn-ghost" id="m2-pause" disabled>暂停</button>
+        <button class="btn-ghost" id="m2-reset">重置</button>
+      </div>
+      <div class="ctrl-row">
+        <label>视图：</label>
+        <label><input type="radio" name="m2view" value="manual" checked> 我的手动分组</label>
+        <label><input type="radio" name="m2view" value="auto"> 自动聚类结果</label>
+        <span id="m2-status" class="badge info">待开始</span>
+      </div>
+      <canvas id="m2-cv" width="640" height="380"></canvas>
+      <div class="fb" id="m2-fb"></div>
+    </div>
+    <div class="cell-output"><div class="out-label">输出 [2]</div><div id="m2-out">完成一次自动聚类后，这里会显示迭代次数与两种分组的对照统计。</div></div>
+  </div>
+</section>
+
+<!-- ======== 单元格 3 平均数实验室 ======== -->
+<section class="cell" id="cell3">
+  <div class="cell-no">[3]<small>输入</small></div>
+  <div class="cell-main">
+    <div class="cell-card">
+      <h2>平均数实验室：极端值的威力 <span class="tag">可拖动实验</span></h2>
+      <div class="task"><b>任务：</b>下面 10 个圆点代表 10 位同学每周的零花钱（元），左右拖动圆点改变数值。试着把某个点拖到很大（比如 180 元），观察 <b style="color:#dc2626">红色平均数线</b> 和 <b style="color:#059669">绿色中位数线</b> 谁被"拉走"了，然后回答问题。</div>
+      <canvas id="m3-cv" width="640" height="230"></canvas>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="v" id="m3-mean">--</div><div class="k">平均数（元）</div></div>
+        <div class="stat-box"><div class="v" id="m3-median">--</div><div class="k">中位数（元）</div></div>
+        <div class="stat-box"><div class="v" id="m3-max">--</div><div class="k">最大值（元）</div></div>
+      </div>
+      <div class="ctrl-row"><button class="btn-ghost" id="m3-reset">重置数据</button><span id="m3-tip" class="badge warn" style="display:none">注意：平均数正被极端值拉动！</span></div>
+      <div class="scene">
+        <div class="q"><span class="no">Q</span>当有同学的零花钱特别多（极端值）时，哪个统计量更能代表"大多数同学"的水平？</div>
+        <div class="opt-row" id="m3-q"></div>
+        <div class="fb" id="m3-fb"></div>
+      </div>
+      <hr style="border:none;border-top:1px dashed var(--line);margin:14px 0">
+      <div class="task"><b>分组统计：</b>光看总平均还不够。点击按钮，按小组分别求平均并画柱状图对比，看看哪个组的平均零花钱最高。</div>
+      <div class="ctrl-row"><button class="btn-main" id="m3-group">计算分组平均并绘图</button></div>
+      <canvas id="m3-cv2" width="640" height="220" style="display:none"></canvas>
+    </div>
+    <div class="cell-output"><div class="out-label">输出 [3]</div><div id="m3-out">拖动数据点并回答问题后，这里会记录你的实验发现。</div></div>
+  </div>
+</section>
+
+<!-- ======== 单元格 4 趋势与预测 ======== -->
+<section class="cell" id="cell4">
+  <div class="cell-no">[4]<small>输入</small></div>
+  <div class="cell-main">
+    <div class="cell-card">
+      <h2>趋势与预测：二氧化碳浓度回归实验 <span class="tag">最小二乘</span></h2>
+      <div class="task"><b>任务：</b>图中是 A 地 1995—2019 年二氧化碳年均浓度（mg/L，示例数据，其中 2000/2005/2010/2015 年与教材表 2.3.1 一致）。① 拖动直线两端的圆形手柄，尽量让直线贴近所有点，误差分数越低越好；② 点击"最小二乘拟合"看电脑算出的最佳直线；③ 用它外推预测未来年份，并思考预测的可信度。</div>
+      <canvas id="m4-cv" width="640" height="330"></canvas>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="v" id="m4-err">--</div><div class="k">你的拟合误差 RMSE</div></div>
+        <div class="stat-box"><div class="v" id="m4-best">--</div><div class="k">最佳误差 RMSE</div></div>
+        <div class="stat-box"><div class="v mono" id="m4-eq" style="font-size:.82rem">--</div><div class="k">最佳直线方程</div></div>
+      </div>
+      <div class="ctrl-row">
+        <button class="btn-main" id="m4-fit">最小二乘拟合</button>
+        <button class="btn-ghost" id="m4-reset">重置手柄</button>
+        <label>预测年份：</label><input type="number" id="m4-year" value="2025" min="2020" max="2040" style="width:90px">
+        <button class="btn-ghost" id="m4-pred">预测</button>
+        <span id="m4-predv" class="badge info" style="display:none"></span>
+      </div>
+      <div class="fb" id="m4-fb"></div>
+      <div id="m4-judge"></div>
+    </div>
+    <div class="cell-output"><div class="out-label">输出 [4]</div><div id="m4-out">完成拟合与判断题后，这里会汇总你的回归实验结果。</div></div>
+  </div>
+</section>
+
+<!-- ======== 单元格 5 气象站分析任务 ======== -->
+<section class="cell" id="cell5">
+  <div class="cell-no">[5]<small>输入</small></div>
+  <div class="cell-main">
+    <div class="cell-card">
+      <h2>气象站分析任务 <span class="tag">项目实战</span></h2>
+      <div class="task"><b>任务：</b>这是小清团队在荔波小七孔气象站采集的一天 24 小时气温与湿度示例数据。像数据分析师一样：选择分析方法 → 执行 → 阅读结果与小图 → 修改自动生成的结论句，让它更准确，然后保存。目标是回答项目问题：<b>最高气温是否出现在 14 时？最低气温是否出现在日出前后？</b></div>
+      <div class="tb-wrap"><table class="data-tb" id="m5-table"></table></div>
+      <div class="ctrl-row">
+        <label>分析方法：</label>
+        <select id="m5-method">
+          <option value="minmax">找最高/最低气温及出现时间</option>
+          <option value="avg">求全天平均气温、平均湿度</option>
+          <option value="compare">时段对比（白天 8—18 时 vs 夜间）</option>
+          <option value="corr">气温—湿度相关性（散点）</option>
+        </select>
+        <button class="btn-main" id="m5-run">执行分析</button>
+      </div>
+      <div id="m5-result" style="display:none">
+        <div class="stat-grid" id="m5-stats"></div>
+        <canvas id="m5-cv" width="640" height="200"></canvas>
+        <div class="ctrl-row" style="margin-top:10px"><label style="font-weight:600;color:var(--ink)">结论句（可修改措辞后保存）：</label></div>
+        <textarea id="m5-conc" rows="2"></textarea>
+        <div class="ctrl-row"><button class="btn-ghost" id="m5-save">保存这条结论</button><span id="m5-saved" class="badge ok" style="display:none">已保存</span></div>
+      </div>
+      <hr style="border:none;border-top:1px dashed var(--line);margin:14px 0">
+      <h2 style="font-size:.98rem">巩固练习 <span class="tag">即时反馈</span></h2>
+      <div class="task"><b>任务：</b>7 道题，读图、选方法、判断结论是否可靠。不确定先点"提示"，答错可换选项重试，首次答对计分。</div>
+      <div id="m5-quiz"></div>
+      <div class="ctrl-row"><button class="btn-ghost" id="m5-retry">练习重做</button><span id="m5-score" class="badge info">得分 0 / 7</span></div>
+    </div>
+    <div class="cell-output"><div class="out-label">输出 [5]</div><div id="m5-out">已保存的结论会显示在这里。</div></div>
+  </div>
+</section>
+
+<!-- ======== 单元格 6 报告导出 ======== -->
+<section class="cell" id="cell6">
+  <div class="cell-no">[6]<small>输出</small></div>
+  <div class="cell-main">
+    <div class="cell-card">
+      <h2>学习小结与成果导出 <span class="tag">气象数据分析报告</span></h2>
+      <div class="task"><b>任务：</b>把本页的方法选择成绩、聚类实验、平均数发现、回归预测、气象站结论汇总成一份《气象数据分析报告》，可下载或复制，交给项目组存档。</div>
+      <div class="ctrl-row">
+        <button class="btn-main" id="m6-gen">生成报告</button>
+        <button class="btn-ghost" id="m6-txt">下载 .txt</button>
+        <button class="btn-ghost" id="m6-json">下载 .json</button>
+        <button class="btn-ghost" id="m6-copy">复制到剪贴板</button>
+        <button class="btn-warn" id="m6-clear">清除本机学习数据</button>
+      </div>
+      <textarea id="m6-report" rows="14" readonly placeholder="点击「生成报告」后在此预览……"></textarea>
+      <div class="fb" id="m6-fb"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+<footer>第2单元 第3节《数据的统计分析》交互学习工具 · 数据均为教学示例 · 学习记录仅保存在本机浏览器</footer>
+
+<script>
+(function(){
+'use strict';
+/* ===================== 公共工具 ===================== */
+var PRE='u2l3_';
+function save(k,v){ try{ localStorage.setItem(PRE+k, JSON.stringify(v)); }catch(e){} }
+function load(k,d){ try{ var s=localStorage.getItem(PRE+k); return s===null?d:JSON.parse(s); }catch(e){ return d; } }
+function $(id){ return document.getElementById(id); }
+function fb(el,type,html){ el.className='fb show '+type; el.innerHTML=html; }
+function download(name,text,mime){
+  var blob=new Blob([text],{type:mime||'text/plain;charset=utf-8'});
+  var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },300);
+}
+function mean(arr){ var s=0,i; for(i=0;i<arr.length;i++) s+=arr[i]; return s/arr.length; }
+function median(arr){ var a=arr.slice().sort(function(x,y){return x-y;}); var n=a.length; return n%2? a[(n-1)/2] : (a[n/2-1]+a[n/2])/2; }
+function linreg(xs,ys){ // 最小二乘：返回 {a:截距,b:斜率}
+  var n=xs.length,sx=0,sy=0,sxy=0,sxx=0,i;
+  for(i=0;i<n;i++){ sx+=xs[i]; sy+=ys[i]; sxy+=xs[i]*ys[i]; sxx+=xs[i]*xs[i]; }
+  var b=(n*sxy-sx*sy)/(n*sxx-sx*sx); var a=(sy-b*sx)/n; return {a:a,b:b};
+}
+function rmse(xs,ys,a,b){ var s=0,i; for(i=0;i<xs.length;i++){ var d=ys[i]-(a+b*xs[i]); s+=d*d; } return Math.sqrt(s/xs.length); }
+// 统一的 Canvas 指针坐标
+function cvPos(cv,ev){
+  var r=cv.getBoundingClientRect();
+  var cx=(ev.touches? ev.touches[0].clientX : ev.clientX);
+  var cy=(ev.touches? ev.touches[0].clientY : ev.clientY);
+  return { x:(cx-r.left)*cv.width/r.width, y:(cy-r.top)*cv.height/r.height };
+}
+function bindDrag(cv,onDown,onMove,onUp){
+  var dragging=false;
+  function down(e){ dragging=true; onDown(cvPos(cv,e),e); e.preventDefault(); }
+  function move(e){ if(!dragging) return; onMove(cvPos(cv,e),e); e.preventDefault(); }
+  function up(e){ if(!dragging) return; dragging=false; if(onUp) onUp(); }
+  cv.addEventListener('mousedown',down); window.addEventListener('mousemove',move); window.addEventListener('mouseup',up);
+  cv.addEventListener('touchstart',down,{passive:false}); cv.addEventListener('touchmove',move,{passive:false}); cv.addEventListener('touchend',up);
+}
+/* 24小时气象示例数据（小七孔） */
+var HOURS=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23];
+var TEMPS=[13.5,13.1,12.8,12.4,12.1,11.8,11.5,12.3,14.0,16.2,18.5,20.6,22.4,23.8,24.6,24.2,23.3,21.8,19.9,18.2,16.8,15.6,14.7,14.0];
+var HUMS=[88,89,90,91,92,93,94,90,84,78,72,66,61,57,55,56,59,64,70,75,79,82,84,86];
+
+/* ===================== [1] 方法选择器 ===================== */
+(function(){
+  var METHODS=['聚类分析','对比分析','平均分析','回归分析'];
+  var SCENES=[
+    {t:'商场想把顾客按购物习惯自动分成几个群体，分别推送不同优惠。',a:0,why:'没有事先定好类别，而是让数据"物以类聚"自动成组，这正是聚类分析。'},
+    {t:'比较八(1)班和八(2)班这次信息科技测验成绩的差异。',a:1,why:'把两组数据放在一起比大小、看差异，是对比分析，常用柱状图呈现。'},
+    {t:'计算小七孔本周 7 天的平均最高气温，了解总体冷暖水平。',a:2,why:'求平均值来代表整体水平，是平均分析法。'},
+    {t:'根据 A 地近 20 年二氧化碳浓度数据，预测 2030 年的浓度。',a:3,why:'利用"年份→浓度"的数量变化关系去预测未来值，是回归分析。'},
+    {t:'把气象站一年的每日记录按"温度湿度特征相似"自动分成几种典型天气类型。',a:0,why:'按数据内在相似性自动分组、类内相似类间差异大，是聚类分析。'},
+    {t:'用柱状图展示某地各月降水量的多少差异。',a:1,why:'重点在"多个数值之间的差异比较"，是对比分析（柱状图正是它的常用图）。'},
+    {t:'统计全班同学每周零花钱的平均数，掌握总体消费水平。',a:2,why:'用平均值体现整体平均水平，是平均分析法。'},
+    {t:'根据一天中「时间→气温」的变化规律，估计明天 15 时的气温。',a:3,why:'研究自变量（时间）与因变量（气温）的关系并做预测，是回归分析。'}
+  ];
+  var state=load('m1',{score:0,done:{},first:{}});
+  var list=$('m1-list');
+  function render(){
+    list.innerHTML='';
+    SCENES.forEach(function(sc,i){
+      var div=document.createElement('div'); div.className='scene';
+      var q=document.createElement('div'); q.className='q';
+      q.innerHTML='<span class="no">'+(i+1)+'.</span>'+sc.t; div.appendChild(q);
+      var row=document.createElement('div'); row.className='opt-row';
+      var f=document.createElement('div'); f.className='fb';
+      METHODS.forEach(function(m,mi){
+        var b=document.createElement('button'); b.textContent=m;
+        if(state.done[i]===true && mi===sc.a) b.className='sel-ok';
+        b.onclick=function(){
+          if(state.done[i]===true) return;
+          if(state.first[i]===undefined) state.first[i]=(mi===sc.a);
+          if(mi===sc.a){
+            state.done[i]=true; b.className='sel-ok';
+            fb(f,'ok','✔ 正确！'+sc.why+(state.first[i]?'（首次答对 +1 分）':'（重试后答对，不计分，但你已经掌握了）'));
+            refresh();
+          }else{
+            b.className='sel-err';
+            var reasons=['这里没有"自动按相似性分组"的需求。','这里的重点不是比较多个数值间的差异。','这里不是在求整体的平均水平。','这里没有"利用变量关系预测未来"的需求。'];
+            fb(f,'err','✘ 不合适：'+reasons[mi]+' 再想想四张说明书卡片，换一个试试。');
+          }
+          save('m1',state);
+        };
+        row.appendChild(b);
+      });
+      div.appendChild(row); div.appendChild(f); list.appendChild(div);
+    });
+    refresh();
+  }
+  function refresh(){
+    var sc=0,dn=0,i;
+    for(i=0;i<SCENES.length;i++){ if(state.done[i]===true){ dn++; if(state.first[i]) sc++; } }
+    state.score=sc; save('m1',state);
+    $('m1-score').textContent='得分 '+sc+' / '+SCENES.length;
+    if(dn===SCENES.length){
+      $('m1-out').innerHTML='全部完成！首次答对 <b>'+sc+'</b> 题。小结：<b>分组找相似→聚类；比差异→对比；看整体水平→平均；找关系做预测→回归</b>。分析小七孔气象数据时，这四种方法常常要配合使用。';
+    }else{
+      $('m1-out').textContent='已完成 '+dn+' / '+SCENES.length+' 个场景，继续加油。';
+    }
+  }
+  $('m1-retry').onclick=function(){ state={score:0,done:{},first:{}}; save('m1',state); render(); };
+  render();
+})();
+
+/* ===================== [2] 聚类实验 ===================== */
+(function(){
+  var RAW=[[146,36],[148,38],[150,40],[152,37],[147,42],[151,44],[154,41],[149,39],[153,43],[155,45],
+           [158,48],[160,50],[162,52],[164,49],[159,54],[163,56],[166,53],[161,51],[165,57],[167,55],
+           [170,61],[172,64],[174,66],[176,63],[171,68],[175,70],[178,67],[173,65],[177,72],[181,74]];
+  var COLORS=['#ef4444','#3b82f6','#10b981','#f59e0b'];
+  var cv=$('m2-cv'), ctx=cv.getContext('2d');
+  var pts=RAW.map(function(p){ return {h:p[0],w:p[1],manual:-1,auto:-1}; });
+  var curColor=0, view='manual';
+  var km={cent:[],phase:'idle',iter:0,timer:null,converged:false};
+  var PADL=56,PADB=40,PADT=18,PADR=16;
+  var HMIN=140,HMAX=188,WMIN=30,WMAX=80;
+  function sx(h){ return PADL+(h-HMIN)/(HMAX-HMIN)*(cv.width-PADL-PADR); }
+  function sy(w){ return cv.height-PADB-(w-WMIN)/(WMAX-WMIN)*(cv.height-PADB-PADT); }
+  // 颜色选择
+  var chipsEl=$('m2-chips');
+  COLORS.forEach(function(c,i){
+    var d=document.createElement('div'); d.className='chip'+(i===0?' on':''); d.style.background=c; d.title='第'+(i+1)+'组';
+    d.onclick=function(){ curColor=i; Array.prototype.forEach.call(chipsEl.children,function(ch,j){ ch.className='chip'+(j===i?' on':''); }); };
+    chipsEl.appendChild(d);
+  });
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    // 坐标轴
+    ctx.strokeStyle='#cbd5e1'; ctx.fillStyle='#64748b'; ctx.font='11px system-ui'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(PADL,PADT); ctx.lineTo(PADL,cv.height-PADB); ctx.lineTo(cv.width-PADR,cv.height-PADB); ctx.stroke();
+    var h,w;
+    for(h=140;h<=188;h+=8){ var x=sx(h); ctx.fillText(h,x-8,cv.height-PADB+16); ctx.strokeStyle='#eef2ff'; ctx.beginPath(); ctx.moveTo(x,PADT); ctx.lineTo(x,cv.height-PADB); ctx.stroke(); }
+    for(w=30;w<=80;w+=10){ var y=sy(w); ctx.fillStyle='#64748b'; ctx.fillText(w,PADL-26,y+4); ctx.strokeStyle='#eef2ff'; ctx.beginPath(); ctx.moveTo(PADL,y); ctx.lineTo(cv.width-PADR,y); ctx.stroke(); }
+    ctx.fillStyle='#334155'; ctx.fillText('身高/cm',cv.width-70,cv.height-8); ctx.save(); ctx.translate(14,90); ctx.rotate(-Math.PI/2); ctx.fillText('体重/kg',0,0); ctx.restore();
+    // 点
+    pts.forEach(function(p){
+      var g=(view==='manual'? p.manual : p.auto);
+      ctx.beginPath(); ctx.arc(sx(p.h),sy(p.w),7,0,Math.PI*2);
+      ctx.fillStyle=(g>=0? COLORS[g] : '#94a3b8'); ctx.fill();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
+    });
+    // 质心
+    if(view==='auto'){
+      km.cent.forEach(function(c,i){
+        var x=sx(c[0]),y=sy(c[1]);
+        ctx.strokeStyle=COLORS[i]; ctx.lineWidth=3;
+        ctx.beginPath(); ctx.moveTo(x-8,y-8); ctx.lineTo(x+8,y+8); ctx.moveTo(x+8,y-8); ctx.lineTo(x-8,y+8); ctx.stroke();
+        ctx.strokeStyle='rgba(0,0,0,.25)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.arc(x,y,12,0,Math.PI*2); ctx.stroke();
+      });
+    }
+  }
+  bindDrag(cv,function(p){
+    // 手动涂色（仅手动视图）
+    if(view!=='manual') return;
+    var best=-1,bd=1e9;
+    pts.forEach(function(pt,i){ var dx=sx(pt.h)-p.x, dy=sy(pt.w)-p.y, d=dx*dx+dy*dy; if(d<bd){bd=d;best=i;} });
+    if(best>=0 && bd<200){ pts[best].manual=(pts[best].manual===curColor? -1 : curColor); draw(); saveManual(); }
+  },function(){},function(){});
+  function saveManual(){ save('m2_manual',pts.map(function(p){return p.manual;})); }
+  function initCent(k){
+    km.cent=[]; var idxs=[0,29,14,7]; // 分散选取初始质心，确定性
+    for(var i=0;i<k;i++){ var p=pts[idxs[i]]; km.cent.push([p.h+1.5*i,p.w-1.5*i]); }
+    km.phase='assign'; km.iter=0; km.converged=false;
+    pts.forEach(function(p){ p.auto=-1; });
+  }
+  function kstep(){
+    var k=km.cent.length,i,j;
+    if(km.phase==='assign'){
+      pts.forEach(function(p){
+        var best=0,bd=1e18;
+        for(j=0;j<k;j++){ var dx=p.h-km.cent[j][0], dy=p.w-km.cent[j][1], d=dx*dx+dy*dy; if(d<bd){bd=d;best=j;} }
+        p.auto=best;
+      });
+      km.phase='move';
+      $('m2-status').textContent='第'+(km.iter+1)+'轮：已按最近质心分配颜色';
+    }else{
+      var moved=0;
+      for(j=0;j<k;j++){
+        var sh=0,sw=0,n=0;
+        for(i=0;i<pts.length;i++){ if(pts[i].auto===j){ sh+=pts[i].h; sw+=pts[i].w; n++; } }
+        if(n>0){
+          var nh=sh/n,nw=sw/n;
+          moved+=Math.abs(nh-km.cent[j][0])+Math.abs(nw-km.cent[j][1]);
+          km.cent[j]=[nh,nw];
+        }
+      }
+      km.iter++; km.phase='assign';
+      $('m2-status').textContent='第'+km.iter+'轮：质心移到本组平均位置';
+      if(moved<0.01){ km.converged=true; stopTimer(); onConverged(); }
+    }
+    draw();
+  }
+  function stopTimer(){ if(km.timer){ clearInterval(km.timer); km.timer=null; } $('m2-pause').disabled=true; $('m2-run').textContent='自动聚类 ▶ 运行'; }
+  function onConverged(){
+    $('m2-status').textContent='已收敛，共迭代 '+km.iter+' 轮';
+    var k=km.cent.length, cnt=[0,0,0,0], mcnt=[0,0,0,0], munk=0;
+    pts.forEach(function(p){ if(p.auto>=0) cnt[p.auto]++; if(p.manual>=0) mcnt[p.manual]++; else munk++; });
+    var autoStr=cnt.slice(0,k).map(function(c,i){ return '第'+(i+1)+'组 '+c+' 点'; }).join('、');
+    var manualStr=(munk===pts.length)?'（你还没有手动分组，可以先涂色再对比）':mcnt.filter(function(c){return c>0;}).map(function(c,i){return c+' 点';}).join(' / ');
+    $('m2-out').innerHTML='k-means 自动聚类完成：k='+k+'，迭代 <b>'+km.iter+'</b> 轮收敛。自动分组：'+autoStr+'。你的手动分组：'+manualStr+'。切换视图对比：机器只根据"距离谁近"分组，却往往和人凭直觉分的很接近——这就是"物以类聚"：<b>同类元素特征尽量相同，不同类差别尽量大</b>。';
+    fb($('m2-fb'),'ok','✔ 聚类完成！质心（✕）不再移动就说明分组稳定了。试试改变 k 值再运行：k 太小会把不同的群体混在一起，k 太大会把同一群体拆散。');
+    save('m2_done',{k:k,iter:km.iter});
+  }
+  $('m2-run').onclick=function(){
+    document.querySelector('input[name="m2view"][value="auto"]').checked=true; view='auto';
+    if(km.phase==='idle'||km.converged) initCent(parseInt($('m2-k').value,10));
+    if(km.timer){ return; }
+    km.timer=setInterval(function(){ if(!km.converged) kstep(); },700);
+    $('m2-pause').disabled=false; $('m2-run').textContent='运行中…'; draw();
+  };
+  $('m2-step').onclick=function(){
+    document.querySelector('input[name="m2view"][value="auto"]').checked=true; view='auto';
+    if(km.phase==='idle'||km.converged) initCent(parseInt($('m2-k').value,10));
+    stopTimer(); if(!km.converged) kstep();
+  };
+  $('m2-pause').onclick=function(){ stopTimer(); $('m2-status').textContent='已暂停（可单步或继续运行）'; };
+  $('m2-reset').onclick=function(){
+    stopTimer(); km.phase='idle'; km.iter=0; km.cent=[]; km.converged=false;
+    pts.forEach(function(p){ p.auto=-1; }); $('m2-status').textContent='待开始';
+    $('m2-fb').className='fb'; draw();
+  };
+  $('m2-clear-manual').onclick=function(){ pts.forEach(function(p){ p.manual=-1; }); saveManual(); draw(); };
+  Array.prototype.forEach.call(document.querySelectorAll('input[name="m2view"]'),function(r){
+    r.onchange=function(){ view=r.value; draw(); };
+  });
+  // 恢复手动分组
+  var sm=load('m2_manual',null);
+  if(sm && sm.length===pts.length){ pts.forEach(function(p,i){ p.manual=sm[i]; }); }
+  draw();
+})();
+
+/* ===================== [3] 平均数实验室 ===================== */
+(function(){
+  var INIT=[10,12,15,15,18,20,20,22,25,30];
+  var vals=load('m3_vals',INIT.slice());
+  var cv=$('m3-cv'), ctx=cv.getContext('2d');
+  var PADL=30,PADR=20,AXY=170,VMAX=200;
+  var dragIdx=-1, extremeSeen=load('m3_extreme',false);
+  function vx(v){ return PADL+v/VMAX*(cv.width-PADL-PADR); }
+  function xv(x){ return Math.max(0,Math.min(VMAX,(x-PADL)/(cv.width-PADL-PADR)*VMAX)); }
+  function dotY(i){ return AXY-24-(i%3)*26; }
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.strokeStyle='#cbd5e1'; ctx.beginPath(); ctx.moveTo(PADL,AXY); ctx.lineTo(cv.width-PADR,AXY); ctx.stroke();
+    ctx.fillStyle='#64748b'; ctx.font='11px system-ui';
+    for(var t=0;t<=VMAX;t+=20){ var x=vx(t); ctx.beginPath(); ctx.moveTo(x,AXY); ctx.lineTo(x,AXY+5); ctx.stroke(); ctx.fillText(t,x-8,AXY+18); }
+    ctx.fillText('零花钱/元',cv.width-70,AXY+34);
+    var m=mean(vals), md=median(vals);
+    // 平均线 / 中位线
+    ctx.strokeStyle='#dc2626'; ctx.lineWidth=2; ctx.setLineDash([6,4]);
+    ctx.beginPath(); ctx.moveTo(vx(m),18); ctx.lineTo(vx(m),AXY); ctx.stroke();
+    ctx.strokeStyle='#059669';
+    ctx.beginPath(); ctx.moveTo(vx(md),18); ctx.lineTo(vx(md),AXY); ctx.stroke();
+    ctx.setLineDash([]); ctx.lineWidth=1;
+    ctx.fillStyle='#dc2626'; ctx.fillText('平均 '+m.toFixed(1),vx(m)-20,14);
+    ctx.fillStyle='#059669'; ctx.fillText('中位 '+md.toFixed(1),vx(md)-20,28);
+    vals.forEach(function(v,i){
+      ctx.beginPath(); ctx.arc(vx(v),dotY(i),9,0,Math.PI*2);
+      ctx.fillStyle=(i===dragIdx?'#4f46e5':'#818cf8'); ctx.fill();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke(); ctx.lineWidth=1;
+      ctx.fillStyle='#312e81'; ctx.fillText(Math.round(v),vx(v)-8,dotY(i)-13);
+    });
+    $('m3-mean').textContent=m.toFixed(1); $('m3-median').textContent=md.toFixed(1);
+    $('m3-max').textContent=Math.max.apply(null,vals).toFixed(0);
+    var tip=$('m3-tip');
+    if(Math.max.apply(null,vals)>=3*md){
+      tip.style.display='inline-block';
+      if(!extremeSeen){ extremeSeen=true; save('m3_extreme',true); updateOut(); }
+    }else tip.style.display='none';
+  }
+  bindDrag(cv,function(p){
+    dragIdx=-1; var bd=400;
+    vals.forEach(function(v,i){ var dx=vx(v)-p.x, dy=dotY(i)-p.y, d=dx*dx+dy*dy; if(d<bd){bd=d;dragIdx=i;} });
+    draw();
+  },function(p){
+    if(dragIdx>=0){ vals[dragIdx]=Math.round(xv(p.x)); draw(); }
+  },function(){ dragIdx=-1; save('m3_vals',vals); draw(); });
+  $('m3-reset').onclick=function(){ vals=INIT.slice(); save('m3_vals',vals); draw(); };
+  // 问题
+  var qAns=load('m3_q',null);
+  var qs=[
+    {t:'平均数',ok:false,why:'平均数会被极端值"拉走"。一位同学零花钱 180 元，能把全班平均抬高很多，但大多数同学并没有那么多钱。'},
+    {t:'中位数',ok:true,why:'中位数是排序后位于中间的值，极端值再大也几乎不影响它，所以更能代表"大多数人"的水平。教材也提醒：数据集中存在极端值时，平均值往往不能正确反映真实水平。'}
+  ];
+  var row=$('m3-q');
+  qs.forEach(function(q,i){
+    var b=document.createElement('button'); b.textContent=q.t;
+    if(qAns===i && q.ok) b.className='sel-ok';
+    b.onclick=function(){
+      qAns=i; save('m3_q',i);
+      if(q.ok){ b.className='sel-ok'; fb($('m3-fb'),'ok','✔ 正确！'+q.why); }
+      else{ b.className='sel-err'; fb($('m3-fb'),'err','✘ 再想想：'+q.why+' 请改选另一项。'); }
+      updateOut();
+    };
+    row.appendChild(b);
+  });
+  // 分组统计
+  var GROUPS={'第1组':[15,18,20,22,25],'第2组':[8,10,12,14,16],'第3组':[20,25,28,30,32],'第4组':[12,15,15,18,90]};
+  $('m3-group').onclick=function(){
+    var cv2=$('m3-cv2'); cv2.style.display='block';
+    var c2=cv2.getContext('2d'); c2.clearRect(0,0,cv2.width,cv2.height);
+    var names=Object.keys(GROUPS), avgs=names.map(function(n){ return mean(GROUPS[n]); });
+    var maxv=Math.max.apply(null,avgs)*1.25, bw=70, gap=(cv2.width-100-names.length*bw)/(names.length-1);
+    c2.strokeStyle='#cbd5e1'; c2.beginPath(); c2.moveTo(50,10); c2.lineTo(50,180); c2.lineTo(cv2.width-20,180); c2.stroke();
+    c2.fillStyle='#64748b'; c2.font='11px system-ui';
+    for(var t=0;t<=maxv;t+=10){ var y=180-t/maxv*160; c2.fillText(t.toFixed(0),26,y+4); c2.strokeStyle='#eef2ff'; c2.beginPath(); c2.moveTo(50,y); c2.lineTo(cv2.width-20,y); c2.stroke(); }
+    names.forEach(function(n,i){
+      var x=60+i*(bw+gap), h=avgs[i]/maxv*160;
+      c2.fillStyle=['#6366f1','#818cf8','#a5b4fc','#4f46e5'][i];
+      c2.fillRect(x,180-h,bw,h);
+      c2.fillStyle='#312e81'; c2.fillText(n,x+16,196); c2.fillText(avgs[i].toFixed(1)+'元',x+14,175-h);
+    });
+    c2.fillStyle='#334155'; c2.fillText('各小组平均零花钱对比（注意第4组里有个 90 元的极端值！）',60,208);
+    save('m3_group',true); updateOut();
+    fb($('m3-fb'),'hint','观察：第4组平均值最高，但主要是被 90 元这个极端值抬起来的——分组对比时也要留意极端值，必要时改用中位数。');
+  };
+  function updateOut(){
+    var parts=[];
+    if(extremeSeen) parts.push('做过"极端值拉动平均数"实验');
+    if(qAns!==null && qs[qAns].ok) parts.push('答对了"平均数 vs 中位数"选择题');
+    if(load('m3_group',false)) parts.push('完成了分组平均柱状对比');
+    $('m3-out').innerHTML=parts.length? ('实验记录：'+parts.join('；')+'。核心发现：<b>平均数怕极端值，中位数更稳健；分组平均能看出组间差异。</b>') : '拖动数据点并回答问题后，这里会记录你的实验发现。';
+  }
+  draw(); updateOut();
+})();
+
+/* ===================== [4] 趋势与预测 ===================== */
+(function(){
+  var YEARS=[1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019];
+  var CO2=[318.5,319.8,320.9,322.6,323.9,325.0,326.5,327.9,329.7,330.4,331.0,332.6,334.1,335.3,336.9,338.0,339.6,341.1,342.4,343.8,345.0,346.7,348.1,349.6,351.2];
+  var cv=$('m4-cv'), ctx=cv.getContext('2d');
+  var PADL=62,PADR=70,PADT=18,PADB=42;
+  var XMIN=1995,XMAX=2028,YMIN=310,YMAX=372;
+  function sx(x){ return PADL+(x-XMIN)/(XMAX-XMIN)*(cv.width-PADL-PADR); }
+  function sy(y){ return cv.height-PADB-(y-YMIN)/(YMAX-YMIN)*(cv.height-PADB-PADT); }
+  // 学生趋势线：两个手柄（在 1995 与 2019 处，可上下拖）
+  var hand=load('m4_hand',{y1:330,y2:340});
+  var best=null, predShown=null, dragH=-1;
+  function myAB(){ var b=(hand.y2-hand.y1)/(2019-1995); var a=hand.y1-b*1995; return {a:a,b:b}; }
+  function draw(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    ctx.strokeStyle='#cbd5e1'; ctx.fillStyle='#64748b'; ctx.font='11px system-ui';
+    ctx.beginPath(); ctx.moveTo(PADL,PADT); ctx.lineTo(PADL,cv.height-PADB); ctx.lineTo(cv.width-PADR,cv.height-PADB); ctx.stroke();
+    for(var yy=1995;yy<=2028;yy+=5){ var x=sx(yy); ctx.fillText(yy,x-14,cv.height-PADB+16); ctx.strokeStyle='#eef2ff'; ctx.beginPath(); ctx.moveTo(x,PADT); ctx.lineTo(x,cv.height-PADB); ctx.stroke(); }
+    for(var vv=310;vv<=372;vv+=10){ var y=sy(vv); ctx.fillStyle='#64748b'; ctx.fillText(vv,PADL-32,y+4); ctx.strokeStyle='#eef2ff'; ctx.beginPath(); ctx.moveTo(PADL,y); ctx.lineTo(cv.width-PADR,y); ctx.stroke(); }
+    ctx.fillStyle='#334155'; ctx.fillText('年份',cv.width-PADR+18,cv.height-PADB+16);
+    ctx.save(); ctx.translate(14,120); ctx.rotate(-Math.PI/2); ctx.fillText('二氧化碳浓度/(mg/L)',0,0); ctx.restore();
+    // 数据折线+点
+    ctx.strokeStyle='#a5b4fc'; ctx.lineWidth=1.5; ctx.beginPath();
+    YEARS.forEach(function(yr,i){ var x=sx(yr),y=sy(CO2[i]); if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); }); ctx.stroke();
+    YEARS.forEach(function(yr,i){ ctx.beginPath(); ctx.arc(sx(yr),sy(CO2[i]),3.5,0,Math.PI*2); ctx.fillStyle='#6366f1'; ctx.fill(); });
+    // 最佳拟合线
+    if(best){
+      ctx.strokeStyle='#059669'; ctx.lineWidth=2; ctx.setLineDash([8,5]);
+      ctx.beginPath(); ctx.moveTo(sx(XMIN),sy(best.a+best.b*XMIN)); ctx.lineTo(sx(XMAX),sy(best.a+best.b*XMAX)); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle='#059669'; ctx.fillText('最佳拟合线（外推为预测）',sx(2016),sy(best.a+best.b*2016)-12);
+    }
+    // 学生线
+    var ab=myAB();
+    ctx.strokeStyle='#f97316'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(sx(1995),sy(hand.y1)); ctx.lineTo(sx(2019),sy(hand.y2)); ctx.stroke(); ctx.lineWidth=1;
+    [[1995,hand.y1],[2019,hand.y2]].forEach(function(h){
+      ctx.beginPath(); ctx.arc(sx(h[0]),sy(h[1]),9,0,Math.PI*2);
+      ctx.fillStyle='#fb923c'; ctx.fill(); ctx.strokeStyle='#fff'; ctx.lineWidth=2; ctx.stroke(); ctx.lineWidth=1;
+    });
+    ctx.fillStyle='#c2410c'; ctx.fillText('← 拖动橙色手柄拟合',sx(2019)+12,sy(hand.y2));
+    // 预测点
+    if(predShown){
+      var px=sx(predShown.year), py=sy(predShown.v);
+      ctx.beginPath(); ctx.arc(px,py,6,0,Math.PI*2); ctx.fillStyle='#dc2626'; ctx.fill();
+      ctx.fillStyle='#dc2626'; ctx.fillText(predShown.year+'年≈'+predShown.v.toFixed(1),px-30,py-12);
+    }
+    var e=rmse(YEARS,CO2,ab.a,ab.b);
+    $('m4-err').textContent=e.toFixed(2);
+    save('m4_hand',hand);
+  }
+  bindDrag(cv,function(p){
+    dragH=-1;
+    var d1=Math.abs(sx(1995)-p.x)<30 && Math.abs(sy(hand.y1)-p.y)<30;
+    var d2=Math.abs(sx(2019)-p.x)<30 && Math.abs(sy(hand.y2)-p.y)<30;
+    if(d2) dragH=2; else if(d1) dragH=1;
+  },function(p){
+    if(dragH<0) return;
+    var v=YMIN+(cv.height-PADB-p.y)/(cv.height-PADB-PADT)*(YMAX-YMIN);
+    v=Math.max(YMIN,Math.min(YMAX,v));
+    if(dragH===1) hand.y1=v; else hand.y2=v;
+    draw();
+  },function(){ dragH=-1; });
+  $('m4-fit').onclick=function(){
+    best=linreg(YEARS,CO2);
+    var e=rmse(YEARS,CO2,best.a,best.b);
+    $('m4-best').textContent=e.toFixed(2);
+    $('m4-eq').textContent='y = '+best.b.toFixed(3)+'×年份 '+(best.a>=0?'+ ':'- ')+Math.abs(best.a).toFixed(1);
+    var my=myAB(), myE=rmse(YEARS,CO2,my.a,my.b);
+    var diff=myE-e;
+    fb($('m4-fb'), diff<0.6?'ok':'hint',
+      (diff<0.6?'✔ 很棒！你手动拟合的误差 '+myE.toFixed(2)+'，已非常接近最佳误差 '+e.toFixed(2)+'。':'电脑用「最小二乘法」找到了误差最小的直线（RMSE='+e.toFixed(2)+'）。你的线误差为 '+myE.toFixed(2)+'，还可以继续微调手柄逼近它。')+
+      ' 最小二乘的思想：让所有点到直线的偏差平方和最小。教材图 2.3.2 正是用这样的趋势对 2020 年浓度做粗略预测。');
+    save('m4_fit',{eq:$('m4-eq').textContent,rmse:e.toFixed(2),myRmse:myE.toFixed(2)});
+    draw(); updateOut();
+  };
+  $('m4-pred').onclick=function(){
+    if(!best){ fb($('m4-fb'),'hint','请先点击「最小二乘拟合」得到最佳直线，再做预测。'); return; }
+    var yr=parseInt($('m4-year').value,10);
+    if(isNaN(yr)||yr<2020||yr>2040){ fb($('m4-fb'),'err','请输入 2020—2040 之间的年份。'); return; }
+    var v=best.a+best.b*yr; predShown={year:yr,v:v};
+    var el=$('m4-predv'); el.style.display='inline-block'; el.textContent=yr+'年预测 ≈ '+v.toFixed(1)+' mg/L';
+    save('m4_pred',{year:yr,v:v.toFixed(1)}); draw(); updateOut();
+    fb($('m4-fb'),'ok','根据趋势直线外推：'+yr+' 年二氧化碳浓度约为 '+v.toFixed(1)+' mg/L。注意：这只是<b>粗略预测</b>——离数据越远，可信度越低，而且未来可能出现新的影响因素（如减排政策）。');
+  };
+  $('m4-reset').onclick=function(){ hand={y1:330,y2:340}; predShown=null; draw(); };
+  // 判断题
+  var J=[
+    {t:'只要画出了趋势直线，对未来任何年份的预测都是准确可靠的。',ok:false,why:'回归得到的是"粗略预测"：外推越远越不可靠，且现实中可能出现数据之外的新因素。所以本题是错误说法。'},
+    {t:'回归分析研究自变量与因变量之间的数量变化关系，可以结合函数与自变量预测对应的因变量数值。',ok:true,why:'这正是教材对回归分析法的描述：找到"年份→浓度"这类关系后，就能代入自变量做预测。'}
+  ];
+  var jbox=$('m4-judge'), jstate=load('m4_judge',{});
+  J.forEach(function(q,i){
+    var div=document.createElement('div'); div.className='scene';
+    div.innerHTML='<div class="q"><span class="no">判断'+(i+1)+'.</span>'+q.t+'</div>';
+    var row=document.createElement('div'); row.className='opt-row';
+    var f=document.createElement('div'); f.className='fb';
+    ['正确','错误'].forEach(function(lab,li){
+      var b=document.createElement('button'); b.textContent=lab;
+      var pick=(li===0);
+      if(jstate[i]===true && pick===q.ok) b.className='sel-ok';
+      b.onclick=function(){
+        if(pick===q.ok){ b.className='sel-ok'; jstate[i]=true; fb(f,'ok','✔ 判断正确！'+q.why); }
+        else{ b.className='sel-err'; fb(f,'err','✘ 再想想：'+q.why); }
+        save('m4_judge',jstate); updateOut();
+      };
+      row.appendChild(b);
+    });
+    div.appendChild(row); div.appendChild(f); jbox.appendChild(div);
+  });
+  function updateOut(){
+    var fit=load('m4_fit',null), pred=load('m4_pred',null);
+    var jn=0; for(var i=0;i<J.length;i++){ if(jstate[i]===true) jn++; }
+    var parts=[];
+    if(fit) parts.push('最佳直线 '+fit.eq+'（RMSE='+fit.rmse+'，你的手动拟合 RMSE='+fit.myRmse+'）');
+    if(pred) parts.push('预测 '+pred.year+' 年浓度 ≈ '+pred.v+' mg/L');
+    parts.push('判断题答对 '+jn+' / '+J.length);
+    $('m4-out').innerHTML=parts.join('；')+'。要点：<b>回归可以预测，但外推是粗略的，要谨慎评估可信度。</b>';
+  }
+  var sf=load('m4_fit',null);
+  if(sf){ best=linreg(YEARS,CO2); $('m4-best').textContent=sf.rmse; $('m4-eq').textContent=sf.eq; }
+  draw(); updateOut();
+})();
+
+/* ===================== [5] 气象站分析任务 ===================== */
+(function(){
+  // 数据表
+  var tb=$('m5-table'), html='<tr><th>时刻</th>'+HOURS.map(function(h){return '<th>'+h+'时</th>';}).join('')+'</tr>';
+  html+='<tr><td>气温/℃</td>'+TEMPS.map(function(t){return '<td>'+t.toFixed(1)+'</td>';}).join('')+'</tr>';
+  html+='<tr><td>湿度/%</td>'+HUMS.map(function(t){return '<td>'+t+'</td>';}).join('')+'</tr>';
+  tb.innerHTML=html;
+  var cv=$('m5-cv'), ctx=cv.getContext('2d');
+  function miniAxes(){ ctx.clearRect(0,0,cv.width,cv.height); ctx.strokeStyle='#cbd5e1'; ctx.beginPath(); ctx.moveTo(40,10); ctx.lineTo(40,170); ctx.lineTo(620,170); ctx.stroke(); ctx.fillStyle='#64748b'; ctx.font='10px system-ui'; }
+  function lineChart(data,color,vmin,vmax,label){
+    miniAxes();
+    for(var h=0;h<24;h+=4){ ctx.fillText(h+'时',40+h/23*570-8,184); }
+    ctx.fillText(label,46,10);
+    ctx.strokeStyle=color; ctx.lineWidth=2; ctx.beginPath();
+    data.forEach(function(v,i){ var x=40+i/23*570, y=170-(v-vmin)/(vmax-vmin)*150; if(i===0)ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+    ctx.stroke(); ctx.lineWidth=1;
+  }
+  function stats(items){
+    $('m5-stats').innerHTML=items.map(function(it){ return '<div class="stat-box"><div class="v">'+it.v+'</div><div class="k">'+it.k+'</div></div>'; }).join('');
+  }
+  var lastAnalysis=load('m5_last',null);
+  $('m5-run').onclick=function(){
+    var m=$('m5-method').value;
+    $('m5-result').style.display='block'; $('m5-saved').style.display='none';
+    var conc='';
+    if(m==='minmax'){
+      var maxV=Math.max.apply(null,TEMPS), minV=Math.min.apply(null,TEMPS);
+      var maxH=TEMPS.indexOf(maxV), minH=TEMPS.indexOf(minV);
+      stats([{v:maxV.toFixed(1)+'℃',k:'最高气温'},{v:maxH+'时',k:'出现时刻'},{v:minV.toFixed(1)+'℃',k:'最低气温'},{v:minH+'时',k:'出现时刻'}]);
+      lineChart(TEMPS,'#6366f1',10,26,'气温/℃ 变化曲线');
+      ctx.fillStyle='#dc2626'; ctx.beginPath(); ctx.arc(40+maxH/23*570,170-(maxV-10)/16*150,5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#2563eb'; ctx.beginPath(); ctx.arc(40+minH/23*570,170-(minV-10)/16*150,5,0,Math.PI*2); ctx.fill();
+      conc='本日最高气温 '+maxV.toFixed(1)+'℃ 出现在 '+maxH+' 时，与"最高值通常出现在14时"的说法一致；最低气温 '+minV.toFixed(1)+'℃ 出现在 '+minH+' 时，接近日出前后。';
+    }else if(m==='avg'){
+      var at=mean(TEMPS), ah=mean(HUMS);
+      stats([{v:at.toFixed(2)+'℃',k:'平均气温'},{v:ah.toFixed(1)+'%',k:'平均湿度'},{v:median(TEMPS).toFixed(1)+'℃',k:'气温中位数'}]);
+      lineChart(TEMPS,'#6366f1',10,26,'气温/℃（虚线为平均值）');
+      var y=170-(at-10)/16*150; ctx.strokeStyle='#dc2626'; ctx.setLineDash([6,4]); ctx.beginPath(); ctx.moveTo(40,y); ctx.lineTo(620,y); ctx.stroke(); ctx.setLineDash([]);
+      conc='本日平均气温约 '+at.toFixed(1)+'℃，平均湿度约 '+ah.toFixed(0)+'%；平均值反映整体水平，但无法体现一天内约 '+(Math.max.apply(null,TEMPS)-Math.min.apply(null,TEMPS)).toFixed(1)+'℃ 的温差。';
+    }else if(m==='compare'){
+      var day=[],night=[];
+      HOURS.forEach(function(h,i){ if(h>=8&&h<=18) day.push(TEMPS[i]); else night.push(TEMPS[i]); });
+      var dm=mean(day),nm=mean(night);
+      stats([{v:dm.toFixed(2)+'℃',k:'白天(8—18时)平均'},{v:nm.toFixed(2)+'℃',k:'夜间平均'},{v:(dm-nm).toFixed(2)+'℃',k:'差值'}]);
+      miniAxes();
+      [[dm,'白天','#f59e0b'],[nm,'夜间','#6366f1']].forEach(function(it,i){
+        var h=(it[0]-8)/18*150, x=180+i*180;
+        ctx.fillStyle=it[2]; ctx.fillRect(x,170-h,90,h);
+        ctx.fillStyle='#334155'; ctx.fillText(it[1]+' '+it[0].toFixed(1)+'℃',x+14,165-h);
+      });
+      conc='对比分析显示：白天(8—18时)平均气温 '+dm.toFixed(1)+'℃，明显高于夜间的 '+nm.toFixed(1)+'℃，相差约 '+(dm-nm).toFixed(1)+'℃，说明光照是影响气温的重要因素。';
+    }else{
+      miniAxes();
+      ctx.fillText('气温/℃ →',560,184); ctx.fillText('湿度/%',46,10);
+      TEMPS.forEach(function(t,i){
+        var x=40+(t-10)/16*570, y=170-(HUMS[i]-50)/45*150;
+        ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fillStyle='#8b5cf6'; ctx.fill();
+      });
+      var r=linreg(TEMPS,HUMS);
+      ctx.strokeStyle='#dc2626'; ctx.setLineDash([6,4]); ctx.beginPath();
+      ctx.moveTo(40+(11-10)/16*570,170-((r.a+r.b*11)-50)/45*150);
+      ctx.lineTo(40+(25-10)/16*570,170-((r.a+r.b*25)-50)/45*150); ctx.stroke(); ctx.setLineDash([]);
+      stats([{v:r.b.toFixed(2),k:'趋势斜率(%/℃)'},{v:'负相关',k:'相关方向'}]);
+      conc='散点图显示气温与湿度呈明显负相关（斜率约 '+r.b.toFixed(1)+'）：气温越高的时段湿度越低，午后高温时湿度降到最低。';
+    }
+    $('m5-conc').value=conc;
+    lastAnalysis={method:$('m5-method').options[$('m5-method').selectedIndex].text,conc:conc};
+  };
+  $('m5-save').onclick=function(){
+    if(!lastAnalysis){ return; }
+    lastAnalysis.conc=$('m5-conc').value;
+    var saved=load('m5_concs',[]);
+    saved.push({method:lastAnalysis.method,conc:lastAnalysis.conc});
+    save('m5_concs',saved); save('m5_last',lastAnalysis);
+    $('m5-saved').style.display='inline-block';
+    renderConcs();
+  };
+  function renderConcs(){
+    var saved=load('m5_concs',[]);
+    $('m5-out').innerHTML= saved.length?
+      ('已保存 '+saved.length+' 条结论：<br>'+saved.map(function(c,i){ return (i+1)+'.【'+c.method+'】'+c.conc; }).join('<br>')) :
+      '已保存的结论会显示在这里。';
+  }
+  renderConcs();
+  // 练习
+  var QUIZ=[
+    {q:'读上面的数据表：一天中气温最高值出现在几时？',opts:['12时','14时','16时','20时'],a:1,hint:'在"气温"这一行里找最大的数字 24.6，再看它对应的时刻。',why:'24.6℃ 是最大值，出现在 14 时——验证了"一天中气温最高值通常出现在14时"。'},
+    {q:'一天中气温最低值 11.5℃ 出现在 6 时，这个时刻大致对应什么时候？',opts:['正午','日落前后','日出前后','午夜零点'],a:2,hint:'想想项目情景里小清读到的知识：最低气温出现在什么时候？',why:'清晨 6 时接近日出。夜间地面不断散热，日出前后地面温度降到最低，气温也最低。'},
+    {q:'想比较"白天平均气温"和"夜间平均气温"谁高，最合适的分析方法是？',opts:['聚类分析','对比分析','回归分析','词频分析'],a:1,hint:'两个数值放在一起比大小，属于哪种方法？',why:'比较不同时段数据的差异是典型的对比分析，配柱状图更直观。'},
+    {q:'用全天平均气温 17.6℃ 能代表 14 时的体感温度吗？',opts:['能，平均值代表每个时刻','不能，平均值抹平了一天内的波动'],a:1,hint:'14 时实际是 24.6℃，比平均值高了 7℃。',why:'平均值反映整体水平，会掩盖时刻之间的差异，所以不能代表某个具体时刻。'},
+    {q:'“气温升高时湿度下降”这一结论的依据最好来自哪种图？',opts:['饼图','气温—湿度散点图','词云','表格截图'],a:1,hint:'要观察两个变量之间的关系，用哪种图最直接？',why:'散点图专门用来观察两个变量的关系，本例中散点整体向右下倾斜，即负相关。'},
+    {q:'若只用 0 时、8 时、16 时三个数据求平均来代表全天平均气温，这个结论——',opts:['非常可靠，三个够了','不够可靠，样本太少且分布不均'],a:1,hint:'全天有 24 个整点，只取 3 个能反映全貌吗？',why:'样本太少且未覆盖高温低温时段，得到的"平均"会有明显偏差，结论不可靠。数据分析要注意样本的数量与代表性。'},
+    {q:'小清团队用 pandas 分析数据。DataFrame 中求平均值应使用哪个函数？',opts:['sum()','mean()','sort_values()','drop()'],a:1,hint:'回忆教材表 2.3.4：sum 求和、mean 求平均、drop 删除。',why:'mean() 求平均值；sum() 求和，sort_values() 排序，drop() 删除数据。'}
+  ];
+  var qstate=load('m5_quiz',{done:{},first:{}});
+  var qbox=$('m5-quiz');
+  function renderQuiz(){
+    qbox.innerHTML='';
+    QUIZ.forEach(function(q,i){
+      var div=document.createElement('div'); div.className='scene';
+      div.innerHTML='<div class="q"><span class="no">'+(i+1)+'.</span>'+q.q+'</div>';
+      var row=document.createElement('div'); row.className='opt-row';
+      var f=document.createElement('div'); f.className='fb';
+      q.opts.forEach(function(o,oi){
+        var b=document.createElement('button'); b.textContent=o;
+        if(qstate.done[i]===true && oi===q.a) b.className='sel-ok';
+        b.onclick=function(){
+          if(qstate.done[i]===true) return;
+          if(qstate.first[i]===undefined) qstate.first[i]=(oi===q.a);
+          if(oi===q.a){ qstate.done[i]=true; b.className='sel-ok'; fb(f,'ok','✔ 正确！'+q.why+(qstate.first[i]?'（首次答对 +1 分）':'')); }
+          else{ b.className='sel-err'; fb(f,'err','✘ 不对。提示：'+q.hint+' 换一个选项再试。'); }
+          save('m5_quiz',qstate); refreshScore();
+        };
+        row.appendChild(b);
+      });
+      var hb=document.createElement('button'); hb.className='btn-ghost'; hb.textContent='提示';
+      hb.onclick=function(){ fb(f,'hint','提示：'+q.hint); };
+      row.appendChild(hb);
+      div.appendChild(row); div.appendChild(f); qbox.appendChild(div);
+    });
+    refreshScore();
+  }
+  function refreshScore(){
+    var sc=0,i;
+    for(i=0;i<QUIZ.length;i++){ if(qstate.done[i]===true && qstate.first[i]) sc++; }
+    $('m5-score').textContent='得分 '+sc+' / '+QUIZ.length;
+    save('m5_score',sc);
+  }
+  $('m5-retry').onclick=function(){ qstate={done:{},first:{}}; save('m5_quiz',qstate); renderQuiz(); };
+  renderQuiz();
+})();
+
+/* ===================== [6] 报告导出 ===================== */
+(function(){
+  function collect(){
+    var m1=load('m1',{score:0,done:{}});
+    var m1done=Object.keys(m1.done).length;
+    var m2=load('m2_done',null);
+    var m4fit=load('m4_fit',null), m4pred=load('m4_pred',null);
+    var concs=load('m5_concs',[]);
+    var m5sc=load('m5_score',0);
+    return {
+      标题:'小七孔在线数字气象站 · 气象数据分析报告',
+      生成时间:new Date().toLocaleString('zh-CN'),
+      方法选择器:{完成场景数:m1done, 首次答对得分:m1.score+' / 8'},
+      聚类实验: m2? {k:m2.k, 收敛迭代轮数:m2.iter, 结论:'k-means 按距离将样本自动分组，同类相似、异类差异大'} : '未完成',
+      平均数实验:{
+        极端值实验:load('m3_extreme',false)?'已观察到平均数被极端值拉动':'未完成',
+        分组统计:load('m3_group',false)?'已完成分组平均柱状对比':'未完成',
+        核心发现:'存在极端值时，中位数比平均数更能代表大多数'
+      },
+      回归与预测: m4fit? {最佳直线:m4fit.eq, 最佳RMSE:m4fit.rmse, 我的手动RMSE:m4fit.myRmse, 预测:(m4pred? m4pred.year+'年 ≈ '+m4pred.v+' mg/L':'未做'), 提醒:'外推预测是粗略的，离数据越远可信度越低'} : '未完成',
+      气象站分析结论:concs.length? concs : '未保存结论',
+      巩固练习得分:m5sc+' / 7'
+    };
+  }
+  function toText(o){
+    var L=[];
+    L.push('====== '+o.标题+' ======');
+    L.push('生成时间：'+o.生成时间);
+    L.push('');
+    L.push('【一、方法选择器】完成 '+o.方法选择器.完成场景数+'/8 个场景，首次答对 '+o.方法选择器.首次答对得分);
+    L.push('');
+    if(typeof o.聚类实验==='object'){ L.push('【二、聚类实验】k='+o.聚类实验.k+'，迭代 '+o.聚类实验.收敛迭代轮数+' 轮收敛。'+o.聚类实验.结论); }
+    else L.push('【二、聚类实验】未完成');
+    L.push('');
+    L.push('【三、平均数实验】'+o.平均数实验.极端值实验+'；'+o.平均数实验.分组统计+'。发现：'+o.平均数实验.核心发现);
+    L.push('');
+    if(typeof o.回归与预测==='object'){
+      L.push('【四、回归与预测】最佳直线 '+o.回归与预测.最佳直线+'（RMSE '+o.回归与预测.最佳RMSE+'，手动拟合 RMSE '+o.回归与预测.我的手动RMSE+'）');
+      L.push('    预测：'+o.回归与预测.预测+'。'+o.回归与预测.提醒);
+    }else L.push('【四、回归与预测】未完成');
+    L.push('');
+    L.push('【五、气象站分析结论】');
+    if(typeof o.气象站分析结论==='string') L.push('    '+o.气象站分析结论);
+    else o.气象站分析结论.forEach(function(c,i){ L.push('    '+(i+1)+'.【'+c.method+'】'+c.conc); });
+    L.push('');
+    L.push('【六、巩固练习】得分 '+o.巩固练习得分);
+    L.push('');
+    L.push('（本报告由《数据的统计分析》分析笔记本自动汇总，数据为教学示例）');
+    return L.join('\n');
+  }
+  $('m6-gen').onclick=function(){
+    $('m6-report').value=toText(collect());
+    fb($('m6-fb'),'ok','报告已生成，可下载或复制。若某部分显示"未完成"，回到对应单元格补做即可。');
+  };
+  $('m6-txt').onclick=function(){ download('气象数据分析报告_第3节.txt',toText(collect())); };
+  $('m6-json').onclick=function(){ download('气象数据分析报告_第3节.json',JSON.stringify(collect(),null,2),'application/json;charset=utf-8'); };
+  $('m6-copy').onclick=function(){
+    var t=$('m6-report'); if(!t.value) t.value=toText(collect());
+    t.select(); t.setSelectionRange(0,999999);
+    var ok=false;
+    try{ ok=document.execCommand('copy'); }catch(e){}
+    fb($('m6-fb'), ok?'ok':'hint', ok?'已复制到剪贴板。':'请手动全选文本框内容进行复制。');
+  };
+  $('m6-clear').onclick=function(){
+    var i,keys=[];
+    for(i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.indexOf(PRE)===0) keys.push(k); }
+    keys.forEach(function(k){ localStorage.removeItem(k); });
+    $('m6-report').value='';
+    fb($('m6-fb'),'ok','已清除本机全部学习数据（共 '+keys.length+' 项）。刷新页面后从头开始。');
+  };
+})();
+})();
+</script>
+</body>
+</html>

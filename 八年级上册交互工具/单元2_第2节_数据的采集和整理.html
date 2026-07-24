@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>单元2 第2节 数据的采集和整理 · 数据工作站</title>
+<style>
+  :root{
+    --blue:#3b82f6; --blue-d:#1d4ed8; --blue-dd:#1e3a8a; --blue-l:#bfdbfe; --sky:#eff6ff;
+    --ink:#1e293b; --gray:#64748b; --line:#dbeafe;
+    --ok:#16a34a; --warn:#d97706; --bad:#dc2626; --purple:#7c3aed;
+    --c-miss:#fef08a; --c-dup:#ddd6fe; --c-out:#fecaca; --c-fmt:#fed7aa;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:#dbeafe; color:var(--ink); line-height:1.6; font-size:14px;
+  }
+  .mono{font-family:ui-monospace,Consolas,"Courier New",monospace;}
+  /* ====== 软件外壳（电子表格工作站） ====== */
+  .app{
+    max-width:1240px; margin:14px auto 30px; background:#f8fbff; border-radius:12px;
+    box-shadow:0 14px 44px rgba(30,58,138,.25); overflow:hidden; border:1px solid #93c5fd;
+  }
+  .titlebar{
+    background:linear-gradient(180deg,var(--blue-dd),#274690); color:#fff;
+    display:flex; align-items:center; gap:10px; padding:8px 14px;
+  }
+  .titlebar .dots{display:flex; gap:6px;}
+  .titlebar .dots i{width:12px; height:12px; border-radius:50%; display:block;}
+  .titlebar .dots i:nth-child(1){background:#f87171;} .titlebar .dots i:nth-child(2){background:#fbbf24;}
+  .titlebar .dots i:nth-child(3){background:#34d399;}
+  .titlebar .fname{font-size:14px; font-weight:600; letter-spacing:.5px;}
+  .titlebar .fname small{opacity:.75; font-weight:400;}
+  .menubar{
+    background:#e7f0fe; border-bottom:1px solid var(--line); padding:4px 12px;
+    display:flex; flex-wrap:wrap; gap:2px; position:sticky; top:0; z-index:50;
+  }
+  .menubar button{
+    border:none; background:none; font-family:inherit; font-size:13.5px; padding:6px 14px;
+    border-radius:6px; cursor:pointer; color:var(--blue-dd); font-weight:600;
+  }
+  .menubar button:hover{background:#d3e3fd;}
+  .menubar button.on{background:var(--blue); color:#fff;}
+  .headzone{
+    background:linear-gradient(120deg,#eff6ff, #dbeafe); padding:16px 22px 12px; border-bottom:1px solid var(--line);
+  }
+  .headzone h1{font-size:22px; color:var(--blue-dd);}
+  .headzone .unit{font-size:12.5px; color:#fff; background:var(--blue); border-radius:999px; padding:2px 12px; display:inline-block; margin-bottom:6px;}
+  .headzone .goals{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
+  .headzone .goals span{background:#fff; border:1px solid var(--blue-l); border-left:4px solid var(--blue);
+    border-radius:8px; padding:4px 10px; font-size:12.5px;}
+  /* ====== 面板（模块） ====== */
+  .panel{margin:16px 18px; background:#fff; border:1px solid var(--line); border-radius:10px; scroll-margin-top:58px;}
+  .panel > .phead{
+    display:flex; align-items:center; gap:10px; padding:9px 16px; border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#f4f8ff,#e9f1fe); border-radius:10px 10px 0 0;
+  }
+  .phead .pn{width:26px; height:26px; border-radius:6px; background:var(--blue); color:#fff; font-weight:800;
+    display:flex; align-items:center; justify-content:center; font-size:14px;}
+  .phead h2{font-size:16.5px; color:var(--blue-dd);}
+  .phead .pstat{margin-left:auto; font-size:12px;}
+  .pbody{padding:14px 16px;}
+  .task{
+    background:#eff6ff; border:1px dashed var(--blue); border-radius:8px; padding:8px 12px; margin-bottom:12px; font-size:13.5px;
+  }
+  .task b{color:var(--blue-d);}
+  .btn{
+    display:inline-block; border:1px solid var(--blue-d); cursor:pointer; font-family:inherit; font-size:13.5px;
+    background:linear-gradient(180deg,var(--blue),#2563eb); color:#fff; padding:6px 15px; border-radius:7px;
+  }
+  .btn:hover{filter:brightness(1.1);}
+  .btn:disabled{opacity:.4; cursor:not-allowed;}
+  .btn.ghost{background:#fff; color:var(--blue-d); border:1px solid var(--blue);}
+  .btn.warn{background:linear-gradient(180deg,#ef4444,#dc2626); border-color:#b91c1c;}
+  .btn.gray{background:#f1f5f9; color:var(--ink); border-color:#cbd5e1;}
+  .btn.small{padding:3px 10px; font-size:12.5px;}
+  .badge{display:inline-block; padding:1px 9px; border-radius:999px; font-size:12px; font-weight:700;}
+  .badge.ok{background:#dcfce7; color:var(--ok);} .badge.bad{background:#fee2e2; color:var(--bad);}
+  .badge.info{background:#dbeafe; color:var(--blue-d);} .badge.warn{background:#ffedd5; color:var(--warn);}
+  .badge.purple{background:#ede9fe; color:var(--purple);}
+  .fb{border-radius:8px; padding:9px 13px; font-size:13px; margin-top:9px; display:none;}
+  .fb.show{display:block; animation:pop .22s;}
+  .fb.good{background:#f0fdf4; border:1px solid #86efac; color:#14532d;}
+  .fb.err{background:#fef2f2; border:1px solid #fca5a5; color:#7f1d1d;}
+  .fb.hint{background:#fffbeb; border:1px solid #fcd34d; color:#78350f;}
+  @keyframes pop{from{transform:scale(.97);opacity:0} to{transform:scale(1);opacity:1}}
+  @keyframes flashbg{from{background:#bfdbfe} to{background:transparent}}
+  .flash{animation:flashbg 1s;}
+  /* ====== 模块1 采集方式 ====== */
+  .m-cards{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:12px;}
+  @media(max-width:900px){.m-cards{grid-template-columns:repeat(2,1fr);}}
+  .mcard{border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fdfeff;}
+  .mcard h4{background:#eff6ff; padding:6px 10px; font-size:13.5px; color:var(--blue-dd); border-bottom:1px solid var(--line);}
+  .mcard .good-p, .mcard .bad-p{padding:5px 10px; font-size:12px;}
+  .mcard .good-p{color:#14532d;} .mcard .bad-p{color:#7f1d1d; border-top:1px dashed #fecaca;}
+  .scene{border:1px solid var(--line); border-radius:9px; padding:9px 12px; margin:8px 0; background:#fff;}
+  .scene .opts{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;}
+  .opt-chip{border:1.5px solid #cbd5e1; background:#fff; border-radius:999px; padding:4px 13px; cursor:pointer; font-family:inherit; font-size:12.5px;}
+  .opt-chip:hover{border-color:var(--blue);}
+  .opt-chip.right{border-color:var(--ok); background:#dcfce7;}
+  .opt-chip.wrong{border-color:var(--bad); background:#fee2e2;}
+  /* ====== 模块2 网页提取 ====== */
+  .ext-flex{display:flex; gap:14px; flex-wrap:wrap;}
+  .fakeweb{
+    flex:1 1 380px; border:1px solid #93c5fd; border-radius:10px; overflow:hidden; background:#fff; min-width:320px;
+  }
+  .fakeweb .wbar{background:#e2e8f0; padding:5px 10px; font-size:12px; color:#475569; display:flex; gap:6px; align-items:center;}
+  .fakeweb .wbar .addr{background:#fff; border-radius:5px; padding:1px 10px; flex:1; color:#94a3b8;}
+  .fakeweb .wbody{padding:10px 14px;}
+  .fakeweb h5{color:#0369a1; font-size:15px; margin-bottom:2px;}
+  .fakeweb .ad{background:repeating-linear-gradient(45deg,#fef9c3 0 8px,#fef08a 8px 16px); border:1px dashed #eab308;
+    padding:4px 10px; font-size:11.5px; color:#854d0e; border-radius:6px; margin:6px 0; cursor:pointer;}
+  .fakeweb table{border-collapse:collapse; width:100%; font-size:12.5px; margin-top:6px;}
+  .fakeweb th{background:#f0f9ff; color:#0369a1;}
+  .fakeweb th,.fakeweb td{border:1px solid #e0f2fe; padding:4px 7px; text-align:center;}
+  .fakeweb td.pick{cursor:pointer;}
+  .fakeweb td.pick:hover{background:#dbeafe; outline:2px solid var(--blue);}
+  .fakeweb td.taken{background:#dcfce7; color:#94a3b8;}
+  .ext-target{flex:1 1 330px; min-width:300px;}
+  .ext-target table{border-collapse:collapse; width:100%; font-size:13px;}
+  .ext-target th{background:var(--blue); color:#fff; padding:5px;}
+  .ext-target td{border:1px solid var(--line); padding:5px 8px; height:30px; text-align:center; background:#fff;}
+  .ext-target td.empty{background:#f8fafc; color:#cbd5e1;}
+  .ext-target td.filled{background:#f0fdf4; font-weight:600;}
+  .ext-ctrl{margin:8px 0; display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+  /* ====== 模块3 清洗工作台（核心，电子表格外观） ====== */
+  .formulabar{
+    display:flex; align-items:center; gap:8px; background:#f8fafc; border:1px solid var(--line);
+    border-radius:7px; padding:4px 10px; margin-bottom:8px; font-size:12.5px;
+  }
+  .formulabar .cellref{background:#fff; border:1px solid #cbd5e1; border-radius:5px; padding:1px 10px; min-width:56px; text-align:center; font-weight:700; color:var(--blue-d);}
+  .toolstrip{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; align-items:center;}
+  .sheetwrap{overflow:auto; max-height:430px; border:1.5px solid #93c5fd; border-radius:8px; background:#fff;}
+  table.sheet{border-collapse:collapse; width:100%; font-size:13px; min-width:640px;}
+  .sheet th{
+    background:#e7f0fe; color:#334155; border:1px solid #c7dbfa; padding:4px 6px; font-weight:600;
+    position:sticky; top:0; z-index:2; font-size:12.5px;
+  }
+  .sheet th.rowh{position:sticky; left:0; z-index:3; min-width:40px; background:#e7f0fe;}
+  .sheet td.rowh{
+    position:sticky; left:0; background:#eff6ff; border:1px solid #c7dbfa; text-align:center;
+    color:#64748b; font-size:12px; min-width:40px; cursor:pointer; z-index:1;
+  }
+  .sheet td.rowh:hover{background:#dbeafe;}
+  .sheet tr.rowsel td.rowh{background:var(--blue); color:#fff;}
+  .sheet td.cell{border:1px solid #e2e8f0; padding:4px 8px; text-align:center; cursor:cell; background:#fff; min-width:86px;}
+  .sheet td.cell:hover{outline:2px solid var(--blue); outline-offset:-2px;}
+  .sheet td.p-miss{background:var(--c-miss);}
+  .sheet td.p-dup{background:var(--c-dup);}
+  .sheet td.p-out{background:var(--c-out);}
+  .sheet td.p-fmt{background:var(--c-fmt);}
+  .sheet th.h-bad{background:#fbcfe8; color:#9d174d;}
+  .sheet td input{
+    width:100%; border:2px solid var(--blue); border-radius:3px; font-family:inherit; font-size:13px;
+    padding:2px 4px; text-align:center;
+  }
+  .sheet td input:focus{outline:none;}
+  .probchips{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0; font-size:12.5px; align-items:center;}
+  .probchips .pc{border-radius:6px; padding:2px 10px; border:1px solid transparent; font-weight:600;}
+  .pc.miss{background:var(--c-miss); border-color:#eab308;} .pc.dup{background:var(--c-dup); border-color:#8b5cf6;}
+  .pc.out{background:var(--c-out); border-color:#ef4444;} .pc.fmt{background:var(--c-fmt); border-color:#f97316;}
+  .pc.hd{background:#fbcfe8; border-color:#db2777;}
+  .problist{max-height:230px; overflow:auto; border:1px solid var(--line); border-radius:8px; margin-top:8px;}
+  .problist .pi{display:flex; align-items:center; gap:8px; padding:6px 10px; border-bottom:1px dashed #e2e8f0; font-size:12.5px; flex-wrap:wrap;}
+  .problist .pi:last-child{border-bottom:none;}
+  .clean-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:12px; margin-top:10px;}
+  @media(max-width:960px){.clean-grid{grid-template-columns:1fr;}}
+  .logbox{
+    background:#0f172a; color:#93c5fd; border-radius:8px; padding:8px 12px; font-size:12px; height:200px;
+    overflow:auto; font-family:ui-monospace,Consolas,monospace; line-height:1.55;
+  }
+  .logbox .lt{color:#475569;}
+  .cmpbox{border:1px solid var(--line); border-radius:8px; padding:10px 12px; font-size:13px; background:#f8fafc;}
+  .cmpbox table{border-collapse:collapse; width:100%; margin-top:6px;}
+  .cmpbox th,.cmpbox td{border:1px solid var(--line); padding:4px 8px; text-align:center; font-size:12.5px;}
+  .cmpbox th{background:#eff6ff;}
+  /* ====== 模块4 排序筛选 ====== */
+  .srt-tasks .scene{background:#fdfeff;}
+  .grpbars{display:flex; gap:14px; align-items:flex-end; height:110px; padding:8px 4px 0; border-bottom:2px solid #cbd5e1; margin:8px 0 4px; max-width:420px;}
+  .grpbars .gb{flex:1; background:linear-gradient(180deg,#60a5fa,#2563eb); border-radius:4px 4px 0 0; position:relative; transition:height .4s;}
+  .grpbars .gb b{position:absolute; top:-20px; left:0; right:0; text-align:center; font-size:12px; color:var(--blue-dd);}
+  .grpbars .gb span{position:absolute; bottom:-22px; left:0; right:0; text-align:center; font-size:11.5px; color:var(--gray);}
+  /* ====== 模块5 字典 ====== */
+  .dict-table{border-collapse:collapse; width:100%; font-size:13px;}
+  .dict-table th{background:#eff6ff; color:var(--blue-dd);}
+  .dict-table th,.dict-table td{border:1px solid var(--line); padding:5px 7px;}
+  .dict-table input,.dict-table select{
+    font-family:inherit; font-size:12.5px; border:1px solid #cbd5e1; border-radius:5px; padding:3px 6px; width:100%; background:#fff;
+  }
+  .dict-table input:focus,.dict-table select:focus{outline:none; border-color:var(--blue);}
+  .dictcard{border:2px solid var(--blue); border-radius:10px; padding:10px 14px; margin-top:10px; background:#eff6ff; display:none; font-size:12.5px;}
+  .quizzone .scene .opts{flex-direction:column; align-items:stretch;}
+  .quizzone .opt-chip{border-radius:8px; text-align:left;}
+  /* ====== 模块6 导出 ====== */
+  .sum-box{background:#f8fafc; border:1.5px dashed #94a3b8; border-radius:10px; padding:10px 14px;
+    font-size:12.5px; white-space:pre-wrap; font-family:ui-monospace,Consolas,monospace; max-height:280px; overflow:auto;}
+  .statusbar{
+    background:#e7f0fe; border-top:1px solid var(--line); padding:5px 16px; font-size:12px; color:#475569;
+    display:flex; gap:16px; flex-wrap:wrap;
+  }
+  footer{max-width:1240px; margin:0 auto 20px; text-align:center; color:#3b5a86; font-size:12px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="titlebar">
+    <span class="dots"><i></i><i></i><i></i></span>
+    <span class="fname">数据工作站 —— 校园气象观测.csv <small>· 第2单元 第2节《数据的采集和整理》</small></span>
+  </div>
+  <nav class="menubar" id="menubar">
+    <button data-t="p1">① 采集方式</button>
+    <button data-t="p2">② 网页提取</button>
+    <button data-t="p3" class="on">③ 清洗工作台</button>
+    <button data-t="p4">④ 排序与筛选</button>
+    <button data-t="p5">⑤ 数据字典与练习</button>
+    <button data-t="p6">⑥ 导出成果</button>
+  </nav>
+  <div class="headzone">
+    <span class="unit">第 2 单元 · 数据与数据探究 · 贯通项目：小七孔在线数字气象站</span>
+    <h1>第 2 节　数据的采集和整理 · 数据处理工作站</h1>
+    <div style="font-size:13px;color:#475569;margin-top:4px;">小清的气象站采到了一堆“脏数据”：有缺的、重的、错得离谱的……在这个像电子表格软件一样的工作站里，把它们变成干净可用的数据集吧。</div>
+    <div class="goals">
+      <span>① 会为不同任务选择合适的数据采集方法</span>
+      <span>② 能发现并处理缺失、重复、异常、格式不统一等数据问题（数据清洗）</span>
+      <span>③ 会用排序、筛选、分类汇总整理数据，并为数据集编写数据字典</span>
+    </div>
+  </div>
+
+  <!-- ========== 面板1 采集方式 ========== -->
+  <section class="panel" id="p1">
+    <div class="phead"><span class="pn">1</span><h2>四种采集方式选择器</h2><span class="pstat badge info" id="p1Stat">0 / 6</span></div>
+    <div class="pbody">
+      <div class="task"><b>任务：</b>先读四张“方式卡”，再给下面 6 个任务场景各选一种<b>最合适</b>的采集方式。选错会说明原因，可重选。</div>
+      <div class="m-cards">
+        <div class="mcard"><h4>开放数据平台下载</h4><div class="good-p">优点：权威规范、量大、常年积累，气象/交通/人口等数据可自由获取</div><div class="bad-p">局限：内容固定，未必正好有你要的字段；部分数据收费或需申请</div></div>
+        <div class="mcard"><h4>网络爬取（爬虫）</h4><div class="good-p">优点：程序自动批量汇总网页信息，效率远高于逐页人工查找</div><div class="bad-p">局限：需编程；必须守法——不得窃取个人信息，遵守网站规则</div></div>
+        <div class="mcard"><h4>传感器自动采集</h4><div class="good-p">优点：可定时、连续、实时地采集现场环境数据，精度稳定</div><div class="bad-p">局限：要部署硬件设备，只能测部署点的数据，需维护</div></div>
+        <div class="mcard"><h4>问卷调查</h4><div class="good-p">优点：能收集人的想法、习惯等主观信息，网络问卷发放方便</div><div class="bad-p">局限：样本有限、回答可能不准确，整理工作量较大</div></div>
+      </div>
+      <div id="sceneList"></div>
+    </div>
+  </section>
+
+  <!-- ========== 面板2 网页提取 ========== -->
+  <section class="panel" id="p2">
+    <div class="phead"><span class="pn">2</span><h2>模拟网页数据提取（体验“爬虫”的活儿）</h2><span class="pstat badge info" id="p2Stat">已抽取 0 / 21</span></div>
+    <div class="pbody">
+      <div class="task"><b>任务：</b>左边是一个“模拟天气网页”。请把表中的<b>日期、最高温、最低温</b>逐个<b>点击</b>“抽取”到右侧结构化表格中（广告等无关内容不要抽）。也可以点“运行”让<b>模拟爬虫</b>自动批量抽取（可暂停/单步/重置），体会程序为什么比人工快。抽完点“核对完整性”。</div>
+      <div class="ext-flex">
+        <div class="fakeweb">
+          <div class="wbar"><span>◀ ▶ ⟳</span><span class="addr">模拟浏览器（本地演示页，不联网）</span></div>
+          <div class="wbody">
+            <h5>荔波小七孔 · 未来7天天气</h5>
+            <div style="font-size:11px;color:#94a3b8;">示例网页 · 数据为虚构演示</div>
+            <div class="ad" data-ad="1">【广告】超值旅行套餐限时抢购！点我领券 →</div>
+            <table id="webTable"></table>
+            <div class="ad" data-ad="1">【推广】天气小助手App下载（示意，不可用）</div>
+          </div>
+        </div>
+        <div class="ext-target">
+          <b style="font-size:13.5px;color:var(--blue-dd);">结构化表格（抽取目标）</b>
+          <table id="extTable"></table>
+          <div class="ext-ctrl">
+            <button class="btn small" id="crawlRun">运行</button>
+            <button class="btn ghost small" id="crawlStep">单步</button>
+            <button class="btn ghost small" id="crawlReset">重置抽取</button>
+            <button class="btn small" id="extCheck">核对完整性</button>
+          </div>
+          <div class="fb" id="extFb"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 面板3 清洗工作台（核心） ========== -->
+  <section class="panel" id="p3">
+    <div class="phead"><span class="pn">3</span><h2>核心工作台 · 数据表编辑与清洗</h2><span class="pstat badge warn" id="p3Stat">未体检</span></div>
+    <div class="pbody">
+      <div class="task"><b>任务：</b>这份“校园气象观测”原始表有 21 行，混进了各种问题。请：① 点<b>一键体检</b>，让缺失/重复/异常/格式问题现出原形（不同颜色高亮）；② 在“问题清单”里逐个选择处理方式（删除该行 / 填充平均值 / 修正格式）；③ 也可以<b>双击单元格</b>手工修改、增删行；④ 每步都会记入清洗日志，支持<b>撤销/重做</b>；⑤ 问题清零后查看清洗前后对比。</div>
+      <div class="formulabar"><span>单元格</span><span class="cellref" id="cellRef">--</span><span id="cellVal" class="mono" style="color:#475569;">（点击单元格查看，双击编辑）</span></div>
+      <div class="toolstrip">
+        <button class="btn" id="btnDetect">一键体检（检测问题）</button>
+        <button class="btn ghost" id="btnUndo">↶ 撤销</button>
+        <button class="btn ghost" id="btnRedo">↷ 重做</button>
+        <button class="btn gray" id="btnAddRow">＋添加行</button>
+        <button class="btn gray" id="btnDelRow">－删除选中行</button>
+        <button class="btn gray" id="btnFixHeader">规范列名</button>
+        <button class="btn warn" id="btnRestore">恢复原始脏数据</button>
+      </div>
+      <div class="probchips" id="probChips">
+        <span>图例：</span>
+        <span class="pc miss">缺失 ?</span><span class="pc dup">重复 ?</span>
+        <span class="pc out">异常 ?</span><span class="pc fmt">格式 ?</span><span class="pc hd">列名 ?</span>
+      </div>
+      <div class="sheetwrap"><table class="sheet" id="sheet"></table></div>
+      <div class="fb" id="cleanFb"></div>
+      <div class="clean-grid">
+        <div>
+          <b style="font-size:13.5px;">问题清单（点按钮处理，处理后自动重新体检）</b>
+          <div class="problist" id="probList"><div class="pi">请先点击「一键体检」。</div></div>
+        </div>
+        <div>
+          <b style="font-size:13.5px;">清洗日志</b>
+          <div class="logbox" id="cleanLog"></div>
+          <div class="cmpbox" style="margin-top:8px;">
+            <b>清洗前后对比</b>
+            <table id="cmpTable"><tr><th></th><th>行数</th><th>缺失</th><th>重复</th><th>异常</th><th>格式</th><th>列名</th></tr></table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 面板4 排序与筛选 ========== -->
+  <section class="panel" id="p4">
+    <div class="phead"><span class="pn">4</span><h2>排序 · 筛选 · 分类汇总实验</h2><span class="pstat badge info" id="p4Stat">任务 0 / 3</span></div>
+    <div class="pbody">
+      <div class="task"><b>任务：</b>整理操作直接作用于上方工作台的表格（建议先完成清洗）。完成 3 个小任务，系统自动判定。教材提醒：排序时要选<b>连续区域</b>整行参与，只排一列会造成数据错位——本工具自动整行排序，帮你避开这个坑。</div>
+      <div class="toolstrip">
+        <button class="btn" data-sort="asc">按气温升序 ↑</button>
+        <button class="btn" data-sort="desc">按气温降序 ↓</button>
+        <span style="margin-left:10px;">按日期筛选：</span><select id="fltDate" style="font-family:inherit;font-size:13px;padding:3px 8px;border:1px solid #cbd5e1;border-radius:6px;"></select>
+        <button class="btn ghost" id="btnGroup">按天气分类汇总</button>
+      </div>
+      <div id="groupOut" style="display:none;">
+        <div class="grpbars" id="grpBars"></div>
+        <div style="height:24px;"></div>
+      </div>
+      <div class="srt-tasks" id="srtTasks"></div>
+    </div>
+  </section>
+
+  <!-- ========== 面板5 数据字典与练习 ========== -->
+  <section class="panel" id="p5">
+    <div class="phead"><span class="pn">5</span><h2>数据字典生成器 + 巩固练习</h2><span class="pstat badge info" id="p5Stat">练习 0 / 8</span></div>
+    <div class="pbody">
+      <div class="task"><b>任务A：</b>规范的数据集要配一份“数据字典”，说明每个字段是什么。请为 5 个字段填写含义、类型、单位与合理范围（下拉可辅助），然后点“生成数据字典卡”。<b>任务B：</b>完成 8 道练习题，每题都有解释与提示，答错可重试。</div>
+      <table class="dict-table" id="dictTable">
+        <tr><th style="width:90px;">字段名</th><th>含义（自己写）</th><th style="width:110px;">类型</th><th style="width:100px;">单位</th><th style="width:150px;">合理范围</th></tr>
+      </table>
+      <div style="margin-top:8px;"><button class="btn" id="dictGen">生成数据字典卡</button></div>
+      <div class="fb" id="dictFb"></div>
+      <div class="dictcard" id="dictCard"></div>
+      <div style="margin-top:16px;border-top:1px dashed #cbd5e1;padding-top:10px;" class="quizzone">
+        <b style="font-size:14px;">巩固练习（识别缺失 / 判断异常 / 选择清洗方法……）</b>
+        <div id="quizList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 面板6 导出 ========== -->
+  <section class="panel" id="p6">
+    <div class="phead"><span class="pn">6</span><h2>学习小结与成果导出</h2><span class="pstat badge info" id="p6Stat">成果区</span></div>
+    <div class="pbody">
+      <div class="task"><b>任务：</b>把你的劳动成果带走：整理后的数据集（CSV）、清洗日志、数据字典与学习小结。这些正是小清项目“预期成果”里的<b>整理好的数据集</b>！</div>
+      <div class="toolstrip">
+        <button class="btn" id="expCsv">导出整理后数据集 (.csv)</button>
+        <button class="btn" id="expLog">导出清洗日志 (.txt)</button>
+        <button class="btn" id="expSum">下载学习小结 (.txt)</button>
+        <button class="btn" id="expJson">下载完整档案 (.json)</button>
+        <button class="btn ghost" id="sumMake">生成学习小结</button>
+        <button class="btn warn" id="clearAll">清除本机学习数据</button>
+      </div>
+      <div class="sum-box" id="sumBox">（点击“生成学习小结”查看）</div>
+    </div>
+  </section>
+
+  <div class="statusbar">
+    <span id="sbRows">行数：--</span><span id="sbProb">问题：未体检</span>
+    <span id="sbOps">操作数：0</span><span style="margin-left:auto;">学习记录仅存本机 localStorage</span>
+  </div>
+</div>
+<footer>本页为单文件离线学习工具 · 模拟网页与数据均为虚构教学示例 · 第 2 单元贯通项目：在线数字气象站</footer>
+
+<script>
+(function(){
+"use strict";
+var LS = "u2l2_state_v1";
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function deep(o){ return JSON.parse(JSON.stringify(o)); }
+function showFb(el, cls, html){ el.className = "fb show " + cls; el.innerHTML = html; }
+
+/* ================= 原始脏数据 ================= */
+var DIRTY_HEADER = ["日期", "时间", " 气温 ", "湿度%", "天气情况"]; // 列名不规范
+var GOOD_HEADER = ["日期", "时间", "气温(℃)", "湿度(%)", "天气"];
+var DIRTY_ROWS = [
+  ["10-01","08:00","18.5","62","晴"],
+  ["10-01","14:00","25度","55","晴"],
+  ["10-01","20:00","16.0","70","多云"],
+  ["10-02","08:00","","68","阴"],
+  ["10-02","14:00","88","40","晴"],
+  ["10-02","20:00","15.8","72","多云"],
+  ["10-03","08:00","17.2","65","晴"],
+  ["10-03","08:00","17.2","65","晴"],
+  ["10-03","14:00","26.5℃","52","晴"],
+  ["10-03","20:00","16.4","","多云"],
+  ["10-04","08:00","12.1","80","小雨"],
+  ["10-04","14:00","19.0","75","小雨"],
+  ["10-04","20:00","-35","82","小雨"],
+  ["10-05","08:00","14.6","76","阴"],
+  ["10-05","14:00","21.3","66","多云"],
+  ["10-05","20:00","15.0","71","多云"],
+  ["10-06","08:00","13.9","78","阴"],
+  ["10-06","14:00","20.8","999","阴"],
+  ["10-06","20:00","14.7","74","阴"],
+  ["10-04","14:00","19.0","75","小雨"],
+  ["10-07","08:00","15.5度","69","晴"]
+];
+
+/* ================= 状态 ================= */
+var defState = {
+  header: deep(DIRTY_HEADER), rows: deep(DIRTY_ROWS),
+  log: [], ops: 0, detected: false, cleanedOnce: false,
+  scene: {}, ext: {},
+  tasks: {t1:false, t2:false, t3:false},
+  dict: {vals:{}, made:false},
+  quiz: {},
+  filterDate: ""
+};
+var state;
+try{ state = JSON.parse(localStorage.getItem(LS) || "null") || deep(defState); }
+catch(e){ state = deep(defState); }
+Object.keys(defState).forEach(function(k){ if(state[k] === undefined) state[k] = deep(defState[k]); });
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(state)); }catch(e){} }
+
+var undoStack = [], redoStack = [];
+function snapshot(label){
+  undoStack.push({h:deep(state.header), r:deep(state.rows), label:label});
+  if(undoStack.length > 60) undoStack.shift();
+  redoStack = [];
+}
+function addLog(text){
+  var t = new Date().toLocaleTimeString("zh-CN");
+  state.log.push({t:t, text:text});
+  state.ops++;
+  if(state.log.length > 400) state.log.shift();
+  save(); renderLog();
+  $("sbOps").textContent = "操作数：" + state.ops;
+}
+function renderLog(){
+  var box = $("cleanLog");
+  box.innerHTML = state.log.slice(-60).map(function(l){
+    return '<div><span class="lt">[' + l.t + ']</span> ' + esc(l.text) + "</div>";
+  }).join("") || '<div class="lt">（暂无操作记录）</div>';
+  box.scrollTop = box.scrollHeight;
+}
+
+/* ================= 菜单导航 ================= */
+Array.prototype.forEach.call(document.querySelectorAll("#menubar button"), function(b){
+  b.addEventListener("click", function(){
+    Array.prototype.forEach.call(document.querySelectorAll("#menubar button"), function(x){ x.classList.remove("on"); });
+    b.classList.add("on");
+    $(b.getAttribute("data-t")).scrollIntoView({behavior:"smooth"});
+  });
+});
+
+/* ================= 面板1 采集方式 ================= */
+var METHODS = ["开放数据平台下载", "网络爬取", "传感器自动采集", "问卷调查"];
+var SCENES = [
+  {s:"要研究气候变化，获取全国主要城市近 30 年的历史气温数据。", a:0,
+   why:"气象部门等机构已在开放数据平台常年积累了权威、完整的历史数据，直接下载最可靠高效。",
+   wrong:["用爬虫从零散网页拼 30 年数据既费力又易出错，而且平台数据更权威。","传感器只能从现在开始测，测不到过去 30 年。","问卷问不出精确的历史气温。"]},
+  {s:"连续一周、每 10 分钟记录一次本校操场的温度和湿度。", a:2,
+   why:"温湿度传感器接上开源硬件即可定时自动采集现场数据，正是小清气象站的做法。",
+   wrong:["开放平台没有“你们学校操场”这么具体的现场数据。","网页上没有你们操场的实时数据可爬。","总不能每 10 分钟发一次问卷吧？问卷测不了环境量。"]},
+  {s:"想了解全班同学平均每天的睡眠时间和睡前习惯。", a:3,
+   why:"睡眠时间、习惯是关于“人”的主观信息，问卷调查最合适。",
+   wrong:["开放平台上没有你们班同学的睡眠数据。","同学的个人作息不在公开网页上，即使有也涉及隐私不可爬取。","传感器可以测睡眠（如手环），但要每人佩戴设备，了解全班习惯用问卷更现实。"]},
+  {s:"把某天气网站上 20 个城市的 7 天预报自动汇总成一张表。", a:1,
+   why:"数据分散在网页里、页数多且结构相同，编写爬虫程序批量抽取效率最高（注意遵守法律与网站规则）。",
+   wrong:["预报数据在网页上，开放平台未必提供同样的预报接口；题目要求的正是自动汇总网页信息。","传感器无法获得其他城市的预报。","问卷收集不到天气预报。"]},
+  {s:"小清要采集小七孔气象站每分钟的气温、湿度、是否下雨。", a:2,
+   why:"部署 DHT11 温湿度传感器、水滴检测传感器等到开源硬件上定时采集——教材中在线数字气象站正是这么做的。",
+   wrong:["开放平台只有台站级数据，没有小清自己观测点的每分钟数据。","没有现成网页实时发布小清观测点的数据。","问卷无法采集环境数据。"]},
+  {s:"获取本市政府公开发布的空气质量监测历史数据。", a:0,
+   why:"政府和许多组织会把气象、交通、人口等数据公开供人们自由获取和使用——这就是开放数据平台。",
+   wrong:["官方已主动公开，直接下载即可，无需爬虫。","自建传感器成本高，且不如官方监测站规范。","问卷得不到监测数据。"]}
+];
+function sceneRender(){
+  var box = $("sceneList"); box.innerHTML = "";
+  SCENES.forEach(function(sc, i){
+    var d = document.createElement("div"); d.className = "scene";
+    var done = state.scene[i] === true;
+    d.innerHTML = '<b>场景 ' + (i+1) + '：</b>' + esc(sc.s) + (done ? ' <span class="badge ok">已答对</span>' : "") +
+      '<div class="opts">' + METHODS.map(function(m, j){
+        var cls = "opt-chip" + (done && j === sc.a ? " right" : "");
+        return '<button class="' + cls + '" data-i="' + i + '" data-j="' + j + '">' + m + "</button>";
+      }).join("") + "</div>" + '<div class="fb' + (done ? " show good" : "") + '" id="scFb' + i + '">' + (done ? "✓ " + esc(sc.why) : "") + "</div>";
+    box.appendChild(d);
+  });
+  var n = Object.keys(state.scene).filter(function(k){ return state.scene[k]; }).length;
+  $("p1Stat").textContent = n + " / 6";
+  $("p1Stat").className = "pstat badge " + (n === 6 ? "ok" : "info");
+  Array.prototype.forEach.call(box.querySelectorAll(".opt-chip"), function(b){
+    b.addEventListener("click", function(){
+      var i = +b.getAttribute("data-i"), j = +b.getAttribute("data-j");
+      var sc = SCENES[i], fb = $("scFb" + i);
+      if(state.scene[i]){ showFb(fb, "good", "本题已答对：" + esc(sc.why)); return; }
+      if(j === sc.a){
+        state.scene[i] = true; save();
+        addLog("采集方式：场景" + (i+1) + " 答对（" + METHODS[j] + "）");
+        sceneRender();
+      }else{
+        b.classList.add("wrong");
+        var wi = j > sc.a ? j - 1 : j;
+        showFb(fb, "err", "「" + METHODS[j] + "」不是最佳选择：" + esc(sc.wrong[wi]) + "<br>提示：想一想数据在哪里——在<b>机构手里</b>（平台）？在<b>网页上</b>（爬虫）？在<b>现场环境里</b>（传感器）？还是在<b>人的头脑里</b>（问卷）？再选一次。");
+      }
+    });
+  });
+}
+sceneRender();
+
+/* ================= 面板2 网页提取 ================= */
+var WEB = [
+  ["10-08","晴","24","12"],["10-09","多云","22","11"],["10-10","小雨","18","10"],
+  ["10-11","小雨","16","9"],["10-12","阴","19","10"],["10-13","晴","23","11"],["10-14","晴","25","13"]
+];
+var EXT_COLS = ["日期", "最高温(℃)", "最低温(℃)"]; // 需要抽取的3列
+function webRender(){
+  var t = $("webTable");
+  var h = "<tr><th>日期</th><th>天气</th><th>最高温</th><th>最低温</th></tr>";
+  WEB.forEach(function(w, r){
+    h += "<tr>";
+    h += '<td class="pick' + (state.ext[r + "_0"] ? " taken" : "") + '" data-r="' + r + '" data-f="0">' + w[0] + "</td>";
+    h += "<td>" + w[1] + "</td>";
+    h += '<td class="pick' + (state.ext[r + "_1"] ? " taken" : "") + '" data-r="' + r + '" data-f="1">' + w[2] + "℃</td>";
+    h += '<td class="pick' + (state.ext[r + "_2"] ? " taken" : "") + '" data-r="' + r + '" data-f="2">' + w[3] + "℃</td>";
+    h += "</tr>";
+  });
+  t.innerHTML = h;
+  Array.prototype.forEach.call(t.querySelectorAll("td.pick"), function(td){
+    td.addEventListener("click", function(){ extract(+td.getAttribute("data-r"), +td.getAttribute("data-f"), false); });
+  });
+}
+function extRender(){
+  var t = $("extTable");
+  var h = "<tr>" + EXT_COLS.map(function(c){ return "<th>" + c + "</th>"; }).join("") + "</tr>";
+  WEB.forEach(function(w, r){
+    h += "<tr>";
+    for(var f = 0; f < 3; f++){
+      var k = r + "_" + f;
+      var val = f === 0 ? w[0] : (f === 1 ? w[2] : w[3]);
+      h += state.ext[k] ? '<td class="filled">' + val + "</td>" : '<td class="empty">待抽取</td>';
+    }
+    h += "</tr>";
+  });
+  t.innerHTML = h;
+  var n = Object.keys(state.ext).length;
+  $("p2Stat").textContent = "已抽取 " + n + " / 21";
+  $("p2Stat").className = "pstat badge " + (n === 21 ? "ok" : "info");
+}
+function extract(r, f, silent){
+  var k = r + "_" + f;
+  if(state.ext[k]){
+    if(!silent) showFb($("extFb"), "hint", "这个字段已经抽取过了——真实的爬虫程序也要注意<b>去重</b>，别重复采集同一条数据。");
+    return false;
+  }
+  state.ext[k] = true; save();
+  webRender(); extRender();
+  if(!silent){
+    var names = ["日期", "最高温", "最低温"];
+    showFb($("extFb"), "good", "抽取成功：第 " + (r+1) + " 天的「" + names[f] + "」已进入结构化表格。网页里的内容是给人看的，抽进表格后才方便程序处理。");
+  }
+  if(Object.keys(state.ext).length === 21){
+    showFb($("extFb"), "good", "21 个字段全部抽取完成，完整性 100%！你刚才做的“找到网页 → 剥离有效数据 → 批量存表”正是<b>网络爬虫</b>的工作流程。记住：爬取数据必须遵守法律法规，不得窃取个人信息。");
+    addLog("网页提取：完成全部 21 个字段");
+  }
+  return true;
+}
+document.querySelectorAll(".ad").forEach(function(ad){
+  ad.addEventListener("click", function(){
+    showFb($("extFb"), "err", "这是广告，不是我们需要的天气字段！写爬虫时要先分析网页结构，只“剥离”目标数据，忽略无关内容。");
+  });
+});
+/* 爬虫自动演示：运行/暂停/单步/重置 */
+var crawlTimer = null;
+function crawlNext(){
+  for(var r = 0; r < 7; r++){
+    for(var f = 0; f < 3; f++){
+      if(!state.ext[r + "_" + f]){
+        extract(r, f, true);
+        showFb($("extFb"), "hint", "模拟爬虫：自动抽取第 " + (r+1) + " 天「" + ["日期","最高温","最低温"][f] + "」……程序按规则逐项批量获取，这就是它比人工快的原因。");
+        return true;
+      }
+    }
+  }
+  return false;
+}
+$("crawlRun").addEventListener("click", function(){
+  if(crawlTimer){ clearInterval(crawlTimer); crawlTimer = null; this.textContent = "运行"; return; }
+  var self = this;
+  self.textContent = "暂停";
+  crawlTimer = setInterval(function(){
+    if(!crawlNext()){
+      clearInterval(crawlTimer); crawlTimer = null; self.textContent = "运行";
+      showFb($("extFb"), "good", "模拟爬虫运行完毕，21 个字段全部入表。");
+    }
+  }, 350);
+  addLog("网页提取：启动模拟爬虫");
+});
+$("crawlStep").addEventListener("click", function(){
+  if(!crawlNext()) showFb($("extFb"), "good", "已经全部抽取完成。");
+});
+$("crawlReset").addEventListener("click", function(){
+  if(crawlTimer){ clearInterval(crawlTimer); crawlTimer = null; $("crawlRun").textContent = "运行"; }
+  state.ext = {}; save(); webRender(); extRender();
+  showFb($("extFb"), "hint", "已清空抽取结果，可重新体验（手动点击或自动运行）。");
+});
+$("extCheck").addEventListener("click", function(){
+  var n = Object.keys(state.ext).length;
+  if(n === 21){
+    showFb($("extFb"), "good", "核对通过：7 天 × 3 字段 = 21 项，无缺漏。数据的<b>完整性</b>是数据质量的第一关。");
+  }else{
+    var missing = [];
+    for(var r = 0; r < 7; r++){
+      for(var f = 0; f < 3; f++){
+        if(!state.ext[r + "_" + f]) missing.push("第" + (r+1) + "天·" + ["日期","最高温","最低温"][f]);
+      }
+    }
+    showFb($("extFb"), "err", "还差 " + (21-n) + " 项未抽取：" + esc(missing.slice(0,6).join("、")) + (missing.length > 6 ? " 等" : "") + "。缺了它们，后面的分析就会失真——请继续抽取。");
+  }
+  addLog("网页提取：核对完整性（" + n + "/21）");
+});
+webRender(); extRender();
+
+/* ================= 面板3 清洗工作台 ================= */
+var COLS = ["A","B","C","D","E"];
+var selRow = -1;
+function toNum(v){
+  if(v === null || v === undefined) return NaN;
+  var s = String(v).trim().replace(/[℃度%]/g, "");
+  if(s === "" || isNaN(Number(s))) return NaN;
+  return Number(s);
+}
+/* 检测：返回问题对象 */
+function detect(header, rows){
+  var res = {miss:[], dup:[], out:[], fmt:[], head:[]};
+  header.forEach(function(h, i){
+    if(h !== GOOD_HEADER[i]) res.head.push(i);
+  });
+  var seen = {};
+  rows.forEach(function(r, ri){
+    var key = r.join("\u0001");
+    if(seen[key] !== undefined) res.dup.push(ri);
+    else seen[key] = ri;
+    r.forEach(function(v, ci){
+      var s = String(v).trim();
+      if(s === ""){ res.miss.push({r:ri, c:ci}); return; }
+      if(ci === 2 || ci === 3){
+        var hasUnit = /[℃度%]/.test(s);
+        var n = toNum(s);
+        if(hasUnit && !isNaN(n)){ res.fmt.push({r:ri, c:ci}); return; }
+        if(isNaN(n)){ res.fmt.push({r:ri, c:ci}); return; }
+        if(ci === 2 && (n < -20 || n > 45)) res.out.push({r:ri, c:ci, v:n});
+        if(ci === 3 && (n < 0 || n > 100)) res.out.push({r:ri, c:ci, v:n});
+      }
+    });
+  });
+  return res;
+}
+var probsBefore = detect(DIRTY_HEADER, DIRTY_ROWS);
+function probCount(p){ return p.miss.length + p.dup.length + p.out.length + p.fmt.length + p.head.length; }
+
+function colMean(ci){
+  var vals = [];
+  state.rows.forEach(function(r, ri){
+    var n = toNum(r[ci]);
+    // 只用正常范围内的值计算平均，避免异常值污染
+    if(!isNaN(n)){
+      if(ci === 2 && n >= -20 && n <= 45) vals.push(n);
+      if(ci === 3 && n >= 0 && n <= 100) vals.push(n);
+    }
+  });
+  if(!vals.length) return 0;
+  return Math.round(vals.reduce(function(a,b){ return a+b; }, 0) / vals.length * 10) / 10;
+}
+
+function sheetRender(){
+  var p = state.detected ? detect(state.header, state.rows) : null;
+  var cellClass = {};
+  if(p){
+    p.miss.forEach(function(m){ cellClass[m.r + "_" + m.c] = "p-miss"; });
+    p.fmt.forEach(function(m){ cellClass[m.r + "_" + m.c] = "p-fmt"; });
+    p.out.forEach(function(m){ cellClass[m.r + "_" + m.c] = "p-out"; });
+  }
+  var t = $("sheet");
+  var h = '<tr><th class="rowh">#</th>';
+  state.header.forEach(function(hd, i){
+    var bad = p && p.head.indexOf(i) >= 0;
+    h += '<th class="' + (bad ? "h-bad" : "") + '" title="' + (bad ? "列名不规范，建议：" + GOOD_HEADER[i] : "") + '">' + COLS[i] + " · " + esc(hd) + (bad ? " ⚠" : "") + "</th>";
+  });
+  h += "</tr>";
+  var shown = 0;
+  state.rows.forEach(function(r, ri){
+    if(state.filterDate && r[0] !== state.filterDate) return;
+    shown++;
+    var dup = p && p.dup.indexOf(ri) >= 0;
+    h += '<tr data-r="' + ri + '"' + (ri === selRow ? ' class="rowsel"' : "") + '>';
+    h += '<td class="rowh" data-selrow="' + ri + '" title="点击选中整行">' + (ri + 1) + "</td>";
+    r.forEach(function(v, ci){
+      var cls = cellClass[ri + "_" + ci] || (dup ? "p-dup" : "");
+      var disp = String(v).trim() === "" ? "（空）" : esc(v);
+      h += '<td class="cell ' + cls + '" data-r="' + ri + '" data-c="' + ci + '">' + disp + "</td>";
+    });
+    h += "</tr>";
+  });
+  t.innerHTML = h;
+  $("sbRows").textContent = "行数：" + state.rows.length + (state.filterDate ? "（筛选显示 " + shown + " 行）" : "");
+  if(p){
+    var n = probCount(p);
+    $("sbProb").textContent = "问题：" + n + " 处";
+    $("p3Stat").textContent = n === 0 ? "问题已清零 ✓" : "剩余问题 " + n;
+    $("p3Stat").className = "pstat badge " + (n === 0 ? "ok" : "warn");
+    $("probChips").innerHTML = '<span>体检结果：</span>' +
+      '<span class="pc miss">缺失 ' + p.miss.length + '</span>' +
+      '<span class="pc dup">重复行 ' + p.dup.length + '</span>' +
+      '<span class="pc out">异常 ' + p.out.length + '</span>' +
+      '<span class="pc fmt">格式 ' + p.fmt.length + '</span>' +
+      '<span class="pc hd">列名 ' + p.head.length + "</span>";
+  }
+  // 单元格事件
+  Array.prototype.forEach.call(t.querySelectorAll("td.cell"), function(td){
+    td.addEventListener("click", function(){
+      var r = +td.getAttribute("data-r"), c = +td.getAttribute("data-c");
+      $("cellRef").textContent = COLS[c] + (r + 1);
+      $("cellVal").textContent = String(state.rows[r][c]) || "（空）";
+    });
+    td.addEventListener("dblclick", function(){ editCell(td); });
+  });
+  Array.prototype.forEach.call(t.querySelectorAll("[data-selrow]"), function(td){
+    td.addEventListener("click", function(){
+      var r = +td.getAttribute("data-selrow");
+      selRow = (selRow === r ? -1 : r);
+      sheetRender();
+    });
+  });
+  probListRender(p);
+  cmpRender(p);
+  fltOptions();
+  save();
+}
+function editCell(td){
+  var r = +td.getAttribute("data-r"), c = +td.getAttribute("data-c");
+  var old = state.rows[r][c];
+  td.innerHTML = "";
+  var inp = document.createElement("input");
+  inp.value = old;
+  td.appendChild(inp); inp.focus(); inp.select();
+  var done = false;
+  function commit(ok){
+    if(done) return; done = true;
+    var nv = inp.value.trim();
+    if(ok && nv !== String(old)){
+      snapshot("编辑单元格");
+      state.rows[r][c] = nv;
+      addLog("手工编辑 " + COLS[c] + (r+1) + "：「" + old + "」→「" + nv + "」");
+    }
+    sheetRender();
+  }
+  inp.addEventListener("keydown", function(ev){
+    if(ev.key === "Enter") commit(true);
+    if(ev.key === "Escape") commit(false);
+  });
+  inp.addEventListener("blur", function(){ commit(true); });
+}
+function probListRender(p){
+  var box = $("probList");
+  if(!p){ box.innerHTML = '<div class="pi">请先点击「一键体检」。</div>'; return; }
+  var items = [];
+  if(p.head.length){
+    items.push('<div class="pi"><span class="pc hd">列名</span> ' +
+      p.head.map(function(i){ return "「" + esc(state.header[i]) + "」应为「" + GOOD_HEADER[i] + "」"; }).join("；") +
+      ' <button class="btn small" data-act="header">一键规范列名</button></div>');
+  }
+  p.dup.forEach(function(ri){
+    items.push('<div class="pi"><span class="pc dup">重复</span> 第 ' + (ri+1) + " 行与前面某行完全相同 " +
+      '<button class="btn small" data-act="delrow" data-r="' + ri + '">删除该行</button></div>');
+  });
+  p.miss.forEach(function(m){
+    var canMean = m.c === 2 || m.c === 3;
+    items.push('<div class="pi"><span class="pc miss">缺失</span> ' + COLS[m.c] + (m.r+1) + "（" + esc(GOOD_HEADER[m.c]) + "）为空 " +
+      (canMean ? '<button class="btn small" data-act="mean" data-r="' + m.r + '" data-c="' + m.c + '">填充平均值</button> ' : "") +
+      '<button class="btn small ghost" data-act="delrow" data-r="' + m.r + '">删除该行</button></div>');
+  });
+  p.out.forEach(function(m){
+    items.push('<div class="pi"><span class="pc out">异常</span> ' + COLS[m.c] + (m.r+1) + " 的值 " + m.v +
+      "（" + (m.c === 2 ? "气温合理范围约 -20~45℃" : "湿度合理范围 0~100%") + "） " +
+      '<button class="btn small" data-act="delrow" data-r="' + m.r + '">删除该行</button> ' +
+      '<button class="btn small ghost" data-act="mean" data-r="' + m.r + '" data-c="' + m.c + '">改为平均值</button></div>');
+  });
+  p.fmt.forEach(function(m){
+    items.push('<div class="pi"><span class="pc fmt">格式</span> ' + COLS[m.c] + (m.r+1) + " 的「" + esc(state.rows[m.r][m.c]) +
+      "」混入了单位/文字，应统一为纯数字 " +
+      '<button class="btn small" data-act="fixfmt" data-r="' + m.r + '" data-c="' + m.c + '">修正格式</button></div>');
+  });
+  box.innerHTML = items.length ? items.join("") :
+    '<div class="pi" style="color:var(--ok);font-weight:700;">✓ 没有检测到问题——数据已满足完整性、统一性、准确性！</div>';
+  Array.prototype.forEach.call(box.querySelectorAll("button"), function(b){
+    b.addEventListener("click", function(){
+      var act = b.getAttribute("data-act");
+      var r = +b.getAttribute("data-r"), c = +b.getAttribute("data-c");
+      if(act === "header") fixHeader();
+      else if(act === "delrow") delRow(r);
+      else if(act === "mean") fillMean(r, c);
+      else if(act === "fixfmt") fixFmt(r, c);
+    });
+  });
+}
+function afterClean(msg){
+  sheetRender();
+  var p = detect(state.header, state.rows);
+  if(probCount(p) === 0 && state.detected){
+    state.cleanedOnce = true; save();
+    showFb($("cleanFb"), "good", msg + "<br><b>问题已全部清零！</b>“脏数据”经过去重、补漏、勘误和标准化，变成了可加工分析的<b>清洁数据</b>。请看右侧“清洗前后对比”，然后去面板④做整理实验。");
+  }else{
+    showFb($("cleanFb"), "good", msg);
+  }
+}
+function fixHeader(){
+  snapshot("规范列名");
+  var oldH = state.header.join(",");
+  state.header = deep(GOOD_HEADER);
+  addLog("规范列名：" + oldH + " → " + GOOD_HEADER.join(","));
+  afterClean("列名已统一为规范名称（含单位），方便自己和他人正确理解每一列。");
+}
+function delRow(r){
+  if(r < 0 || r >= state.rows.length) return;
+  snapshot("删除行");
+  var rowTxt = state.rows[r].join(", ");
+  state.rows.splice(r, 1);
+  if(selRow === r) selRow = -1;
+  addLog("删除第 " + (r+1) + " 行（" + rowTxt + "）");
+  afterClean("已删除该行。删除适用于重复行或无法修复的记录——注意：能修复的尽量修复，随意删行会损失信息。");
+}
+function fillMean(r, c){
+  snapshot("填充平均值");
+  var m = colMean(c);
+  var old = state.rows[r][c];
+  state.rows[r][c] = String(m);
+  addLog("将 " + COLS[c] + (r+1) + " 由「" + old + "」填充为该列平均值 " + m);
+  afterClean("已用该列（正常值的）平均值 " + m + " 填充。用平均值补缺失是常见的“补漏”方法，能保住整行其他有用数据。");
+}
+function fixFmt(r, c){
+  snapshot("修正格式");
+  var old = String(state.rows[r][c]);
+  var n = toNum(old);
+  if(isNaN(n)){
+    showFb($("cleanFb"), "err", "这个值无法自动转换成数字，请双击单元格手工修正。");
+    return;
+  }
+  state.rows[r][c] = String(n);
+  addLog("修正格式 " + COLS[c] + (r+1) + "：「" + old + "」→「" + n + "」");
+  afterClean("已把「" + esc(old) + "」统一成纯数字 " + n + "。同一列必须遵循统一标准（统一性），计算机才能对它做计算。");
+}
+$("btnDetect").addEventListener("click", function(){
+  state.detected = true; save();
+  var p = detect(state.header, state.rows);
+  sheetRender();
+  var n = probCount(p);
+  if(n === 0){
+    showFb($("cleanFb"), "good", "体检完成：没有发现问题，数据已经很干净了！");
+  }else{
+    showFb($("cleanFb"), "hint", "体检完成：共发现 <b>" + n + "</b> 处问题——缺失 " + p.miss.length + "、重复行 " + p.dup.length +
+      "、异常 " + p.out.length + "、格式 " + p.fmt.length + "、列名 " + p.head.length +
+      "。表中已用不同颜色高亮，请到下方“问题清单”逐个处理。");
+  }
+  addLog("一键体检：发现 " + n + " 处问题");
+});
+$("btnUndo").addEventListener("click", function(){
+  if(!undoStack.length){ showFb($("cleanFb"), "hint", "没有可撤销的操作了。"); return; }
+  var s = undoStack.pop();
+  redoStack.push({h:deep(state.header), r:deep(state.rows), label:s.label});
+  state.header = s.h; state.rows = s.r;
+  addLog("撤销：" + s.label);
+  sheetRender();
+});
+$("btnRedo").addEventListener("click", function(){
+  if(!redoStack.length){ showFb($("cleanFb"), "hint", "没有可重做的操作。"); return; }
+  var s = redoStack.pop();
+  undoStack.push({h:deep(state.header), r:deep(state.rows), label:s.label});
+  state.header = s.h; state.rows = s.r;
+  addLog("重做：" + s.label);
+  sheetRender();
+});
+$("btnAddRow").addEventListener("click", function(){
+  snapshot("添加行");
+  state.rows.push(["", "", "", "", ""]);
+  addLog("添加空白行（第 " + state.rows.length + " 行）");
+  sheetRender();
+  showFb($("cleanFb"), "hint", "已在表尾添加空行，双击单元格填写内容。注意：空行如果不填，体检时会被记为缺失。");
+});
+$("btnDelRow").addEventListener("click", function(){
+  if(selRow < 0){ showFb($("cleanFb"), "hint", "请先点击表格最左边的行号选中一行，再点删除。"); return; }
+  delRow(selRow);
+});
+$("btnFixHeader").addEventListener("click", fixHeader);
+$("btnRestore").addEventListener("click", function(){
+  snapshot("恢复原始数据");
+  state.header = deep(DIRTY_HEADER);
+  state.rows = deep(DIRTY_ROWS);
+  state.detected = false; state.filterDate = "";
+  $("fltDate").value = "";
+  addLog("恢复原始脏数据（21 行）");
+  sheetRender();
+  showFb($("cleanFb"), "hint", "已恢复最初的脏数据表，可以重新练习一遍完整的清洗流程。");
+});
+function cmpRender(p){
+  var t = $("cmpTable");
+  var b = probsBefore;
+  var html = "<tr><th></th><th>行数</th><th>缺失</th><th>重复</th><th>异常</th><th>格式</th><th>列名</th></tr>";
+  html += "<tr><td>清洗前</td><td>" + DIRTY_ROWS.length + "</td><td>" + b.miss.length + "</td><td>" + b.dup.length +
+          "</td><td>" + b.out.length + "</td><td>" + b.fmt.length + "</td><td>" + b.head.length + "</td></tr>";
+  if(p){
+    html += "<tr><td>当前</td><td>" + state.rows.length + "</td><td>" + p.miss.length + "</td><td>" + p.dup.length +
+            "</td><td>" + p.out.length + "</td><td>" + p.fmt.length + "</td><td>" + p.head.length + "</td></tr>";
+  }else{
+    html += "<tr><td>当前</td><td>" + state.rows.length + "</td><td colspan='5'>（未体检）</td></tr>";
+  }
+  t.innerHTML = html;
+}
+
+/* ================= 面板4 排序筛选 ================= */
+function fltOptions(){
+  var sel = $("fltDate");
+  var dates = [];
+  state.rows.forEach(function(r){ if(r[0] && dates.indexOf(r[0]) < 0) dates.push(r[0]); });
+  dates.sort();
+  var cur = state.filterDate;
+  sel.innerHTML = '<option value="">（全部日期）</option>' + dates.map(function(d){
+    return '<option value="' + esc(d) + '"' + (d === cur ? " selected" : "") + ">" + esc(d) + "</option>";
+  }).join("");
+}
+$("fltDate").addEventListener("change", function(){
+  state.filterDate = this.value; save();
+  sheetRender();
+  addLog(this.value ? "筛选：只显示日期 " + this.value : "筛选：显示全部日期");
+  if(this.value === "10-03") taskDone("t2");
+  $("p3").scrollIntoView({behavior:"smooth", block:"center"});
+});
+Array.prototype.forEach.call(document.querySelectorAll("[data-sort]"), function(b){
+  b.addEventListener("click", function(){
+    var dir = b.getAttribute("data-sort");
+    snapshot("排序");
+    state.rows.sort(function(x, y){
+      var a = toNum(x[2]), bb = toNum(y[2]);
+      if(isNaN(a)) a = -Infinity;
+      if(isNaN(bb)) bb = -Infinity;
+      return dir === "asc" ? a - bb : bb - a;
+    });
+    selRow = -1;
+    addLog("整行排序：按气温" + (dir === "asc" ? "升序" : "降序"));
+    sheetRender();
+    document.querySelectorAll("#sheet td.cell").forEach(function(td){ td.classList.add("flash"); });
+    if(dir === "desc") taskDone("t1");
+    $("p3").scrollIntoView({behavior:"smooth", block:"center"});
+  });
+});
+$("btnGroup").addEventListener("click", function(){
+  var agg = {};
+  state.rows.forEach(function(r){
+    var w = String(r[4]).trim() || "（空）";
+    agg[w] = (agg[w] || 0) + 1;
+  });
+  var keys = Object.keys(agg);
+  var mx = Math.max.apply(null, keys.map(function(k){ return agg[k]; }).concat([1]));
+  $("groupOut").style.display = "block";
+  $("grpBars").innerHTML = keys.map(function(k){
+    return '<div class="gb" style="height:' + Math.max(6, agg[k]/mx*92) + 'px"><b>' + agg[k] + '</b><span>' + esc(k) + "</span></div>";
+  }).join("");
+  addLog("分类汇总：按天气统计各类条数（" + keys.map(function(k){ return k + ":" + agg[k]; }).join("，") + "）");
+  taskCheck3(agg);
+});
+var TASKS = [
+  {id:"t1", txt:"任务1：请把表格整理成「按气温从高到低」排列。", how:"点上方「按气温降序 ↓」。"},
+  {id:"t2", txt:"任务2：请筛选出 10-03 这一天的全部记录。", how:"在「按日期筛选」下拉框选择 10-03。"},
+  {id:"t3", txt:"任务3：做一次按天气的分类汇总，然后回答：目前表中「多云」有几条记录？", how:"点「按天气分类汇总」，看柱状图上的数字。"}
+];
+var t3Answer = null;
+function taskRender(){
+  var box = $("srtTasks"); box.innerHTML = "";
+  TASKS.forEach(function(tk){
+    var done = state.tasks[tk.id];
+    var d = document.createElement("div"); d.className = "scene";
+    var inner = "<b>" + esc(tk.txt) + "</b> " + (done ? '<span class="badge ok">已完成</span>' : '<span class="badge info">未完成</span>') +
+      '<div style="font-size:12px;color:var(--gray);margin-top:3px;">提示：' + esc(tk.how) + "</div>";
+    if(tk.id === "t3" && !done && t3Answer !== null){
+      inner += '<div class="opts" style="margin-top:6px;">「多云」有 ' +
+        [t3Answer - 1, t3Answer, t3Answer + 2].map(function(v, i){
+          return '<button class="opt-chip t3opt" data-v="' + v + '">' + v + " 条</button>";
+        }).join(" ") + "</div><div class='fb' id='t3Fb'></div>";
+    }
+    box.appendChild(d);
+    d.innerHTML = inner;
+  });
+  var n = ["t1","t2","t3"].filter(function(k){ return state.tasks[k]; }).length;
+  $("p4Stat").textContent = "任务 " + n + " / 3";
+  $("p4Stat").className = "pstat badge " + (n === 3 ? "ok" : "info");
+  Array.prototype.forEach.call(box.querySelectorAll(".t3opt"), function(b){
+    b.addEventListener("click", function(){
+      var fb = $("t3Fb");
+      if(+b.getAttribute("data-v") === t3Answer){
+        taskDone("t3");
+      }else{
+        showFb(fb, "err", "不对哦。再点一次「按天气分类汇总」，仔细看「多云」那根柱子顶上的数字。");
+      }
+    });
+  });
+}
+function taskDone(id){
+  if(state.tasks[id]) return;
+  // t1 额外校验：当前确实是降序
+  if(id === "t1"){
+    var last = Infinity, ok = true;
+    state.rows.forEach(function(r){
+      var n = toNum(r[2]); if(isNaN(n)) n = -Infinity;
+      if(n > last + 0.0001) ok = false;
+      last = n;
+    });
+    if(!ok) return;
+  }
+  state.tasks[id] = true; save();
+  addLog("整理任务完成：" + id.toUpperCase());
+  taskRender();
+}
+function taskCheck3(agg){
+  t3Answer = agg["多云"] || 0;
+  taskRender();
+}
+
+/* ================= 面板5 数据字典 ================= */
+var DICT_FIELDS = [
+  {name:"日期", type:"日期", unit:"—", range:"10-01 至 10-07", meanHint:"观测发生在哪一天"},
+  {name:"时间", type:"时间", unit:"时:分", range:"00:00 至 23:59", meanHint:"一天中的观测时刻"},
+  {name:"气温(℃)", type:"数值", unit:"℃", range:"-20 至 45", meanHint:"观测点的空气温度"},
+  {name:"湿度(%)", type:"数值", unit:"%", range:"0 至 100", meanHint:"空气相对湿度"},
+  {name:"天气", type:"文本", unit:"—", range:"晴/多云/阴/小雨等", meanHint:"天气状况的文字描述"}
+];
+var TYPE_OPTS = ["数值", "文本", "日期", "时间"];
+var UNIT_OPTS = ["—", "℃", "%", "时:分", "级"];
+var RANGE_OPTS = {
+  "日期":["10-01 至 10-07", "0 至 100", "-20 至 45"],
+  "时间":["00:00 至 23:59", "1 至 12", "-20 至 45"],
+  "气温(℃)":["-20 至 45", "0 至 100", "任何数都行"],
+  "湿度(%)":["0 至 100", "-20 至 45", "任何数都行"],
+  "天气":["晴/多云/阴/小雨等", "0 至 100", "任意文字"]
+};
+function dictRender(){
+  var t = $("dictTable");
+  var rows = ['<tr><th style="width:90px;">字段名</th><th>含义（自己写）</th><th style="width:110px;">类型</th><th style="width:100px;">单位</th><th style="width:150px;">合理范围</th></tr>'];
+  DICT_FIELDS.forEach(function(f, i){
+    var v = state.dict.vals[i] || {};
+    rows.push("<tr>" +
+      "<td><b>" + esc(f.name) + "</b></td>" +
+      '<td><input class="di" data-i="' + i + '" data-k="mean" placeholder="例如：' + esc(f.meanHint) + '" value="' + esc(v.mean || "") + '"></td>' +
+      '<td><select class="di" data-i="' + i + '" data-k="type"><option value="">选择</option>' +
+        TYPE_OPTS.map(function(o){ return '<option' + (v.type === o ? " selected" : "") + ">" + o + "</option>"; }).join("") + "</select></td>" +
+      '<td><select class="di" data-i="' + i + '" data-k="unit"><option value="">选择</option>' +
+        UNIT_OPTS.map(function(o){ return '<option' + (v.unit === o ? " selected" : "") + ">" + o + "</option>"; }).join("") + "</select></td>" +
+      '<td><select class="di" data-i="' + i + '" data-k="range"><option value="">选择</option>' +
+        RANGE_OPTS[f.name].map(function(o){ return '<option' + (v.range === o ? " selected" : "") + ">" + o + "</option>"; }).join("") + "</select></td>" +
+      "</tr>");
+  });
+  t.innerHTML = rows.join("");
+  Array.prototype.forEach.call(t.querySelectorAll(".di"), function(el){
+    el.addEventListener("change", function(){
+      var i = +el.getAttribute("data-i"), k = el.getAttribute("data-k");
+      state.dict.vals[i] = state.dict.vals[i] || {};
+      state.dict.vals[i][k] = el.value;
+      save();
+    });
+    if(el.tagName === "INPUT"){
+      el.addEventListener("input", function(){
+        var i = +el.getAttribute("data-i");
+        state.dict.vals[i] = state.dict.vals[i] || {};
+        state.dict.vals[i].mean = el.value;
+        save();
+      });
+    }
+  });
+}
+$("dictGen").addEventListener("click", function(){
+  var errs = [];
+  DICT_FIELDS.forEach(function(f, i){
+    var v = state.dict.vals[i] || {};
+    if(!v.mean || v.mean.trim().length < 2) errs.push("「" + f.name + "」的含义还没写（用自己的话说清它记录了什么）");
+    if(v.type !== f.type) errs.push("「" + f.name + "」的类型不对——想想它的值是数字、文字还是日期/时间");
+    if(v.unit !== f.unit) errs.push("「" + f.name + "」的单位再想想（没有单位就选“—”）");
+    if(v.range !== f.range) errs.push("「" + f.name + "」的合理范围再想想（超出这个范围就是异常值）");
+  });
+  if(errs.length){
+    showFb($("dictFb"), "err", "字典还不规范，共 " + errs.length + " 处：<br>· " + errs.slice(0,5).map(esc).join("<br>· ") + (errs.length > 5 ? "<br>……" : "") + "<br>修改后再生成。");
+    return;
+  }
+  state.dict.made = true; save();
+  var html = "<b>数据字典 · 校园气象观测数据集</b><table class='dict-table' style='margin-top:6px;background:#fff;'>" +
+    "<tr><th>字段名</th><th>含义</th><th>类型</th><th>单位</th><th>合理范围</th></tr>" +
+    DICT_FIELDS.map(function(f, i){
+      var v = state.dict.vals[i];
+      return "<tr><td>" + esc(f.name) + "</td><td>" + esc(v.mean) + "</td><td>" + esc(v.type) + "</td><td>" + esc(v.unit) + "</td><td>" + esc(v.range) + "</td></tr>";
+    }).join("") + "</table>";
+  var card = $("dictCard");
+  card.innerHTML = html;
+  card.style.display = "block";
+  showFb($("dictFb"), "good", "数据字典生成成功！有了字典，别人（和未来的你）拿到数据集就知道每列是什么、什么值算异常——“合理范围”正是一键体检判断异常值的依据。");
+  addLog("数据字典：生成成功");
+});
+/* 练习题 */
+var QUIZ = [
+  {q:"下列观测记录中，哪一条存在「缺失值」？", opts:["10-02, 08:00, （空）, 68, 阴", "10-01, 08:00, 18.5, 62, 晴", "10-05, 14:00, 21.3, 66, 多云"], a:0,
+   why:"气温一格是空的，就是缺失值。缺失破坏了数据的完整性。", hint:"逐格看，哪条少了一个值？"},
+  {q:"气温列出现了 88（℃），最合理的判断是？", opts:["小七孔真的有 88℃ 的高温", "这是异常值，可能是传感器故障或录入错误", "88 是正常值，不用管"], a:1,
+   why:"地表气温不可能到 88℃（合理范围约 -20~45℃），超出合理范围的值应判为异常值，需要勘误或删除。", hint:"对照“合理范围”想一想。"},
+  {q:"同一列里出现「25度 / 25.0 / 25℃」三种写法，这违反了数据质量的哪个要求？", opts:["完整性", "统一性", "准确性"], a:1,
+   why:"统一性要求数据符合统一的标准。混着写单位，计算机就没法直接把它们当数字计算，要做标准化处理。", hint:"三个词分别对应：不缺、同标准、不出错。"},
+  {q:"表里有两行完全相同的记录，最合适的清洗方法是？", opts:["两行都删掉", "保留一行，删除多余的重复行（去重）", "把其中一行的数字改掉"], a:1,
+   why:"去重是删掉多余的副本，但要保留一份真实记录；全删会丢数据，乱改会制造错误。", hint:"“去重”去的是“多余的重复”。"},
+  {q:"湿度列有一格缺失，其余湿度值都正常，想保住整行其他数据，应？", opts:["删除整行", "用该列平均值（或中位数）填充", "随便填一个 0"], a:1,
+   why:"用平均值/中位数补漏能在不歪曲整体规律的前提下保留该行其他有用信息；填 0 会制造一个假异常。", hint:"题目说了“想保住整行其他数据”。"},
+  {q:"在电子表格软件中排序时，教材提醒要注意什么？", opts:["选中连续区域让整行一起排序，否则单列排序会造成数据错位", "只选一列排序更快更好", "排序前必须先删掉表头"], a:0,
+   why:"若只让一列参与排序，这一列和其他列就对不上号了——张三的身高配到李四头上。所以要选连续区域整行排序。", hint:"想想“数据错位”是怎么发生的。"},
+  {q:"关于用网络爬虫采集数据，正确的说法是？", opts:["只要技术上能爬到，什么数据都能随便用", "必须遵守法律法规，不得窃取或非法获取、出售个人信息", "爬虫只能由搜索引擎公司使用"], a:1,
+   why:"《中华人民共和国网络安全法》规定不得窃取或以其他非法方式获取个人信息。爬虫要合理合法、负责任地使用。", hint:"回忆教材“合理合法使用网络爬虫”。"},
+  {q:"CSV 文件的特点是？", opts:["它是一种纯文本文件，每行一条数据，值之间用逗号分隔", "它只能用一种专门软件打开", "它把数据保存为图片"], a:0,
+   why:"CSV 是纯文本，逗号是列分隔标记；记事本、电子表格软件、Python 程序都能读写它，所以特别通用。", hint:"CSV 的“C”就是逗号（comma）。"}
+];
+function quizRender(){
+  var box = $("quizList"); box.innerHTML = "";
+  QUIZ.forEach(function(q, i){
+    var done = state.quiz[i] === true;
+    var d = document.createElement("div"); d.className = "scene";
+    d.innerHTML = "<b>" + (i+1) + "．</b>" + esc(q.q) + (done ? ' <span class="badge ok">已答对</span>' : "") +
+      '<div class="opts">' + q.opts.map(function(o, j){
+        return '<button class="opt-chip' + (done && j === q.a ? " right" : "") + '" data-i="' + i + '" data-j="' + j + '">' + "ABC"[j] + "．" + esc(o) + "</button>";
+      }).join("") + "</div><div class='fb" + (done ? " show good" : "") + "' id='qzFb" + i + "'>" + (done ? "✓ " + esc(q.why) : "") + "</div>";
+    box.appendChild(d);
+  });
+  var n = Object.keys(state.quiz).filter(function(k){ return state.quiz[k]; }).length;
+  $("p5Stat").textContent = "练习 " + n + " / 8";
+  $("p5Stat").className = "pstat badge " + (n === 8 ? "ok" : "info");
+  Array.prototype.forEach.call(box.querySelectorAll(".opt-chip"), function(b){
+    b.addEventListener("click", function(){
+      var i = +b.getAttribute("data-i"), j = +b.getAttribute("data-j");
+      var q = QUIZ[i], fb = $("qzFb" + i);
+      if(state.quiz[i]){ showFb(fb, "good", "本题已答对：" + esc(q.why)); return; }
+      if(j === q.a){
+        state.quiz[i] = true; save();
+        addLog("练习：第 " + (i+1) + " 题答对");
+        quizRender();
+      }else{
+        b.classList.add("wrong");
+        showFb(fb, "err", "不对。提示：" + esc(q.hint) + " 再选一次。");
+      }
+    });
+  });
+}
+dictRender(); quizRender(); taskRender();
+
+/* ================= 面板6 导出 ================= */
+function download(name, content, mime){
+  var blob = new Blob(["\ufeff" + content], {type:mime});
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+function csvText(){
+  var lines = [state.header.join(",")];
+  state.rows.forEach(function(r){ lines.push(r.join(",")); });
+  return lines.join("\r\n");
+}
+function logText(){
+  return "清洗日志 · 校园气象观测数据集\r\n" + state.log.map(function(l){ return "[" + l.t + "] " + l.text; }).join("\r\n");
+}
+function buildSummary(){
+  var p = detect(state.header, state.rows);
+  var lines = [];
+  lines.push("======= 第2单元 第2节《数据的采集和整理》学习档案 =======");
+  lines.push("生成时间：" + new Date().toLocaleString("zh-CN"));
+  lines.push("");
+  var n1 = Object.keys(state.scene).filter(function(k){ return state.scene[k]; }).length;
+  lines.push("【①采集方式】 场景选择答对 " + n1 + "/6");
+  lines.push("【②网页提取】 已抽取 " + Object.keys(state.ext).length + "/21 个字段");
+  lines.push("【③清洗工作台】 " + (state.detected ? "已体检" : "未体检") + "；当前行数 " + state.rows.length +
+    "；当前问题数 " + probCount(p) + "（清洗前 " + probCount(probsBefore) + "）" + (state.cleanedOnce ? "；曾达成问题清零 ✓" : ""));
+  lines.push("【④整理实验】 任务完成 " + ["t1","t2","t3"].filter(function(k){ return state.tasks[k]; }).length + "/3");
+  lines.push("【⑤数据字典】 " + (state.dict.made ? "已生成规范字典 ✓" : "未生成") + "；练习答对 " +
+    Object.keys(state.quiz).filter(function(k){ return state.quiz[k]; }).length + "/8");
+  lines.push("【清洗操作】 共 " + state.ops + " 步（详见清洗日志）");
+  lines.push("");
+  lines.push("【核心结论】");
+  lines.push("· 采集方法各有所长：开放平台（权威历史数据）、爬虫（批量网页数据，须守法）、传感器（现场连续采集）、问卷（人的想法习惯）。");
+  lines.push("· 数据质量三要求：完整性（不缺失）、统一性（同标准）、准确性（不出错）。");
+  lines.push("· 数据清洗 = 去重、补漏、勘误 + 统一化标准化，把“脏数据”变成可分析的清洁数据集。");
+  lines.push("· 排序要整行进行，筛选可按条件挑出记录；数据字典让数据集能被他人正确使用。");
+  lines.push("· 呼应贯通项目：小清的气象站数据也要先清洗整理，才能分析“14时最热、日出前后最冷”。");
+  return lines.join("\r\n");
+}
+$("sumMake").addEventListener("click", function(){ $("sumBox").textContent = buildSummary(); });
+$("expCsv").addEventListener("click", function(){
+  download("校园气象观测_整理后.csv", csvText(), "text/csv;charset=utf-8");
+  addLog("导出：整理后数据集 CSV");
+});
+$("expLog").addEventListener("click", function(){
+  download("数据清洗日志.txt", logText(), "text/plain;charset=utf-8");
+  addLog("导出：清洗日志");
+});
+$("expSum").addEventListener("click", function(){
+  download("第2单元第2节_学习小结.txt", buildSummary(), "text/plain;charset=utf-8");
+  addLog("导出：学习小结");
+});
+$("expJson").addEventListener("click", function(){
+  var pack = {
+    小结: buildSummary(),
+    表头: state.header, 数据: state.rows,
+    数据字典: state.dict, 清洗日志: state.log,
+    练习: state.quiz, 整理任务: state.tasks
+  };
+  download("第2单元第2节_完整档案.json", JSON.stringify(pack, null, 2), "application/json;charset=utf-8");
+  addLog("导出：完整档案 JSON");
+});
+$("clearAll").addEventListener("click", function(){
+  if(this.getAttribute("data-arm") !== "1"){
+    this.setAttribute("data-arm", "1");
+    this.textContent = "再点一次确认清除";
+    var self = this;
+    setTimeout(function(){ self.setAttribute("data-arm", ""); self.textContent = "清除本机学习数据"; }, 4000);
+    return;
+  }
+  try{ localStorage.removeItem(LS); }catch(e){}
+  location.reload();
+});
+
+/* ================= 初始渲染 ================= */
+renderLog();
+sheetRender();
+$("sbOps").textContent = "操作数：" + state.ops;
+})();
+</script>
+</body>
+</html>

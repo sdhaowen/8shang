@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第1单元 第2节 物联网的终端设备 · 开发者工作台</title>
+<style>
+:root{
+  --bg:#0f172a; --panel:#1e293b; --panel2:#16213a; --line:#334155;
+  --acc:#22c55e; --accd:#16a34a; --ink:#e2e8f0; --mut:#94a3b8;
+  --bad:#f87171; --warn:#fbbf24; --info:#38bdf8;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  font-family:system-ui,"PingFang SC","Microsoft YaHei",sans-serif;
+  background:var(--bg); color:var(--ink); line-height:1.65; min-height:100vh;
+}
+code, .mono{font-family:ui-monospace,Consolas,"Courier New",monospace;}
+header.top{
+  background:linear-gradient(120deg,#020617,#0f172a 60%,#064e3b);
+  border-bottom:1px solid #14532d; padding:18px 26px 0;
+}
+header .t1{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;}
+header .t1 .logo{color:var(--acc); font-weight:800; font-size:1.35rem; letter-spacing:.04em;}
+header .t1 .sub{color:var(--mut); font-size:.85rem;}
+header .goals{margin:8px 0 12px; display:flex; gap:8px; flex-wrap:wrap;}
+header .goals span{
+  border:1px solid #14532d; background:rgba(34,197,94,.08); color:#86efac;
+  border-radius:999px; padding:2px 12px; font-size:.8rem;
+}
+.tabs{display:flex; gap:2px; flex-wrap:wrap;}
+.tabs button{
+  background:#111c33; color:var(--mut); border:1px solid var(--line); border-bottom:none;
+  border-radius:10px 10px 0 0; padding:9px 16px; font-size:.9rem; cursor:pointer;
+  font-family:inherit;
+}
+.tabs button.cur{background:var(--panel); color:var(--acc); font-weight:700; border-color:#14532d;
+  box-shadow:0 -3px 12px rgba(34,197,94,.15);}
+main{max-width:1120px; margin:0 auto; padding:20px 26px 60px;}
+.pane{display:none;}
+.pane.cur{display:block; animation:fadein .25s;}
+@keyframes fadein{from{opacity:0; transform:translateY(6px);}to{opacity:1;}}
+.card{
+  background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  padding:18px 20px; margin-bottom:16px; box-shadow:0 6px 22px rgba(0,0,0,.35);
+}
+h2{font-size:1.12rem; color:#86efac; margin-bottom:6px; display:flex; gap:10px; align-items:center;}
+h2 .tag{background:linear-gradient(120deg,var(--accd),#0d9488); color:#022c22; font-size:.7rem;
+  border-radius:7px; padding:2px 10px; font-weight:700;}
+.task{
+  background:rgba(34,197,94,.07); border-left:3px solid var(--acc); border-radius:0 8px 8px 0;
+  padding:8px 14px; margin:8px 0 14px; font-size:.9rem; color:#bbf7d0;
+}
+button.act{
+  font-family:inherit; font-size:.88rem; cursor:pointer; border:1px solid var(--accd);
+  border-radius:9px; padding:7px 16px; background:linear-gradient(120deg,#15803d,#16a34a); color:#f0fdf4;
+}
+button.act:hover{filter:brightness(1.15);}
+button.act:active{transform:scale(.97);}
+button.ghost{background:transparent; border:1px solid var(--line); color:var(--ink);
+  border-radius:9px; padding:7px 16px; font-size:.88rem; cursor:pointer; font-family:inherit;}
+button.ghost:hover{border-color:var(--acc); color:#86efac;}
+button.dangerB{background:#7f1d1d; border:1px solid #b91c1c; color:#fecaca;
+  border-radius:9px; padding:7px 16px; font-size:.88rem; cursor:pointer; font-family:inherit;}
+button:disabled{opacity:.4; cursor:not-allowed;}
+.fb{border-radius:9px; padding:9px 14px; margin-top:10px; font-size:.9rem; display:none;}
+.fb.show{display:block;}
+.fb.ok{background:rgba(34,197,94,.12); border:1px solid #166534; color:#bbf7d0;}
+.fb.bad{background:rgba(248,113,113,.1); border:1px solid #991b1b; color:#fecaca;}
+.fb.warn{background:rgba(251,191,36,.1); border:1px solid #92400e; color:#fde68a;}
+.fb.info{background:rgba(56,189,248,.1); border:1px solid #075985; color:#bae6fd;}
+.row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+.mut{color:var(--mut); font-size:.84rem;}
+.badge{display:inline-block; border-radius:999px; padding:1px 10px; font-size:.76rem; font-weight:700;}
+.bg1{background:#052e16; color:#86efac; border:1px solid #166534;}
+.bg2{background:#450a0a; color:#fca5a5; border:1px solid #991b1b;}
+.bg3{background:#082f49; color:#7dd3fc; border:1px solid #075985;}
+/* 拆解图 */
+.boardwrap{display:grid; grid-template-columns:1.4fr 1fr; gap:16px;}
+.boardwrap svg{width:100%; height:auto; background:#0b1120; border:1px solid var(--line); border-radius:12px;}
+.part{cursor:pointer;}
+.part:hover .phit, .part.sel .phit{stroke:#22c55e; stroke-width:2.5; filter:drop-shadow(0 0 6px #22c55e);}
+.part.found .phit{stroke:#38bdf8;}
+#partInfo{background:var(--panel2); border:1px solid var(--line); border-radius:12px; padding:14px; min-height:120px;}
+#partInfo h3{color:var(--acc); font-size:1rem; margin-bottom:4px;}
+#partInfo p{font-size:.88rem; color:#cbd5e1;}
+/* 表格 */
+table.spec{border-collapse:collapse; width:100%; font-size:.86rem; margin-top:10px;}
+table.spec th, table.spec td{border:1px solid var(--line); padding:7px 10px; text-align:left;}
+table.spec th{background:#0b1120; color:#86efac;}
+table.spec td{color:#cbd5e1;}
+/* 选择题按钮 */
+.qopt{display:block; width:100%; text-align:left; background:#0b1120; color:var(--ink);
+  border:1.5px solid var(--line); margin:6px 0; border-radius:9px; padding:9px 14px;
+  font-size:.9rem; cursor:pointer; font-family:inherit;}
+.qopt:hover{border-color:var(--acc);}
+.qopt.right{border-color:var(--acc); background:rgba(34,197,94,.15);}
+.qopt.wrong{border-color:var(--bad); background:rgba(248,113,113,.12);}
+.qopt:disabled{opacity:.7; cursor:default;}
+/* 编程实验 */
+.codegrid{display:grid; grid-template-columns:1.2fr 1fr; gap:16px;}
+.blockbin .blk{
+  display:inline-block; margin:5px 6px 5px 0; padding:8px 14px; border-radius:10px 10px 10px 4px;
+  background:linear-gradient(120deg,#1d4ed8,#2563eb); color:#dbeafe; cursor:pointer;
+  font-size:.86rem; border:1px solid #3b82f6; user-select:none;
+}
+.blockbin .blk:hover{filter:brightness(1.2);}
+#blockProg{min-height:120px; background:#0b1120; border:1px dashed #3b82f6; border-radius:10px; padding:10px; margin-top:8px;}
+#blockProg .blk{
+  display:flex; justify-content:space-between; align-items:center; margin:5px 0; padding:7px 12px;
+  border-radius:8px; background:#1e3a8a; color:#dbeafe; font-size:.86rem; border:1px solid #3b82f6;
+}
+#blockProg .blk b{cursor:pointer; color:#93c5fd; padding:0 6px;}
+.codebox{background:#0b1120; border:1px solid var(--line); border-radius:10px; padding:10px 0; font-size:.88rem; overflow-x:auto;}
+.codebox .ln{display:flex;}
+.codebox .no{width:38px; text-align:right; padding-right:10px; color:#475569; user-select:none; flex-shrink:0;}
+.codebox .ct{color:#e2e8f0; white-space:pre;}
+.codebox .kw{color:#c084fc;} .codebox .st{color:#fbbf24;} .codebox .fn{color:#38bdf8;}
+.codebox input{
+  background:#1e293b; border:1px solid #16a34a; color:#fde68a; border-radius:5px;
+  font-family:inherit; font-size:.88rem; padding:1px 6px; width:120px;
+}
+.codebox input.n{width:56px;}
+.oledbox{text-align:center;}
+canvas.oled{background:#000; border:6px solid #1e293b; border-radius:8px; image-rendering:pixelated;}
+/* 引脚配置 */
+.pingrid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+.pingrid svg{width:100%; height:auto; background:#0b1120; border:1px solid var(--line); border-radius:12px;}
+.cfgrow{display:flex; gap:8px; align-items:center; margin:8px 0; flex-wrap:wrap;}
+.cfgrow .dev{width:110px; font-size:.9rem; color:#86efac; font-weight:700;}
+select{
+  background:#0b1120; color:var(--ink); border:1px solid var(--line); border-radius:8px;
+  padding:6px 8px; font-size:.86rem; font-family:inherit;
+}
+.vbtn{
+  width:92px; height:92px; border-radius:50%; border:3px solid var(--line);
+  background:radial-gradient(circle at 35% 30%,#334155,#111c33); color:#e2e8f0;
+  font-size:.9rem; cursor:pointer; font-family:inherit; user-select:none; touch-action:none;
+}
+.vbtn:active, .vbtn.dn{border-color:var(--acc); background:radial-gradient(circle at 35% 30%,#166534,#052e16); color:#bbf7d0;}
+.leddot{width:40px; height:40px; border-radius:50%; background:#27272a; border:3px solid #3f3f46; display:inline-block; vertical-align:middle; transition:all .12s;}
+.leddot.on{background:#facc15; border-color:#fde047; box-shadow:0 0 22px #facc15, 0 0 44px rgba(250,204,21,.5);}
+canvas.scope{background:#020617; border:1px solid var(--line); border-radius:10px; width:100%;}
+.qprog{display:flex; gap:5px; margin:8px 0; flex-wrap:wrap;}
+.qprog i{font-style:normal; width:26px; height:26px; border-radius:7px; display:flex; align-items:center;
+  justify-content:center; font-size:.78rem; background:#111c33; color:var(--mut); border:1px solid var(--line);}
+.qprog i.cur{background:var(--accd); color:#022c22; font-weight:700;}
+.qprog i.ok{background:#052e16; color:#86efac; border-color:#166534;}
+.qprog i.no{background:#450a0a; color:#fca5a5; border-color:#991b1b;}
+#report{
+  width:100%; min-height:220px; background:#0b1120; color:#a7f3d0; border:1px solid var(--line);
+  border-radius:10px; padding:12px; font-family:ui-monospace,Consolas,monospace; font-size:.84rem;
+  white-space:pre-wrap; resize:vertical;
+}
+table.sum{border-collapse:collapse; width:100%; margin:10px 0; font-size:.88rem;}
+table.sum th, table.sum td{border:1px solid var(--line); padding:7px 10px; text-align:left; color:#cbd5e1;}
+table.sum th{background:#0b1120; color:#86efac;}
+footer{max-width:1120px; margin:0 auto; padding:0 26px 40px; color:#475569; font-size:.78rem;}
+@media (max-width:880px){
+  .boardwrap,.codegrid,.pingrid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="t1">
+    <span class="logo">⟨/⟩ 终端设备开发者工作台</span>
+    <span class="sub">第1单元 物联网入门 · 第2节 物联网的终端设备 · 智能农植园项目</span>
+  </div>
+  <div class="goals">
+    <span>① 认识智能终端 / 单片机与三种常见开源硬件</span>
+    <span>② 体验块语言与 MicroPython 两种编程方式</span>
+    <span>③ 会配置 I/O 引脚的输入 / 输出模式</span>
+  </div>
+  <div class="tabs" id="tabs">
+    <button data-p="p1" class="cur">🔍 虚拟拆解</button>
+    <button data-p="p2">⚖ 硬件对比</button>
+    <button data-p="p3">⌨ 编程实验</button>
+    <button data-p="p4">🔌 引脚配置</button>
+    <button data-p="p5">📈 信号与练习</button>
+    <button data-p="p6">📋 我的配置单</button>
+  </div>
+</header>
+
+<main>
+<!-- ============ 面板1 虚拟拆解 ============ -->
+<div class="pane cur" id="p1">
+  <div class="card">
+    <h2><span class="tag">原理可视化</span>智能终端虚拟拆解台（教学开发板）</h2>
+    <div class="task">任务①：把鼠标移到（或点击）开发板的各个部件上，查看右侧说明卡，认全 11 个部件。任务②：点「开始部件找一找」，按报出的部件名点击对应位置，共 10 轮，看看你能得几分！</div>
+    <div class="boardwrap">
+      <svg id="boardSvg" viewBox="0 0 520 400" aria-label="虚拟教学开发板">
+        <rect x="30" y="20" width="460" height="330" rx="18" fill="#134e4a" stroke="#0f766e" stroke-width="3"/>
+        <text x="260" y="44" font-size="13" fill="#5eead4" text-anchor="middle" font-weight="bold">虚拟教学开发板 vBoard-8（仿掌控板类终端 · 教学示意）</text>
+        <!-- Wi-Fi 天线 -->
+        <g class="part" data-k="wifi">
+          <path class="phit" d="M 60 60 q 0 -22 26 -22 q 26 0 26 22 M 72 60 q 0 -10 14 -10 q 14 0 14 10" fill="none" stroke="#fbbf24" stroke-width="3"/>
+          <circle cx="86" cy="64" r="4" fill="#fbbf24" class="phit2"/>
+          <text x="86" y="84" font-size="10" fill="#94a3b8" text-anchor="middle">Wi-Fi天线</text>
+        </g>
+        <!-- 麦克风 -->
+        <g class="part" data-k="mic">
+          <circle class="phit" cx="170" cy="62" r="13" fill="#1f2937" stroke="#64748b" stroke-width="2"/>
+          <circle cx="170" cy="62" r="4" fill="#0ea5e9"/>
+          <text x="170" y="92" font-size="10" fill="#94a3b8" text-anchor="middle">麦克风</text>
+        </g>
+        <!-- 光线传感器 -->
+        <g class="part" data-k="light">
+          <rect class="phit" x="330" y="50" width="26" height="24" rx="5" fill="#1f2937" stroke="#64748b" stroke-width="2"/>
+          <circle cx="343" cy="62" r="6" fill="#facc15" opacity=".85"/>
+          <text x="343" y="92" font-size="10" fill="#94a3b8" text-anchor="middle">光线传感器</text>
+        </g>
+        <!-- 主控芯片 -->
+        <g class="part" data-k="mcu">
+          <rect class="phit" x="416" y="46" width="52" height="52" rx="6" fill="#111827" stroke="#64748b" stroke-width="2"/>
+          <text x="442" y="68" font-size="9" fill="#a5b4fc" text-anchor="middle">ESP32</text>
+          <text x="442" y="82" font-size="8" fill="#64748b" text-anchor="middle">主控芯片</text>
+          <line x1="416" y1="54" x2="408" y2="54" stroke="#64748b"/><line x1="416" y1="66" x2="408" y2="66" stroke="#64748b"/>
+          <line x1="416" y1="78" x2="408" y2="78" stroke="#64748b"/><line x1="416" y1="90" x2="408" y2="90" stroke="#64748b"/>
+          <line x1="468" y1="54" x2="476" y2="54" stroke="#64748b"/><line x1="468" y1="66" x2="476" y2="66" stroke="#64748b"/>
+          <line x1="468" y1="78" x2="476" y2="78" stroke="#64748b"/><line x1="468" y1="90" x2="476" y2="90" stroke="#64748b"/>
+        </g>
+        <!-- OLED -->
+        <g class="part" data-k="oled">
+          <rect class="phit" x="150" y="110" width="220" height="120" rx="8" fill="#020617" stroke="#475569" stroke-width="3"/>
+          <text x="260" y="162" font-size="14" fill="#4ade80" text-anchor="middle" class="mono">OLED 128×64</text>
+          <text x="260" y="184" font-size="11" fill="#166534" text-anchor="middle">显示屏</text>
+        </g>
+        <!-- 按钮A / B -->
+        <g class="part" data-k="btnA">
+          <circle class="phit" cx="92" cy="170" r="24" fill="#1e293b" stroke="#64748b" stroke-width="3"/>
+          <text x="92" y="176" font-size="15" fill="#e2e8f0" text-anchor="middle" font-weight="bold">A</text>
+          <text x="92" y="208" font-size="10" fill="#94a3b8" text-anchor="middle">按钮A(P5)</text>
+        </g>
+        <g class="part" data-k="btnB">
+          <circle class="phit" cx="428" cy="170" r="24" fill="#1e293b" stroke="#64748b" stroke-width="3"/>
+          <text x="428" y="176" font-size="15" fill="#e2e8f0" text-anchor="middle" font-weight="bold">B</text>
+          <text x="428" y="208" font-size="10" fill="#94a3b8" text-anchor="middle">按钮B(P11)</text>
+        </g>
+        <!-- RGB 灯 -->
+        <g class="part" data-k="rgb">
+          <g class="phitwrap">
+            <rect class="phit" x="180" y="248" width="160" height="30" rx="15" fill="#111827" stroke="#64748b" stroke-width="2"/>
+            <circle cx="216" cy="263" r="9" fill="#ef4444"/><circle cx="260" cy="263" r="9" fill="#22c55e"/><circle cx="304" cy="263" r="9" fill="#3b82f6"/>
+          </g>
+          <text x="260" y="296" font-size="10" fill="#94a3b8" text-anchor="middle">RGB 彩灯 ×3</text>
+        </g>
+        <!-- 蜂鸣器 -->
+        <g class="part" data-k="buzzer">
+          <circle class="phit" cx="92" cy="268" r="20" fill="#111827" stroke="#64748b" stroke-width="2"/>
+          <circle cx="92" cy="268" r="5" fill="#334155"/>
+          <text x="92" y="302" font-size="10" fill="#94a3b8" text-anchor="middle">蜂鸣器(P6)</text>
+        </g>
+        <!-- USB -->
+        <g class="part" data-k="usb">
+          <rect class="phit" x="404" y="246" width="60" height="34" rx="5" fill="#374151" stroke="#9ca3af" stroke-width="2"/>
+          <rect x="414" y="256" width="40" height="14" rx="2" fill="#111827"/>
+          <text x="434" y="296" font-size="10" fill="#94a3b8" text-anchor="middle">USB接口</text>
+        </g>
+        <!-- 金手指 -->
+        <g class="part" data-k="pins">
+          <rect class="phit" x="60" y="318" width="400" height="26" rx="4" fill="#78350f" stroke="#b45309" stroke-width="2"/>
+          <g id="goldPins"></g>
+          <text x="260" y="364" font-size="10" fill="#94a3b8" text-anchor="middle">金手指 I/O 引脚（P0~P16）</text>
+        </g>
+        <text x="260" y="390" font-size="10" fill="#475569" text-anchor="middle">提示：本图为教学示意图，非任何真实产品的精确电路</text>
+      </svg>
+      <div>
+        <div id="partInfo"><h3>👈 点击开发板上的部件</h3><p>每个部件都是智能终端的一个“器官”。认识它们，才能在后面的实验中正确使用。</p></div>
+        <div class="card" style="margin-top:12px; padding:14px;">
+          <div class="row">
+            <button class="act" id="btnFindStart">🎯 开始部件找一找</button>
+            <span class="mut" id="findState">未开始</span>
+          </div>
+          <div class="fb" id="findFb"></div>
+          <div class="fb info show" id="seenInfo">已查看 0 / 11 个部件说明。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 面板2 硬件对比 ============ -->
+<div class="pane" id="p2">
+  <div class="card">
+    <h2><span class="tag">对比实验</span>三种开源硬件选型器（Arduino · 虚谷号 · 掌控板）</h2>
+    <div class="task">任务①：逐个场景为“智能农植园”挑选最合适的开源硬件，系统会判断并说明理由。任务②：点开规格对照表核对。任务③：在底部填写你最终的选型和理由，会记入配置单。</div>
+    <div id="hwQBody"></div>
+    <div class="fb" id="hwFb"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="ghost" id="btnHwReset">↺ 重做场景题</button>
+      <button class="ghost" id="btnSpecToggle">📑 显示 / 隐藏规格对照表</button>
+      <span class="mut" id="hwScore"></span>
+    </div>
+    <div id="specTable" style="display:none">
+      <table class="spec">
+        <tr><th>项目</th><th>Arduino</th><th>虚谷号</th><th>掌控板</th></tr>
+        <tr><td>出身</td><td>源自意大利一所艺术学院，创客空间中非常流行</td><td>中国原创，面向人工智能教学和 Python 编程学习</td><td>国内教育团队为中小学创客教育开发</td></tr>
+        <tr><td>系统 / 语言</td><td>建立在 C/C++ 基础上（Arduino IDE）</td><td>能够运行 Linux 系统，直接支持 Python</td><td>支持“块语言”与 MicroPython</td></tr>
+        <tr><td>板载资源</td><td>版本众多、扩展板与传感器生态最丰富</td><td>接口丰富、性能较强，可跑 AI 教学案例</td><td>自带 OLED 屏、按钮、RGB 灯、蜂鸣器、麦克风、光线传感器、Wi-Fi</td></tr>
+        <tr><td>体积特点</td><td>因版本而异</td><td>较大（类似卡片计算机）</td><td>尺寸较小，适合智能穿戴、电子饰品等 DIY 作品</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="card">
+    <h2><span class="tag">项目选型</span>我为智能农植园选择的硬件</h2>
+    <div class="row">
+      <select id="myHw">
+        <option value="">——请选择——</option>
+        <option>Arduino</option><option>虚谷号</option><option>掌控板</option>
+      </select>
+      <input id="myHwWhy" placeholder="用一句话写出你的选型理由…" style="flex:1;min-width:240px;background:#0b1120;color:#e2e8f0;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-family:inherit;font-size:.88rem">
+      <button class="act" id="btnHwSave">保存选型</button>
+    </div>
+    <div class="fb" id="hwSaveFb"></div>
+  </div>
+</div>
+
+<!-- ============ 面板3 编程实验 ============ -->
+<div class="pane" id="p3">
+  <div class="card">
+    <h2><span class="tag">代码任务</span>用两种方式点亮 OLED 屏</h2>
+    <div class="task">教材：给智能终端编程分为“块语言”和纯文本代码两大形式。任务①：用积木块按正确顺序拼出程序并运行。任务②：切换到 MicroPython 模式，把代码填空补完整再运行。右侧 128×64 虚拟 OLED 屏会实时显示结果；参数错误会给出具体报错。</div>
+    <div class="row" style="margin-bottom:10px">
+      <button class="act" id="modeBlock">🧩 块语言模式</button>
+      <button class="ghost" id="modeCode">⌨ MicroPython 模式</button>
+    </div>
+    <div class="codegrid">
+      <div>
+        <div id="blockPane">
+          <p class="mut">可用积木（点击加入程序，注意顺序；点程序里的 ✕ 可移除）：</p>
+          <div class="blockbin" id="blockBin"></div>
+          <p class="mut" style="margin-top:6px">我的积木程序：</p>
+          <div id="blockProg"></div>
+          <div class="row" style="margin-top:10px">
+            <button class="act" id="btnBlockRun">▶ 运行积木程序</button>
+            <button class="ghost" id="btnBlockClear">清空</button>
+          </div>
+        </div>
+        <div id="codePane" style="display:none">
+          <p class="mut">把 MicroPython 代码补充完整（黄色输入框）：</p>
+          <div class="codebox" id="mpCode">
+            <div class="ln"><span class="no">1</span><span class="ct"><span class="kw">from</span> mpython <span class="kw">import</span> *</span></div>
+            <div class="ln"><span class="no">2</span><span class="ct">oled.<span class="fn">fill</span>(0)          <span style="color:#475569"># 清空屏幕</span></span></div>
+            <div class="ln"><span class="no">3</span><span class="ct">oled.<span class="fn">DispChar</span>(<span class="st">"</span><input id="inTxt" value="" placeholder="要显示的文字"><span class="st">"</span>, <input id="inX" class="n" value="" placeholder="x">, <input id="inY" class="n" value="" placeholder="y">)</span></div>
+            <div class="ln"><span class="no">4</span><span class="ct">oled.<span class="fn">show</span>()         <span style="color:#475569"># 刷新显示</span></span></div>
+          </div>
+          <p class="mut" style="margin-top:6px">提示：屏幕宽 128 像素、高 64 像素，文字高约 16 像素。想让“你好，物联网”显示在第二行，可以试试 x=0，y=16。</p>
+          <div class="row" style="margin-top:10px">
+            <button class="act" id="btnCodeRun">▶ 运行代码</button>
+            <button class="ghost" id="btnCodeReset">重置填空</button>
+          </div>
+        </div>
+        <div class="fb" id="progFb"></div>
+      </div>
+      <div class="oledbox">
+        <p class="mut">虚拟 OLED 显示屏（128 × 64）</p>
+        <canvas id="oledCv" class="oled" width="384" height="192"></canvas>
+        <p class="mut" id="oledState">屏幕未初始化</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 面板4 引脚配置 ============ -->
+<div class="pane" id="p4">
+  <div class="card">
+    <h2><span class="tag">配置实验</span>I/O 引脚地图与输入 / 输出模式配置</h2>
+    <div class="task">教材：引脚接<b>传感器</b>要设为“输入”，接 <b>LED、电机等执行器</b>要设为“输出”；光线传感器这类连续变化的量要用“模拟输入”。任务：为三个外接设备选择引脚和模式，点「检查配置」；全部正确后点「▶ 运行联动模拟」，按住虚拟按钮看 LED 是否点亮。</div>
+    <div class="pingrid">
+      <div>
+        <svg id="pinSvg" viewBox="0 0 480 150">
+          <rect x="10" y="20" width="460" height="70" rx="10" fill="#134e4a" stroke="#0f766e" stroke-width="2"/>
+          <text x="240" y="44" font-size="12" fill="#5eead4" text-anchor="middle">vBoard-8 引脚条（教学示意）　标 A = 支持模拟输入</text>
+          <g id="pinStrip"></g>
+        </svg>
+        <div class="cfgrow"><span class="dev">🔘 按钮</span>
+          <select id="cfgBtnPin"></select>
+          <select id="cfgBtnMode"></select>
+        </div>
+        <div class="cfgrow"><span class="dev">💡 LED 灯</span>
+          <select id="cfgLedPin"></select>
+          <select id="cfgLedMode"></select>
+        </div>
+        <div class="cfgrow"><span class="dev">🌞 光线传感器</span>
+          <select id="cfgLdrPin"></select>
+          <select id="cfgLdrMode"></select>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="act" id="btnPinCheck">🔍 检查配置</button>
+          <button class="ghost" id="btnPinReset">↺ 重置配置</button>
+        </div>
+        <div class="fb" id="pinFb"></div>
+      </div>
+      <div>
+        <p class="mut">配置正确后生成的 pinpong 风格代码：</p>
+        <div class="codebox" id="pinCode"><div class="ln"><span class="no">·</span><span class="ct" style="color:#475569"># 等待正确配置……</span></div></div>
+        <div style="text-align:center; margin-top:16px">
+          <button class="vbtn" id="simBtn" disabled>按住我<br>(按钮)</button>
+          <span style="display:inline-block; width:60px; border-top:2px dashed #475569; vertical-align:middle; margin:0 8px"></span>
+          <span class="leddot" id="simLed"></span>
+          <p class="mut" id="simMsg" style="margin-top:10px">先完成正确配置，再点下方按钮开始联动模拟。</p>
+          <button class="act" id="btnRunSim" disabled style="margin-top:6px">▶ 运行联动模拟</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ 面板5 信号与练习 ============ -->
+<div class="pane" id="p5">
+  <div class="card">
+    <h2><span class="tag">数字输入实验</span>按钮信号示波器</h2>
+    <div class="task">教材实验：按钮是典型的数字输入设备——默认（弹起）读到 <b>1</b>，按下读到 <b>0</b>。任务：按住 / 松开下方虚拟按钮，观察示波器上 1/0 波形的变化，并把观察结果记入记录表。</div>
+    <div class="row" style="align-items:flex-start">
+      <div style="text-align:center">
+        <button class="vbtn" id="scopeBtn">按住我</button>
+        <p style="margin-top:8px">当前读数：<span class="badge bg1 mono" id="scopeVal" style="font-size:1.05rem">1</span></p>
+      </div>
+      <div style="flex:1; min-width:280px">
+        <canvas id="scopeCv" class="scope" width="640" height="150"></canvas>
+        <p class="mut">read_digital() 采样波形：高电平=1（弹起），低电平=0（按下）</p>
+      </div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <button class="act" id="btnScopeLog">📌 记录当前读数</button>
+      <span class="mut" id="scopeLogTxt">记录表：按下=？ 放开=？（两种状态各记一次）</span>
+    </div>
+    <div class="fb" id="scopeFb"></div>
+  </div>
+  <div class="card">
+    <h2><span class="tag">即时反馈练习</span>终端设备辨析 8 题</h2>
+    <div class="task">逐题作答，答后立即讲解；不会先点「提示①」，再点「提示②」。答错可换选项重试（该题按 0.5 分计）。</div>
+    <div class="qprog" id="q2Prog"></div>
+    <div id="q2Body"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="ghost" id="btnQ2Hint" style="border-color:#92400e;color:#fde68a">💡 提示①</button>
+      <button class="ghost" id="btnQ2Next" disabled>下一题 →</button>
+      <button class="ghost" id="btnQ2Restart">↺ 全部重做</button>
+      <span class="mut" id="q2Score"></span>
+    </div>
+    <div class="fb" id="q2HintBox"></div>
+    <div class="fb" id="q2Fb"></div>
+    <div id="q2Review"></div>
+  </div>
+</div>
+
+<!-- ============ 面板6 配置单 ============ -->
+<div class="pane" id="p6">
+  <div class="card">
+    <h2><span class="tag">成果输出</span>我的终端配置单 · 实验报告</h2>
+    <div class="task">任务：完成前面各面板后，点「生成实验报告」自动汇总：部件认识与找一找得分、硬件选型、OLED 显示内容、引脚分配表、数字输入实验记录与练习得分；可下载保存。</div>
+    <table class="sum" id="sum2"></table>
+    <div class="row" style="margin:8px 0">
+      <button class="act" id="btnGen2">📋 生成实验报告</button>
+      <button class="ghost" id="btnCopy2">复制文本</button>
+      <button class="ghost" id="btnTxt2">下载 .txt</button>
+      <button class="ghost" id="btnJson2">下载 .json</button>
+      <button class="dangerB" id="btnClear2">🗑 清除本机数据</button>
+    </div>
+    <textarea id="report" placeholder="点击「生成实验报告」……" readonly></textarea>
+    <div class="fb" id="exp2Fb"></div>
+  </div>
+</div>
+</main>
+<footer>本页为单机交互学习工具，配合清华大学出版社《信息科技》八年级上册第1单元第2节使用。板卡与引脚均为虚构教学示例，不连接真实设备。</footer>
+
+<script>
+(function(){
+"use strict";
+var PRE="u1l2_";
+function $(s){ return document.querySelector(s); }
+function $all(s){ return Array.prototype.slice.call(document.querySelectorAll(s)); }
+function save(k,v){ try{ localStorage.setItem(PRE+k, JSON.stringify(v)); }catch(e){} }
+function load(k,d){ try{ var v=localStorage.getItem(PRE+k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+function fb(el,cls,html){ el.className="fb show "+cls; el.innerHTML=html; }
+function hideFb(el){ el.className="fb"; el.innerHTML=""; }
+function nowStr(){ var d=new Date(); function p(n){return (n<10?"0":"")+n;} return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes()); }
+
+/* ---------- Tab 切换 ---------- */
+$all("#tabs button").forEach(function(b){
+  b.addEventListener("click",function(){
+    $all("#tabs button").forEach(function(x){ x.classList.remove("cur"); });
+    $all(".pane").forEach(function(x){ x.classList.remove("cur"); });
+    b.classList.add("cur");
+    document.getElementById(b.dataset.p).classList.add("cur");
+  });
+});
+
+/* ========== 面板1：虚拟拆解 ========== */
+var PARTS = {
+ mcu:{n:"ESP32 主控芯片（单片机）", d:"整块板的“大脑”。单片机（MCU）是集成在一块集成电路芯片上的微型计算机系统，体积小、成本低，可直接嵌入其他设备。ESP32 芯片自带 Wi-Fi 与蓝牙功能，被广泛用于各类物联网设备。"},
+ oled:{n:"OLED 显示屏", d:"分辨率 128×64 像素的小屏幕，是终端的“输出窗口”。可以用块语言、MicroPython 或 Python（pinpong 库）在上面显示文字，比如“智能农植园系统”。"},
+ btnA:{n:"按钮 A（对应引脚 P5）", d:"典型的数字输入设备。教材示例：按钮默认（弹起）读到 1（高电平），按下读到 0（低电平）。程序里用 Pin(Pin.P5, Pin.IN) 把它设为数字输入模式。"},
+ btnB:{n:"按钮 B（对应引脚 P11）", d:"和按钮 A 一样是数字输入设备，对应引脚 P11。教材例程：当按钮 A 和按钮 B 状态不一致时，蜂鸣器发出警报声。"},
+ rgb:{n:"RGB 彩灯 ×3", d:"三颗可编程彩色灯珠，属于输出（执行）设备。控制它们要用“输出”模式，可显示不同颜色，用来做状态指示、氛围灯等。"},
+ buzzer:{n:"蜂鸣器（对应引脚 P6）", d:"发声装置，属于执行器。教材例程用 Pin(Pin.P6, Pin.PWM) 把它设为模拟输出模式，write_analog(1000) 发声、write_analog(0) 停止。"},
+ mic:{n:"麦克风（声音传感器）", d:"采集环境声音强弱，属于输入设备。第1节体验活动里，我们正是通过网页远程查看开源硬件麦克风传回的数值。"},
+ light:{n:"光线传感器", d:"感知环境光照强弱。光照是连续变化的模拟量，所以要用“模拟输入”模式读取，返回一个范围内的数值（如 10 位精度 0~1023，12 位精度 0~4095）。"},
+ pins:{n:"金手指 I/O 引脚（P0~P16）", d:"引脚（pin）是从芯片内部电路引出的接线，是智能终端与外接设备沟通的桥梁。接传感器设“输入”，接 LED、电机等执行器设“输出”。"},
+ usb:{n:"USB 接口", d:"负责供电和程序上传。通过串口上传程序是最通用的方式，使用前要按说明书安装对应的串口驱动（如 CH340 或 CP210x）。"},
+ wifi:{n:"Wi-Fi 天线", d:"让终端具备无线联网能力，把感知到的数据发送到物联网平台。随着蓝牙、Wi-Fi 技术普及，各种联网智能终端不断涌现。"}
+};
+var seenParts=load("parts",[]);
+var find={on:false, order:[], idx:0, score:0, best:load("findBest",-1)};
+function seenUpd(){
+  $("#seenInfo").innerHTML="已查看 <b>"+seenParts.length+"</b> / "+Object.keys(PARTS).length+" 个部件说明。"+(seenParts.length>=Object.keys(PARTS).length?" ✔ 全部认识啦！":"");
+}
+// 金手指小引脚
+(function(){
+  var g=document.getElementById("goldPins");
+  for(var i=0;i<17;i++){
+    var r=document.createElementNS("http://www.w3.org/2000/svg","rect");
+    r.setAttribute("x",68+i*23); r.setAttribute("y",322); r.setAttribute("width",12); r.setAttribute("height",18);
+    r.setAttribute("fill","#fbbf24"); r.setAttribute("rx",2);
+    g.appendChild(r);
+    var t=document.createElementNS("http://www.w3.org/2000/svg","text");
+    t.setAttribute("x",74+i*23); t.setAttribute("y",356); t.setAttribute("font-size",6.5);
+    t.setAttribute("fill","#a16207"); t.setAttribute("text-anchor","middle"); t.textContent="P"+i;
+    g.appendChild(t);
+  }
+})();
+$all("#boardSvg .part").forEach(function(p){
+  p.addEventListener("click",function(){
+    var k=p.dataset.k;
+    if(find.on){ findClick(k,p); return; }
+    $all("#boardSvg .part").forEach(function(x){ x.classList.remove("sel"); });
+    p.classList.add("sel");
+    var info=PARTS[k];
+    $("#partInfo").innerHTML="<h3>"+info.n+"</h3><p>"+info.d+"</p>";
+    if(seenParts.indexOf(k)<0){ seenParts.push(k); save("parts",seenParts); }
+    seenUpd(); updateSum();
+  });
+});
+$("#btnFindStart").addEventListener("click",function(){
+  var keys=Object.keys(PARTS);
+  find.order=keys.slice();
+  for(var i=find.order.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=find.order[i]; find.order[i]=find.order[j]; find.order[j]=t; }
+  find.order=find.order.slice(0,10);
+  find.idx=0; find.score=0; find.on=true;
+  $all("#boardSvg .part").forEach(function(x){ x.classList.remove("sel","found"); });
+  askFind();
+});
+function askFind(){
+  if(find.idx>=find.order.length){
+    find.on=false;
+    if(find.score>find.best){ find.best=find.score; save("findBest",find.best); }
+    save("findLast",find.score);
+    fb($("#findFb"), find.score>=8?"ok":"warn", "🏁 找一找结束！得分 <b>"+find.score+" / "+find.order.length+"</b>"+(find.score>=8?"，非常棒！":"，再点击各部件复习说明后重试一次吧。")+"（历史最佳 "+find.best+" 分）");
+    $("#findState").textContent="已结束，可再来一轮";
+    updateSum(); return;
+  }
+  var k=find.order[find.idx];
+  $("#findState").innerHTML="第 "+(find.idx+1)+" / "+find.order.length+" 轮";
+  fb($("#findFb"),"info","🎯 请在开发板上点击：<b>"+PARTS[k].n+"</b>");
+}
+function findClick(k, el){
+  var want=find.order[find.idx];
+  if(k===want){
+    find.score++;
+    el.classList.add("found");
+    fb($("#findFb"),"ok","✔ 正确！它就是 "+PARTS[want].n+"。");
+  }else{
+    fb($("#findFb"),"bad","✘ 你点的是「"+PARTS[k].n+"」，要找的是「"+PARTS[want].n+"」。想想它的样子和位置——本轮不得分。");
+  }
+  find.idx++;
+  setTimeout(askFind, 900);
+}
+seenUpd();
+
+/* ========== 面板2：硬件对比 ========== */
+var HWQ=[
+ {q:"场景1：作品要“自带屏幕直接显示文字”，还要板载按钮、光线传感器，开箱即用。选哪款？", a:"掌控板",
+  why:"掌控板自带 OLED 屏、按钮、RGB 灯、光线传感器等丰富板载资源，且尺寸较小，最适合开箱即做显示类作品。",
+  no:{ "Arduino":"Arduino 本体没有屏幕，需要另接显示模块和传感器。", "虚谷号":"虚谷号性能强，但做“自带小屏 + 板载传感器”的轻量作品不如掌控板直接。"}},
+ {q:"场景2：想直接运行完整 Python 程序甚至 Linux 系统，用于人工智能教学。选哪款？", a:"虚谷号",
+  why:"教材：虚谷号是面向人工智能教学和 Python 编程学习的中国原创开源硬件，能够运行 Linux 系统。",
+  no:{ "Arduino":"Arduino 基于 C/C++（Arduino IDE），不能直接运行完整 Python / Linux。", "掌控板":"掌控板运行的是精简的 MicroPython，不是完整 Python / Linux 环境。"}},
+ {q:"场景3：需要“扩展板和外接传感器生态最丰富、版本众多”，在创客空间通用性最好。选哪款？", a:"Arduino",
+  why:"教材：Arduino 源自意大利一所艺术学院，在创客空间中非常流行，经过多年发展有很多版本，适用于不同开发需求，配件生态最庞大。",
+  no:{ "虚谷号":"虚谷号是中国原创教学硬件，生态侧重 AI 教学，不以扩展板数量见长。", "掌控板":"掌控板板载资源丰富，但外部扩展生态不如 Arduino 庞大。"}},
+ {q:"场景4：想做“智能手环”这类小巧的穿戴 DIY 作品。选哪款？", a:"掌控板",
+  why:"教材：掌控板尺寸较小，可以用于智能穿戴、电子饰品等各种 DIY 作品的制作。",
+  no:{ "Arduino":"多数 Arduino 板做穿戴偏大，还要额外接屏幕、传感器。", "虚谷号":"虚谷号类似小电脑，体积和功耗都不适合穿戴。"}},
+ {q:"场景5：老师要求同一作品既能用“块语言”入门、又能平滑过渡到 MicroPython 文本代码。选哪款最顺手？", a:"掌控板",
+  why:"掌控板配套的 mPython 软件同时支持“块语言”和 MicroPython 两种方式，切换学习最顺畅（教材表1.2.2）。",
+  no:{ "Arduino":"Arduino 常用 Arduino IDE（C/C++ 文本代码），块语言要借助 Ardublock 等额外软件，且不用 MicroPython。", "虚谷号":"虚谷号主打完整 Python 编程，块语言不是它的主要形态。"}}
+];
+var hwState=load("hw",{idx:0, right:0, done:false});
+function renderHw(){
+  var box=$("#hwQBody");
+  if(hwState.done){
+    box.innerHTML="<p><b>场景题完成！</b>答对 <span class='badge bg1'>"+hwState.right+" / "+HWQ.length+"</span>。可点「重做场景题」再来一遍。</p>";
+    hideFb($("#hwFb"));
+  }else{
+    var q=HWQ[hwState.idx];
+    var html="<p><b>第 "+(hwState.idx+1)+" / "+HWQ.length+" 题</b>　"+q.q+"</p>";
+    ["Arduino","虚谷号","掌控板"].forEach(function(o){ html+="<button class='qopt hwopt' data-o='"+o+"'>"+o+"</button>"; });
+    box.innerHTML=html;
+    $all(".hwopt").forEach(function(b){
+      b.addEventListener("click",function(){
+        var pick=this.dataset.o;
+        if(pick===q.a){
+          hwState.right++;
+          $all(".hwopt").forEach(function(x){ x.disabled=true; });
+          this.classList.add("right");
+          fb($("#hwFb"),"ok","✔ 正确！"+q.why);
+          setTimeout(function(){
+            hwState.idx++;
+            if(hwState.idx>=HWQ.length) hwState.done=true;
+            save("hw",hwState); renderHw(); updateSum();
+          },1600);
+        }else{
+          this.classList.add("wrong"); this.disabled=true;
+          fb($("#hwFb"),"bad","✘ "+pick+" 不是最佳选择："+q.no[pick]+" 再想想另一款。");
+        }
+        save("hw",hwState);
+      });
+    });
+  }
+  $("#hwScore").textContent="已答对 "+hwState.right+" / "+HWQ.length;
+}
+$("#btnHwReset").addEventListener("click",function(){ hwState={idx:0,right:0,done:false}; save("hw",hwState); hideFb($("#hwFb")); renderHw(); });
+$("#btnSpecToggle").addEventListener("click",function(){
+  var t=$("#specTable"); t.style.display = t.style.display==="none"?"block":"none";
+});
+$("#btnHwSave").addEventListener("click",function(){
+  var hw=$("#myHw").value, why=$("#myHwWhy").value.trim();
+  if(!hw){ fb($("#hwSaveFb"),"warn","请先在下拉框中选择一款硬件。"); return; }
+  if(!why){ fb($("#hwSaveFb"),"warn","请补充一句选型理由——工程师做选择都要讲依据哦。"); return; }
+  save("myHw",{hw:hw, why:why});
+  fb($("#hwSaveFb"),"ok","✔ 已保存选型：<b>"+hw+"</b>（"+why+"），已记入「我的配置单」。");
+  updateSum();
+});
+(function(){ var m=load("myHw",null); if(m){ $("#myHw").value=m.hw; $("#myHwWhy").value=m.why; } })();
+renderHw();
+
+/* ========== 面板3：编程实验 ========== */
+var oledCv=$("#oledCv"), octx=oledCv.getContext("2d");
+var oledText=load("oledText",null);
+function oledDraw(lines){
+  octx.fillStyle="#000"; octx.fillRect(0,0,oledCv.width,oledCv.height);
+  // 像素网格质感
+  octx.strokeStyle="rgba(34,197,94,.05)";
+  for(var x=0;x<128;x+=8){ octx.beginPath(); octx.moveTo(x*3,0); octx.lineTo(x*3,192); octx.stroke(); }
+  if(!lines) return;
+  octx.fillStyle="#4ade80"; octx.textBaseline="top";
+  octx.font='bold 42px ui-monospace, Consolas, monospace';
+  lines.forEach(function(L){
+    octx.font='bold '+ (L.px||42) +'px ui-monospace, Consolas, monospace';
+    octx.fillText(L.t, L.x*3, L.y*3);
+  });
+}
+oledDraw(null);
+// 块语言
+var BLOCKS=[
+ {id:"init", t:"⚡ 初始化开发板", need:true, ord:0},
+ {id:"fill", t:"🧹 清空屏幕 oled.fill(0)", need:true, ord:1},
+ {id:"disp", t:"✏ 显示文字“你好，物联网”", need:true, ord:2},
+ {id:"show", t:"🔄 刷新显示 oled.show()", need:true, ord:3},
+ {id:"buzz", t:"🔊 蜂鸣器响一声", need:false},
+ {id:"btn", t:"🔘 读取按钮A", need:false}
+];
+var prog=[];
+function renderBin(){
+  var bin=$("#blockBin"); bin.innerHTML="";
+  BLOCKS.forEach(function(b){
+    var el=document.createElement("span"); el.className="blk"; el.textContent=b.t;
+    el.addEventListener("click",function(){ prog.push(b.id); renderProg(); hideFb($("#progFb")); });
+    bin.appendChild(el);
+  });
+}
+function renderProg(){
+  var box=$("#blockProg"); box.innerHTML="";
+  if(prog.length===0){ box.innerHTML="<span class='mut'>（空）点上方积木加入程序</span>"; return; }
+  prog.forEach(function(id,i){
+    var b=BLOCKS.filter(function(x){return x.id===id;})[0];
+    var el=document.createElement("div"); el.className="blk";
+    el.innerHTML="<span>"+(i+1)+". "+b.t+"</span><b title='移除'>✕</b>";
+    el.querySelector("b").addEventListener("click",function(){ prog.splice(i,1); renderProg(); });
+    box.appendChild(el);
+  });
+}
+$("#btnBlockRun").addEventListener("click",function(){
+  var needed=BLOCKS.filter(function(b){return b.need;}).map(function(b){return b.id;});
+  var seq=prog.filter(function(id){ return needed.indexOf(id)>=0; });
+  var missing=needed.filter(function(id){ return prog.indexOf(id)<0; });
+  if(missing.length){
+    var names=missing.map(function(id){ return BLOCKS.filter(function(x){return x.id===id;})[0].t; });
+    fb($("#progFb"),"bad","✘ 程序不完整：还缺少积木「"+names.join("」「")+"」。想想点亮屏幕需要哪 4 步。");
+    oledDraw(null); $("#oledState").textContent="程序未运行成功"; return;
+  }
+  var wrong=-1;
+  for(var i=0;i<seq.length-1;i++){
+    var a=BLOCKS.filter(function(x){return x.id===seq[i];})[0];
+    var b=BLOCKS.filter(function(x){return x.id===seq[i+1];})[0];
+    if(a.ord>b.ord){ wrong=i; break; }
+  }
+  if(wrong>=0){
+    var a2=BLOCKS.filter(function(x){return x.id===seq[wrong];})[0];
+    var b2=BLOCKS.filter(function(x){return x.id===seq[wrong+1];})[0];
+    fb($("#progFb"),"bad","✘ 顺序有误：「"+b2.t+"」应该排在「"+a2.t+"」之前。比如必须先初始化、清屏，再写文字，最后刷新才会显示。");
+    oledDraw(null); $("#oledState").textContent="程序未运行成功"; return;
+  }
+  oledDraw([{t:"你好，物联网", x:0, y:16, px:40}]);
+  $("#oledState").textContent="✔ 运行成功（块语言）";
+  var extra = prog.length>seq.length ? "（其余积木本例中未用到，但不影响显示）" : "";
+  fb($("#progFb"),"ok","🎉 积木程序运行成功！屏幕显示出「你好，物联网」。"+extra+" 块语言把复杂代码封装成积木，最终“编译”后同样变成终端能执行的代码。现在切换到 MicroPython 模式，看看同样的功能用文本代码怎么写。");
+  save("blockDone",true); updateSum();
+});
+$("#btnBlockClear").addEventListener("click",function(){ prog=[]; renderProg(); hideFb($("#progFb")); });
+renderBin(); renderProg();
+// MicroPython 填空
+function modeSwap(toCode){
+  $("#blockPane").style.display=toCode?"none":"block";
+  $("#codePane").style.display=toCode?"block":"none";
+  $("#modeBlock").className=toCode?"ghost":"act";
+  $("#modeCode").className=toCode?"act":"ghost";
+  hideFb($("#progFb"));
+}
+$("#modeBlock").addEventListener("click",function(){ modeSwap(false); });
+$("#modeCode").addEventListener("click",function(){ modeSwap(true); });
+$("#btnCodeRun").addEventListener("click",function(){
+  var t=$("#inTxt").value, xs=$("#inX").value.trim(), ys=$("#inY").value.trim();
+  var errs=[];
+  if(!t.trim()) errs.push("第 3 行：DispChar 的第 1 个参数是要显示的文字，不能为空。试试输入「你好，物联网」。");
+  if(t.length>12) errs.push("第 3 行：文字太长（"+t.length+" 个字符）。128 像素宽的屏幕一行大约只放得下 8 个汉字，请精简到 12 字符以内。");
+  if(xs==="" || isNaN(Number(xs)) || Number(xs)%1!==0) errs.push("第 3 行：x 坐标要填一个整数（如 0）。");
+  else if(Number(xs)<0 || Number(xs)>127) errs.push("第 3 行：x="+xs+" 超出范围。屏幕宽 128 像素，x 应在 0~127 之间。");
+  if(ys==="" || isNaN(Number(ys)) || Number(ys)%1!==0) errs.push("第 3 行：y 坐标要填一个整数（如 16）。");
+  else if(Number(ys)<0 || Number(ys)>63) errs.push("第 3 行：y="+ys+" 超出范围。屏幕高 64 像素，y 应在 0~63 之间。");
+  else if(Number(ys)>48) errs.push("第 3 行：y="+ys+" 时文字（高约 16 像素）会超出屏幕底边，建议 y 不超过 48。");
+  if(errs.length){
+    fb($("#progFb"),"bad","⚠ 模拟运行报错：<br>· "+errs.join("<br>· "));
+    oledDraw(null); $("#oledState").textContent="Traceback：参数错误"; return;
+  }
+  var x=Number(xs), y=Number(ys);
+  oledDraw([{t:t, x:x, y:y, px:40}]);
+  $("#oledState").textContent="✔ 运行成功（MicroPython）";
+  fb($("#progFb"),"ok","🎉 代码运行成功！oled.DispChar(\""+t+"\", "+x+", "+y+") 把文字画到了 ("+x+","+y+") 的位置，oled.show() 负责把缓冲区内容真正刷新到屏幕。改改 x、y 再运行，观察文字位置变化。");
+  save("oledText",{t:t,x:x,y:y}); updateSum();
+});
+$("#btnCodeReset").addEventListener("click",function(){
+  $("#inTxt").value=""; $("#inX").value=""; $("#inY").value="";
+  hideFb($("#progFb")); oledDraw(null); $("#oledState").textContent="屏幕未初始化";
+});
+if(oledText){ $("#inTxt").value=oledText.t; $("#inX").value=oledText.x; $("#inY").value=oledText.y; }
+
+/* ========== 面板4：引脚配置 ========== */
+var PINS=[
+ {p:"P0", analog:true},{p:"P1", analog:true},{p:"P2", analog:true},
+ {p:"P5", analog:false},{p:"P8", analog:false},{p:"P13", analog:false},{p:"P16", analog:false}
+];
+var MODES=[
+ {v:"IN", t:"Pin.IN 数字输入"},{v:"OUT", t:"Pin.OUT 数字输出"},
+ {v:"ANALOG", t:"Pin.ANALOG 模拟输入"},{v:"PWM", t:"Pin.PWM 模拟输出"}
+];
+(function(){
+  var strip=$("#pinStrip");
+  PINS.forEach(function(pin,i){
+    var x=40+i*62;
+    var r=document.createElementNS("http://www.w3.org/2000/svg","rect");
+    r.setAttribute("x",x); r.setAttribute("y",90); r.setAttribute("width",26); r.setAttribute("height",34);
+    r.setAttribute("rx",4); r.setAttribute("fill","#fbbf24"); r.setAttribute("id","pin_"+pin.p);
+    strip.appendChild(r);
+    var t=document.createElementNS("http://www.w3.org/2000/svg","text");
+    t.setAttribute("x",x+13); t.setAttribute("y",112); t.setAttribute("font-size",11);
+    t.setAttribute("text-anchor","middle"); t.setAttribute("fill","#78350f"); t.setAttribute("font-weight","bold");
+    t.textContent=pin.p; strip.appendChild(t);
+    var t2=document.createElementNS("http://www.w3.org/2000/svg","text");
+    t2.setAttribute("x",x+13); t2.setAttribute("y",140); t2.setAttribute("font-size",10);
+    t2.setAttribute("text-anchor","middle"); t2.setAttribute("fill", pin.analog?"#38bdf8":"#475569");
+    t2.textContent= pin.analog?"A":"D"; strip.appendChild(t2);
+  });
+  var pinSel=function(sel){
+    var s=$(sel); s.innerHTML='<option value="">引脚?</option>';
+    PINS.forEach(function(p){ var o=document.createElement("option"); o.value=p.p; o.textContent=p.p+(p.analog?" (A)":""); s.appendChild(o); });
+  };
+  var modeSel=function(sel){
+    var s=$(sel); s.innerHTML='<option value="">模式?</option>';
+    MODES.forEach(function(m){ var o=document.createElement("option"); o.value=m.v; o.textContent=m.t; s.appendChild(o); });
+  };
+  ["#cfgBtnPin","#cfgLedPin","#cfgLdrPin"].forEach(pinSel);
+  ["#cfgBtnMode","#cfgLedMode","#cfgLdrMode"].forEach(modeSel);
+})();
+var pinOK=false, simOn=false;
+function pinColor(){
+  PINS.forEach(function(p){ document.getElementById("pin_"+p.p).setAttribute("fill","#fbbf24"); });
+  var map={};
+  map[$("#cfgBtnPin").value]="#22c55e"; map[$("#cfgLedPin").value]="#facc15"; map[$("#cfgLdrPin").value]="#38bdf8";
+  Object.keys(map).forEach(function(p){ if(p && document.getElementById("pin_"+p)) document.getElementById("pin_"+p).setAttribute("fill",map[p]); });
+}
+$all("#p4 select").forEach(function(s){ s.addEventListener("change",function(){ pinColor(); pinOK=false; $("#btnRunSim").disabled=true; $("#simBtn").disabled=true; hideFb($("#pinFb")); }); });
+$("#btnPinCheck").addEventListener("click",function(){
+  var bp=$("#cfgBtnPin").value, bm=$("#cfgBtnMode").value;
+  var lp=$("#cfgLedPin").value, lm=$("#cfgLedMode").value;
+  var gp=$("#cfgLdrPin").value, gm=$("#cfgLdrMode").value;
+  var errs=[];
+  if(!bp||!bm||!lp||!lm||!gp||!gm) errs.push("还有设备没选完引脚或模式，请把 3 行配置都填满。");
+  else{
+    if(bp===lp || bp===gp || lp===gp) errs.push("引脚冲突：一个引脚同一时间只能接一个设备，请让按钮、LED、光线传感器使用不同引脚。");
+    if(bm!=="IN") errs.push("按钮配置错误：按钮的按下 / 弹起是高低电平信号，属于<b>数字输入</b>，应选 Pin.IN。你选的 "+bm+" 会导致读不到按键状态。");
+    if(lm!=="OUT") errs.push("LED 配置错误：LED 是执行器，需要终端<b>输出</b>电平信号驱动它亮灭，应选 Pin.OUT。"+(lm==="IN"?"配成输入模式，终端只会“听”不会“说”，LED 永远不亮。":"本实验只做亮 / 灭开关控制，用数字输出即可。"));
+    if(gm!=="ANALOG") errs.push("光线传感器配置错误：光照强弱是<b>连续变化的模拟量</b>，应选 Pin.ANALOG（模拟输入），才能读到 0~4095 这样的数值。"+(gm==="IN"?"数字输入只能读 0 / 1，丢失了光照强弱信息。":""));
+    var gPin=PINS.filter(function(p){return p.p===gp;})[0];
+    if(gPin && !gPin.analog) errs.push("光线传感器接错引脚："+gp+" 不支持模拟输入（图中标 A 的引脚才支持，如 P0/P1/P2）。不同引脚具备不同功能，要参照引脚说明。");
+  }
+  if(errs.length){
+    fb($("#pinFb"),"bad","🔧 诊断报告：<br>· "+errs.join("<br>· "));
+    pinOK=false; $("#btnRunSim").disabled=true; $("#simBtn").disabled=true;
+  }else{
+    pinOK=true;
+    fb($("#pinFb"),"ok","✔ 配置全部正确！按钮→数字输入，LED→数字输出，光线传感器→模拟输入。已生成右侧代码，点「▶ 运行联动模拟」试试。");
+    var code=[
+      ['button = Pin(Pin.'+bp+', Pin.IN)','# 按钮：数字输入'],
+      ['led = Pin(Pin.'+lp+', Pin.OUT)','# LED：数字输出'],
+      ['light = Pin(Pin.'+gp+', Pin.ANALOG)','# 光线传感器：模拟输入'],
+      ['while True:',''],
+      ['    if button.read_digital() == 0:','# 按下为 0'],
+      ['        led.write_digital(1)','# 点亮 LED'],
+      ['    else:',''],
+      ['        led.write_digital(0)','# 熄灭 LED']
+    ];
+    var html="";
+    code.forEach(function(L,i){ html+='<div class="ln"><span class="no">'+(i+1)+'</span><span class="ct">'+L[0]+(L[1]?'  <span style="color:#475569">'+L[1]+'</span>':'')+'</span></div>'; });
+    $("#pinCode").innerHTML=html;
+    $("#btnRunSim").disabled=false;
+    save("pinCfg",{btn:{pin:bp,mode:bm}, led:{pin:lp,mode:lm}, ldr:{pin:gp,mode:gm}});
+    updateSum();
+  }
+});
+$("#btnPinReset").addEventListener("click",function(){
+  $all("#p4 select").forEach(function(s){ s.value=""; });
+  pinColor(); hideFb($("#pinFb")); pinOK=false; simOn=false;
+  $("#btnRunSim").disabled=true; $("#simBtn").disabled=true;
+  $("#simLed").classList.remove("on");
+  $("#pinCode").innerHTML='<div class="ln"><span class="no">·</span><span class="ct" style="color:#475569"># 等待正确配置……</span></div>';
+  $("#simMsg").textContent="先完成正确配置，再点下方按钮开始联动模拟。";
+});
+$("#btnRunSim").addEventListener("click",function(){
+  if(!pinOK) return;
+  simOn=true; $("#simBtn").disabled=false;
+  $("#simMsg").textContent="模拟运行中：按住左边的虚拟按钮（read_digital()=0），LED 应当点亮。";
+});
+function simPress(dn){
+  if(!simOn) return;
+  $("#simBtn").classList.toggle("dn",dn);
+  $("#simLed").classList.toggle("on",dn);
+  $("#simMsg").textContent = dn ? "按钮按下 → read_digital() 返回 0 → 程序执行 led.write_digital(1) → LED 亮！"
+                                : "按钮弹起 → read_digital() 返回 1 → 程序执行 led.write_digital(0) → LED 灭。";
+  if(dn){ save("simDone",true); updateSum(); }
+}
+$("#simBtn").addEventListener("pointerdown",function(e){ e.preventDefault(); simPress(true); });
+$("#simBtn").addEventListener("pointerup",function(){ simPress(false); });
+$("#simBtn").addEventListener("pointerleave",function(){ simPress(false); });
+(function(){ var c=load("pinCfg",null); if(c){
+  $("#cfgBtnPin").value=c.btn.pin; $("#cfgBtnMode").value=c.btn.mode;
+  $("#cfgLedPin").value=c.led.pin; $("#cfgLedMode").value=c.led.mode;
+  $("#cfgLdrPin").value=c.ldr.pin; $("#cfgLdrMode").value=c.ldr.mode;
+  pinColor();
+} })();
+
+/* ========== 面板5：示波器 ========== */
+var scope={cv:$("#scopeCv"), data:[], pressed:false, timer:0, logged:load("scopeLog",{dn:null,up:null})};
+var sctx=scope.cv.getContext("2d");
+for(var i=0;i<160;i++) scope.data.push(1);
+function scopeDraw(){
+  var w=scope.cv.width, h=scope.cv.height;
+  sctx.fillStyle="#020617"; sctx.fillRect(0,0,w,h);
+  sctx.strokeStyle="#1e293b";
+  for(var gx=0;gx<w;gx+=40){ sctx.beginPath(); sctx.moveTo(gx,0); sctx.lineTo(gx,h); sctx.stroke(); }
+  [30,h-30].forEach(function(gy){ sctx.beginPath(); sctx.strokeStyle="#334155"; sctx.moveTo(0,gy); sctx.lineTo(w,gy); sctx.stroke(); });
+  sctx.fillStyle="#475569"; sctx.font="12px Consolas,monospace";
+  sctx.fillText("1（高电平·弹起）",6,24); sctx.fillText("0（低电平·按下）",6,h-12);
+  sctx.strokeStyle="#22c55e"; sctx.lineWidth=2.2; sctx.beginPath();
+  var step=w/(scope.data.length-1);
+  scope.data.forEach(function(v,i){
+    var y = v===1 ? 30 : h-30, x=i*step;
+    if(i===0) sctx.moveTo(x,y);
+    else{
+      var py = scope.data[i-1]===1?30:h-30;
+      if(py!==y){ sctx.lineTo(x,py); }
+      sctx.lineTo(x,y);
+    }
+  });
+  sctx.stroke(); sctx.lineWidth=1;
+}
+setInterval(function(){
+  var onP5 = document.getElementById("p5").classList.contains("cur");
+  if(!onP5) return;
+  scope.data.push(scope.pressed?0:1);
+  if(scope.data.length>160) scope.data.shift();
+  scopeDraw();
+},50);
+function scopeSet(dn){
+  scope.pressed=dn;
+  $("#scopeBtn").classList.toggle("dn",dn);
+  var v=dn?0:1;
+  var el=$("#scopeVal"); el.textContent=v;
+  el.className="badge mono "+(dn?"bg2":"bg1"); el.style.fontSize="1.05rem";
+}
+$("#scopeBtn").addEventListener("pointerdown",function(e){ e.preventDefault(); scopeSet(true); });
+$("#scopeBtn").addEventListener("pointerup",function(){ scopeSet(false); });
+$("#scopeBtn").addEventListener("pointerleave",function(){ scopeSet(false); });
+function scopeLogUpd(){
+  var L=scope.logged;
+  $("#scopeLogTxt").textContent="记录表：按下 = "+(L.dn===null?"？":L.dn)+"　放开 = "+(L.up===null?"？":L.up);
+  if(L.dn!==null && L.up!==null){
+    fb($("#scopeFb"),"ok","✔ 实验记录完成：按下 = "+L.dn+"（低电平），放开 = "+L.up+"（高电平）。这正是教材表 1.2.5 数字输入实验的结论。");
+    save("scopeLog",L); updateSum();
+  }
+}
+$("#btnScopeLog").addEventListener("click",function(){
+  if(scope.pressed) scope.logged.dn=0; else scope.logged.up=1;
+  save("scopeLog",scope.logged);
+  if(scope.logged.dn===null || scope.logged.up===null){
+    fb($("#scopeFb"),"info","已记录「"+(scope.pressed?"按下":"放开")+"」状态的读数。别忘了另一种状态：需要<b>按住按钮的同时</b>点这个记录按钮（或松开后再点一次）。");
+  }
+  scopeLogUpd();
+});
+scopeDraw(); scopeLogUpd();
+
+/* ========== 面板5：练习 ========== */
+var QUIZ2=[
+ {q:"按钮的“按下 / 弹起”给智能终端的信号属于：", o:["数字输入","数字输出","模拟输入","模拟输出"], a:0,
+  e:"开关的接通与断开、按钮的按下和弹起都是典型的数字输入信号——终端通过读取引脚电平（1 或 0）获知按钮状态。",
+  h:["信号只有两种状态：高电平和低电平。","是终端在“读取”信号，不是“发出”信号。"]},
+ {q:"教材的开源硬件按钮实验中，按钮的默认值和按下后的值分别是：", o:["默认0，按下1","默认1，按下0","始终为1","始终为0"], a:1,
+  e:"教材例程说明：屏幕上显示按钮的状态，默认是 1（高电平），按下则是 0（低电平）。",
+  h:["回看刚才的示波器：不按时波形停在哪条线上？","“默认是1，按下则是0”是教材原话。"]},
+ {q:"用引脚控制 LED 灯的亮与灭，引脚应设置为哪种模式？", o:["Pin.IN","Pin.OUT","Pin.ANALOG","随便都行"], a:1,
+  e:"LED 是执行设备，要将引脚设为“输出”模式（Pin.OUT），通过输出高低电平控制灯的亮与灭、继电器的吸合与释放、电机的启停等。",
+  h:["终端是要“发出”信号驱动 LED，还是“读取”LED？","教材：引脚连接执行设备时设置为输出模式。"]},
+ {q:"大气温度、土壤湿度这类可在最高值和最低值之间取任意值的量叫作：", o:["数字量","模拟量","二进制量","离散量"], a:1,
+  e:"连续变化的量称为模拟量（如温度、湿度、语音）；离散的量称为数字量（如课桌数量）。自然界大多数信号是模拟信号。",
+  h:["关键词是“连续变化”。","课桌的数量是数字量，那连续变化的呢？"]},
+ {q:"智能终端想输出 1.5V、2.7V 这类介于高低电平之间的电压，常用的“调制”方法是：", o:["A/D 转换","PWM 脉冲宽度调制","安装驱动程序","采样"], a:1,
+  e:"引脚不能输出真正的模拟信号，一般通过脉冲宽度调制（PWM）“调制”出来，很多终端提供专门的 PWM 引脚用于模拟输出。",
+  h:["缩写是三个字母：P、W、M。","A/D 转换是把模拟信号变数字信号，方向反了。"]},
+ {q:"关于“单片机（MCU）”，下列说法正确的是：", o:["它是一种显示屏","它是集成在一块芯片上的微型计算机系统","它只能用在计算机里","它体积很大、成本很高"], a:1,
+  e:"单片机是集成在一块集成电路芯片上的微型计算机系统，体积小、成本低，可直接嵌入或集成到其他设备中——自行车、电饭煲正是靠它“升级”为物联网终端。",
+  h:["MCU 的“C”代表 Computer（计算机）。","想想它为什么能装进小小的共享单车锁里。"]},
+ {q:"某开源硬件模拟输入采用 10 位精度，读到的数值范围是：", o:["0~255","0~1023","0~4095","0~65535"], a:1,
+  e:"10 位二进制能表示 2 的 10 次方 = 1024 个值，即 0~1023；12 位则是 0~4095。量化精度由芯片性能决定。",
+  h:["2 的 10 次方等于多少？","教材：有的默认 10 位（0~1023），有的 12 位（0~4095）。"]},
+ {q:"语句 Pin(Pin.P0, Pin.ANALOG) 的作用是：", o:["把 P0 设为数字输出","读取 P0 的电平","把 P0 设为模拟输入模式","让 P0 发出声音"], a:2,
+  e:"Pin(pin, mode) 用于设置引脚模式：第 1 个参数是引脚（Pin.P0），第 2 个是模式（Pin.ANALOG 模拟输入）。设置后用 read_analog() 读取模拟值。",
+  h:["第二个参数 ANALOG 是什么意思？","四种模式：IN 数字输入 / OUT 数字输出 / ANALOG 模拟输入 / PWM 模拟输出。"]}
+];
+var quiz2=load("quiz2",{idx:0,ans:{},done:false});
+var q2HintLevel=0;
+function q2Score(){
+  var s=0; QUIZ2.forEach(function(_,i){ var a=quiz2.ans[i]; if(a&&a.correct&&a.firstTry)s+=1; else if(a&&a.correct)s+=0.5; });
+  return s;
+}
+function renderQ2(){
+  var prog2=$("#q2Prog"); prog2.innerHTML="";
+  QUIZ2.forEach(function(_,i){
+    var el=document.createElement("i"); el.textContent=i+1;
+    var a=quiz2.ans[i];
+    if(a&&a.correct) el.className="ok";
+    else if(a&&a.tried) el.className="no";
+    if(i===quiz2.idx && !quiz2.done) el.className+=" cur";
+    prog2.appendChild(el);
+  });
+  hideFb($("#q2HintBox")); q2HintLevel=0; $("#btnQ2Hint").textContent="💡 提示①"; $("#btnQ2Hint").disabled=false;
+  $("#q2Review").innerHTML="";
+  var body=$("#q2Body");
+  if(quiz2.done){
+    body.innerHTML="<p style='font-size:1.02rem'><b>练习完成！</b>得分 <span class='badge bg1' style='font-size:.95rem'>"+q2Score()+" / "+QUIZ2.length+"</span>（一次答对 1 分，重试后答对 0.5 分）</p>";
+    var wrongs=[];
+    QUIZ2.forEach(function(q,i){ var a=quiz2.ans[i]; if(!a||!a.firstTry) wrongs.push({q:q,i:i}); });
+    if(wrongs.length){
+      var html="<h3 style='margin:10px 0 4px;font-size:.92rem;color:#fde68a'>错题回顾</h3>";
+      wrongs.forEach(function(w){ html+="<div class='fb warn show' style='margin-top:6px'><b>第"+(w.i+1)+"题：</b>"+w.q.q+"<br><b>正确答案：</b>"+w.q.o[w.q.a]+"<br>"+w.q.e+"</div>"; });
+      $("#q2Review").innerHTML=html;
+    }else{
+      $("#q2Review").innerHTML="<div class='fb ok show'>👍 全部一次答对，向工程师又近了一步！</div>";
+    }
+    $("#btnQ2Next").disabled=true; $("#btnQ2Hint").disabled=true; hideFb($("#q2Fb"));
+  }else{
+    var q=QUIZ2[quiz2.idx];
+    var html2="<p><b>第 "+(quiz2.idx+1)+" / "+QUIZ2.length+" 题</b>　"+q.q+"</p>";
+    q.o.forEach(function(o,i){ html2+="<button class='qopt q2opt' data-o='"+i+"'>"+String.fromCharCode(65+i)+". "+o+"</button>"; });
+    body.innerHTML=html2;
+    var a=quiz2.ans[quiz2.idx];
+    $("#btnQ2Next").disabled=!(a&&a.correct);
+    if(a&&a.correct){
+      $all(".q2opt").forEach(function(b){ b.disabled=true; if(parseInt(b.dataset.o,10)===q.a) b.classList.add("right"); });
+      fb($("#q2Fb"),"ok","✔ 已答对。"+q.e);
+    }else hideFb($("#q2Fb"));
+    $all(".q2opt").forEach(function(b){
+      b.addEventListener("click",function(){
+        var pick=parseInt(this.dataset.o,10);
+        var rec=quiz2.ans[quiz2.idx]||{tried:false,correct:false,firstTry:true};
+        if(pick===q.a){
+          rec.correct=true; if(rec.tried) rec.firstTry=false;
+          quiz2.ans[quiz2.idx]=rec; save("quiz2",quiz2);
+          $all(".q2opt").forEach(function(x){ x.disabled=true; });
+          this.classList.add("right");
+          fb($("#q2Fb"),"ok","✔ 回答正确！"+q.e);
+          $("#btnQ2Next").disabled=false;
+        }else{
+          rec.tried=true; rec.firstTry=false;
+          quiz2.ans[quiz2.idx]=rec; save("quiz2",quiz2);
+          this.classList.add("wrong"); this.disabled=true;
+          fb($("#q2Fb"),"bad","✘ 「"+q.o[pick]+"」不对。想想为什么，点提示，再换一个选项。");
+        }
+        $("#q2Score").textContent="当前得分："+q2Score()+" / "+QUIZ2.length;
+        updateSum();
+      });
+    });
+  }
+  $("#q2Score").textContent="当前得分："+q2Score()+" / "+QUIZ2.length;
+}
+$("#btnQ2Hint").addEventListener("click",function(){
+  var q=QUIZ2[quiz2.idx];
+  if(q2HintLevel===0){ fb($("#q2HintBox"),"info","💡 提示①："+q.h[0]); q2HintLevel=1; this.textContent="💡 提示②"; }
+  else{ fb($("#q2HintBox"),"info","💡 提示①："+q.h[0]+"<br>💡 提示②："+q.h[1]); this.disabled=true; }
+});
+$("#btnQ2Next").addEventListener("click",function(){
+  if(quiz2.idx>=QUIZ2.length-1) quiz2.done=true; else quiz2.idx++;
+  save("quiz2",quiz2); renderQ2(); updateSum();
+});
+$("#btnQ2Restart").addEventListener("click",function(){
+  quiz2={idx:0,ans:{},done:false}; save("quiz2",quiz2); renderQ2(); updateSum();
+});
+renderQ2();
+
+/* ========== 面板6：配置单 ========== */
+function collect(){
+  var parts=load("parts",[]);
+  var findLast=load("findLast",null), findBest=load("findBest",-1);
+  var myHw=load("myHw",null);
+  var hw=load("hw",{right:0,done:false});
+  var oled=load("oledText",null), blockDone=load("blockDone",false);
+  var cfg=load("pinCfg",null), simDone=load("simDone",false);
+  var sl=load("scopeLog",{dn:null,up:null});
+  var q2=load("quiz2",{ans:{},done:false});
+  var sc=0; QUIZ2.forEach(function(_,i){ var a=q2.ans[i]; if(a&&a.correct&&a.firstTry)sc+=1; else if(a&&a.correct)sc+=0.5; });
+  return {
+    生成时间: nowStr(),
+    课时: "第1单元 第2节 物联网的终端设备",
+    部件认识: "已查看 "+parts.length+" / "+Object.keys(PARTS).length+" 个部件说明",
+    部件找一找: findLast===null? "未进行" : ("最近一次 "+findLast+" / 10 分（最佳 "+findBest+" 分）"),
+    硬件场景题: (hw.done?"已完成，":"进行中，")+"答对 "+hw.right+" / "+HWQ.length,
+    我的选型: myHw? (myHw.hw+"（理由："+myHw.why+"）") : "未填写",
+    块语言程序: blockDone? "已成功运行（显示“你好，物联网”）" : "未完成",
+    MicroPython: oled? ('oled.DispChar("'+oled.t+'", '+oled.x+', '+oled.y+') 运行成功') : "未完成",
+    引脚分配: cfg? {按钮:cfg.btn.pin+"（Pin.IN 数字输入）", LED:cfg.led.pin+"（Pin.OUT 数字输出）", 光线传感器:cfg.ldr.pin+"（Pin.ANALOG 模拟输入）", 联动模拟:simDone?"已验证 按下按钮→LED亮":"未运行"} : "未配置",
+    数字输入实验: (sl.dn!==null&&sl.up!==null)? "已完成：按下=0，放开=1" : "未完成",
+    练习得分: sc+" / "+QUIZ2.length+(q2.done?"（已完成全部）":"")
+  };
+}
+function updateSum(){
+  var c=collect();
+  $("#sum2").innerHTML="<tr><th style='width:30%'>项目</th><th>内容</th></tr>"+
+   "<tr><td>① 部件认识 / 找一找</td><td>"+c.部件认识+"；找一找："+c.部件找一找+"</td></tr>"+
+   "<tr><td>② 硬件对比与选型</td><td>"+c.硬件场景题+"；选型："+c.我的选型+"</td></tr>"+
+   "<tr><td>③ 编程实验</td><td>块语言："+c.块语言程序+"；MicroPython："+c.MicroPython+"</td></tr>"+
+   "<tr><td>④ 引脚配置</td><td>"+(typeof c.引脚分配==="string"? c.引脚分配 : ("按钮→"+c.引脚分配.按钮+"，LED→"+c.引脚分配.LED+"，光敏→"+c.引脚分配.光线传感器+"；"+c.引脚分配.联动模拟))+"</td></tr>"+
+   "<tr><td>⑤ 数字输入实验 / 练习</td><td>"+c.数字输入实验+"；练习："+c.练习得分+"</td></tr>";
+}
+function reportText(){
+  var c=collect(), L=[];
+  L.push("=========== 我的终端配置单 · 实验报告 ===========");
+  L.push("课时：" + c.课时);
+  L.push("生成时间：" + c.生成时间);
+  L.push("");
+  L.push("【一、开发板部件认识】" + c.部件认识);
+  L.push("    部件找一找：" + c.部件找一找);
+  L.push("【二、开源硬件选型】" + c.硬件场景题);
+  L.push("    我的选型：" + c.我的选型);
+  L.push("【三、OLED 编程实验】");
+  L.push("    块语言：" + c.块语言程序);
+  L.push("    MicroPython：" + c.MicroPython);
+  L.push("【四、I/O 引脚分配表】");
+  if(typeof c.引脚分配==="object"){
+    L.push("    按钮        → " + c.引脚分配.按钮);
+    L.push("    LED 灯      → " + c.引脚分配.LED);
+    L.push("    光线传感器  → " + c.引脚分配.光线传感器);
+    L.push("    联动模拟：" + c.引脚分配.联动模拟);
+  }else L.push("    " + c.引脚分配);
+  L.push("【五、数字输入实验】" + c.数字输入实验);
+  L.push("【六、辨析练习】" + c.练习得分);
+  L.push("");
+  L.push("一句话收获：智能终端 = 单片机 + I/O 引脚；接传感器用输入模式，接执行器用输出模式，编程让它们各司其职。");
+  return L.join("\n");
+}
+function download(name,content,mime){
+  var blob=new Blob([content],{type:mime});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name;
+  document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },300);
+}
+$("#btnGen2").addEventListener("click",function(){
+  updateSum(); $("#report").value=reportText();
+  fb($("#exp2Fb"),"ok","实验报告已生成，可复制或下载。");
+});
+$("#btnCopy2").addEventListener("click",function(){
+  var ta=$("#report"); if(!ta.value) ta.value=reportText();
+  ta.removeAttribute("readonly"); ta.select();
+  var ok=false; try{ ok=document.execCommand("copy"); }catch(e){ ok=false; }
+  ta.setAttribute("readonly","");
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(ta.value); ok=true; }
+  fb($("#exp2Fb"), ok?"ok":"warn", ok?"已复制到剪贴板。":"复制可能未成功，请手动全选复制。");
+});
+$("#btnTxt2").addEventListener("click",function(){
+  download("终端配置单_第1单元第2节.txt", reportText(), "text/plain;charset=utf-8");
+  fb($("#exp2Fb"),"ok","已下载 .txt 文件。");
+});
+$("#btnJson2").addEventListener("click",function(){
+  download("终端配置单_第1单元第2节.json", JSON.stringify(collect(),null,2), "application/json;charset=utf-8");
+  fb($("#exp2Fb"),"ok","已下载 .json 文件。");
+});
+$("#btnClear2").addEventListener("click",function(){
+  var keys=[]; for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&k.indexOf(PRE)===0) keys.push(k); }
+  keys.forEach(function(k){ localStorage.removeItem(k); });
+  $("#report").value="";
+  fb($("#exp2Fb"),"warn","已清除本机本课时全部学习数据（共 "+keys.length+" 条）。刷新页面后从头开始。");
+});
+updateSum();
+})();
+</script>
+</body>
+</html>
